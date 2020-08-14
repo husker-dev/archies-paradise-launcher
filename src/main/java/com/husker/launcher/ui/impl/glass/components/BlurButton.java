@@ -26,7 +26,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         super(StyleId.buttonUndecorated, text);
         this.screen = screen;
 
-        screen.addBlurSegment(this::onBlurApply);
+        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
 
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -65,7 +65,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         super.paint(g);
     }
 
-    public void onBlurApply(BlurParameter parameter) {
+    public void onBlurApply(BlurParameter parameter, Component component) {
         Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonDefaultAlpha);
 
         parameter.setBlurFactor(25);

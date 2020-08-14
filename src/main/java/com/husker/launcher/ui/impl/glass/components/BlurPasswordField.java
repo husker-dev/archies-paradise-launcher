@@ -23,7 +23,7 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
         super(StyleId.textfieldTransparent);
         this.screen = screen;
 
-        screen.addBlurSegment(this::onBlurApply);
+        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
 
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
@@ -65,7 +65,7 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
         });
     }
 
-    public void onBlurApply(BlurParameter parameter) {
+    public void onBlurApply(BlurParameter parameter, Component component) {
         parameter.setAdditionColor(GlassUI.Colors.textField);
         parameter.setBlurFactor(25);
         parameter.setShadowSize(5);

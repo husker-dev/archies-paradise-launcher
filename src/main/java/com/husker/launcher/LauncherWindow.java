@@ -21,14 +21,11 @@ public class LauncherWindow extends JFrame {
 
     private ScalableImage backgroundImage;
     private LauncherUI currentUI;
+    private String currentUIName;
 
     private float currentAlpha = 0;
     private boolean isAnimating = false;
     private WebPanel animationPanel;
-
-    private static final HashMap<String, Class<? extends LauncherUI>> UI = new HashMap<String, Class<? extends LauncherUI>>(){{
-        put("default", GlassUI.class);
-    }};
 
     private final SettingsFile config = new SettingsFile("launcher.cfg");
 
@@ -45,13 +42,14 @@ public class LauncherWindow extends JFrame {
 
         ConsoleUtils.printResult("OK");
 
+        currentUIName = config.get("ui", GlassUI.class.getCanonicalName());
         try {
-            currentUI = UI.get(config.get("ui", "default")).getConstructor(LauncherWindow.class).newInstance(this);
+            Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
+            currentUI = c.getConstructor(LauncherWindow.class).newInstance(this);
         }catch (Exception ex){
             ex.printStackTrace();
             currentUI = new GlassUI(this);
         }
-
 
         setContentPane(new JPanel(){{
             setLayout(new OverlayLayout(this));
@@ -191,6 +189,16 @@ public class LauncherWindow extends JFrame {
             }
         }).start();
 
+    }
+
+    public String getCurrentUIName(){
+        return currentUIName;
+    }
+
+    public String getCurrentUITitle(){
+        if(currentUIName.contains("."))
+            return currentUIName.split("\\.")[currentUIName.split("\\.").length - 1];
+        return currentUIName;
     }
 
 }

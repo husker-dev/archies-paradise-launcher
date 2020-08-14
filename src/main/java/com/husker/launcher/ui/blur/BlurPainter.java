@@ -96,6 +96,7 @@ public class BlurPainter {
                     blurred = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
                     Graphics2D g2d = blurred.createGraphics();
                     RenderUtils.enableAntialiasing(g2d);
+
                     g2d.setPaint(new TexturePaint(image, translatedShape.getBounds()));
                     g2d.fill(translatedShape);
                 }
@@ -116,7 +117,7 @@ public class BlurPainter {
                 Graphics2D g2d = texture.createGraphics();
                 RenderUtils.enableAntialiasing(g2d);
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.015f));
-                g2d.setPaint(new TexturePaint(Resources.blurTexture, toRender.getBounds2D()));
+                g2d.setPaint(new TexturePaint(Resources.blurTexture, toRender.getBounds()));
                 g2d.fill(translatedShape);
             }else
                 texture = null;

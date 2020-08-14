@@ -5,7 +5,7 @@ import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.ui.impl.glass.screens.MainScreen;
+import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
 import com.husker.launcher.ui.impl.glass.screens.login.AuthProcess;
 import com.husker.launcher.ui.impl.glass.screens.login.Login;
 import com.husker.launcher.ui.impl.glass.screens.registration.*;
@@ -62,7 +62,7 @@ public class GlassUI extends LauncherUI {
     }
 
     public Dimension getDefaultSize() {
-        return new Dimension(1100, 650);
+        return new Dimension(1100, 700);
     }
 
     public static WebLabel createTitleLabel(String text){

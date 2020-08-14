@@ -1,4 +1,4 @@
-package com.husker.launcher.ui.impl.glass.screens;
+package com.husker.launcher.ui.impl.glass.screens.main;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
@@ -6,7 +6,6 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.ScalableImage;
-import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.impl.glass.components.BlurPanel;
@@ -48,14 +47,8 @@ public abstract class AbstractMainScreen extends Screen {
             parameter.setShape(new RoundRectangle2D.Double((getWidth() - statusBarWidth) / 2d, logoPlateHeight - 40, statusBarWidth, 30, 25, 25));
         });
 
-        addBlurSegment(parameter -> {
-            GlassUI.applyTopLayer(parameter);
-            parameter.setShape(new RoundRectangle2D.Double((getWidth() - statusBarWidth) / 2d, logoPlateHeight - 40, statusBarWidth, 30, 25, 25));
-        });
-
         // Swing part
         setLayout(new BorderLayout());
-
 
         // Title
         add(new WebPanel(StyleId.panelTransparent){{
@@ -106,7 +99,7 @@ public abstract class AbstractMainScreen extends Screen {
             setLayout(new GridBagLayout());
 
             add(new BlurPanel(AbstractMainScreen.this){{
-                setPreferredWidth(350);
+                setPreferredWidth(500);
 
                 setLayout(new VerticalFlowLayout(0, 0));
 

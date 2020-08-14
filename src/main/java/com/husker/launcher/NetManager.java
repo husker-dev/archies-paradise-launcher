@@ -76,10 +76,8 @@ public class NetManager {
         try{
             if(ping(launcherWindow.getConfig().get("minecraftServerIp"), 25565, timeout))
                 status.add(ServerStatus.MINECRAFT_SERVER_ONLINE);
-            else {
-                System.out.println("mo");
+            else
                 status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
-            }
         }catch (Exception ex){
             ex.printStackTrace();
             status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);

@@ -80,12 +80,25 @@ public class Resources {
     public final BufferedImage Logo;
     public final BufferedImage Background;
     public final BufferedImage Icon;
-    public final BufferedImage Info;
+
+    public final BufferedImage Icon_Info;
+    public final BufferedImage Icon_Play;
+    public final BufferedImage Icon_Profile;
+    public final BufferedImage Icon_Settings;
+
+    public final BufferedImage Icon_Checkbox_On;
+    public final BufferedImage Icon_Checkbox_Off;
 
     public Resources(LauncherWindow launcher){
         Logo = getBufferedImage(launcher.getConfig().get("logo"));
         Background = getBufferedImage(launcher.getConfig().get("background"));
         Icon = getBufferedImage(launcher.getConfig().get("icon"));
-        Info = getBufferedImage("info.png");
+        Icon_Info = getBufferedImage("info_icon.png");
+        Icon_Play = getBufferedImage("play_icon.png");
+        Icon_Profile = getBufferedImage("profile_icon.png");
+        Icon_Settings = getBufferedImage("settings_icon.png");
+
+        Icon_Checkbox_On = getBufferedImage("checkbox_on.png");
+        Icon_Checkbox_Off = getBufferedImage("checkbox_off.png");
     }
 }

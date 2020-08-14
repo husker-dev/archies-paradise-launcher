@@ -24,10 +24,10 @@ public class BlurPanel extends WebPanel implements BlurComponent{
         this.isMainColor = isMain;
         this.screen = screen;
 
-        screen.addBlurSegment(this::onBlurApply);
+        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
     }
 
-    public void onBlurApply(BlurParameter parameter) {
+    public void onBlurApply(BlurParameter parameter, Component component) {
         if(isMainColor)
             GlassUI.applyTopLayer(parameter);
         else
