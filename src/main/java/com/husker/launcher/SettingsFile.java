@@ -1,16 +1,17 @@
 package com.husker.launcher;
 
+import com.husker.launcher.utils.ConsoleUtils;
+
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SettingsFile {
 
+    public static final String SEPARATOR = ":";
     private final HashMap<String, String> parameters = new HashMap<>();
     private String path;
     private boolean isSaveEnabled = true;
@@ -24,6 +25,9 @@ public class SettingsFile {
 
     public SettingsFile(File file){
         try {
+            if(!file.exists())
+                file.createNewFile();
+
             init(Files.readAllLines(Paths.get(file.getAbsolutePath())));
             path = file.getAbsolutePath();
         }catch (Exception ex){
@@ -41,8 +45,15 @@ public class SettingsFile {
     }
 
     private void init(List<String> lines){
-        for(String line : lines)
-            parameters.put(line.split("=")[0].trim(), line.split("=")[1].trim());
+        for(String line : lines) {
+            if (line.contains(SEPARATOR)) {
+                ArrayList<String> parts = new ArrayList<>(Arrays.asList(line.split(SEPARATOR)));
+                parameters.put(
+                        parts.remove(0),
+                        String.join(":", parts.toArray(new String[0])).trim()
+                );
+            }
+        }
     }
 
     public String get(String parameter){
@@ -71,10 +82,15 @@ public class SettingsFile {
         }
     }
 
+    public void setDefault(String parameter, String value){
+        if(get(parameter) == null)
+            set(parameter, value);
+    }
+
     private String convertToText(){
         StringBuilder text = new StringBuilder();
         for(Map.Entry<String, String> entry : parameters.entrySet())
-            text.append(entry.getKey()).append("=").append(entry.getValue()).append("\r\n");
+            text.append(entry.getKey()).append(SEPARATOR).append(entry.getValue()).append("\r\n");
         return text.toString();
     }
 }

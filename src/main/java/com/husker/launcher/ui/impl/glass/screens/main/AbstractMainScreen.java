@@ -27,6 +27,7 @@ public abstract class AbstractMainScreen extends Screen {
     private WebLabel statusLabel;
 
     abstract void onMenuInit(WebPanel menu);
+    abstract void onRightMenuInit(WebPanel menu);
 
     public void onInit() {
         addBlurSegment(parameter -> {
@@ -96,14 +97,43 @@ public abstract class AbstractMainScreen extends Screen {
         }}, BorderLayout.NORTH);
 
         add(new WebPanel(StyleId.panelTransparent){{
-            setLayout(new GridBagLayout());
+            setLayout(new GridBagLayout(){{
+            }});
 
+            // Left panel *reserved*
+            add(new WebPanel(StyleId.panelTransparent){{
+                setPreferredWidth(220);
+                setPreferredHeight(450);
+            }}, new GridBagConstraints(){{
+                this.weightx = 1;
+                this.anchor = GridBagConstraints.EAST;
+                this.gridx = 1;
+                this.insets = new Insets(0, 0, 0, 30);
+            }});
+
+            // Center panel
             add(new BlurPanel(AbstractMainScreen.this){{
                 setPreferredWidth(500);
 
                 setLayout(new VerticalFlowLayout(0, 0));
-
+                setName("MainMenuPanel");
                 onMenuInit(this);
+            }}, new GridBagConstraints(){{
+                this.weightx = 0;
+                this.gridx = 2;
+            }});
+
+            // Right panel
+            add(new BlurPanel(AbstractMainScreen.this){{
+                setPreferredWidth(220);
+                setPreferredHeight(450);
+                setName("RightMenuPanel");
+                onRightMenuInit(this);
+            }}, new GridBagConstraints(){{
+                this.weightx = 1;
+                this.anchor = GridBagConstraints.WEST;
+                this.gridx = 3;
+                this.insets = new Insets(0, 30, 0, 0);
             }});
         }}, BorderLayout.CENTER);
     }

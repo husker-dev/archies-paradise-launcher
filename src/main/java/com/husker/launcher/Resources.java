@@ -7,15 +7,18 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Resources {
 
-    public static BufferedImage blurTexture;
+    public static BufferedImage blurDefaultTexture;
 
     static {
-        blurTexture = Resources.getBufferedImage("paper.png");
+        blurDefaultTexture = Resources.getBufferedImage("paper.png");
     }
 
     public static InputStream get(String file){
@@ -39,7 +42,6 @@ public class Resources {
         try {
             return ImageUtils.toBufferedImage(ImageIO.read(get(file)));
         }catch (Exception ex){
-            ex.printStackTrace();
         }
         return null;
     }
@@ -48,7 +50,6 @@ public class Resources {
         try {
             return ImageIO.read(get(file));
         } catch (IOException e) {
-            e.printStackTrace();
         }
         return null;
     }
@@ -78,25 +79,46 @@ public class Resources {
     }
 
     public final BufferedImage Logo;
-    public final BufferedImage Background;
     public final BufferedImage Icon;
 
     public final BufferedImage Icon_Info;
     public final BufferedImage Icon_Play;
     public final BufferedImage Icon_Profile;
     public final BufferedImage Icon_Settings;
+    public final BufferedImage Icon_Book;
+    public final BufferedImage Icon_Videos;
+
+    public final BufferedImage Logo_Youtube;
+    public final BufferedImage Logo_VK;
+
+    public final BufferedImage[] Background = new BufferedImage[7];
 
     public final BufferedImage Icon_Checkbox_On;
     public final BufferedImage Icon_Checkbox_Off;
 
     public Resources(LauncherWindow launcher){
         Logo = getBufferedImage(launcher.getConfig().get("logo"));
-        Background = getBufferedImage(launcher.getConfig().get("background"));
+
+        try{
+            if(Files.exists(Paths.get("./background.jpg")))
+                Background[0] = ImageIO.read(new File("./background.jpg"));
+        }catch (Exception ex){}
+        for(int i = 1; i < Background.length; i++) {
+            try {
+                Background[i] = getBufferedImage("background/bg_" + i + ".jpg");
+            }catch (Exception ex){}
+        }
         Icon = getBufferedImage(launcher.getConfig().get("icon"));
+
         Icon_Info = getBufferedImage("info_icon.png");
         Icon_Play = getBufferedImage("play_icon.png");
         Icon_Profile = getBufferedImage("profile_icon.png");
         Icon_Settings = getBufferedImage("settings_icon.png");
+        Icon_Book = getBufferedImage("book_icon.png");
+        Icon_Videos = getBufferedImage("videos_icon.png");
+
+        Logo_Youtube = getBufferedImage("youtube_logo.png");
+        Logo_VK = getBufferedImage("vk_logo.png");
 
         Icon_Checkbox_On = getBufferedImage("checkbox_on.png");
         Icon_Checkbox_Off = getBufferedImage("checkbox_off.png");

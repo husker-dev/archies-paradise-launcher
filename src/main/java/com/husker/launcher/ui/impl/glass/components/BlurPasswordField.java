@@ -71,6 +71,7 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
         parameter.setShadowSize(5);
         parameter.setShadowColor(new Color(0, 0, 0, 40));
         parameter.setShadowType(BlurParameter.ShadowType.INNER);
+        parameter.setDebugName("PasswordField." + getName());
         parameter.setVisible(isVisible() && isDisplayable());
 
         updateShape();

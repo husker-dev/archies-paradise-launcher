@@ -6,9 +6,12 @@ import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.utils.ShapeUtils;
 
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
+
+import static com.husker.launcher.utils.ShapeUtils.*;
 
 public class BlurPanel extends WebPanel implements BlurComponent{
 
@@ -28,15 +31,18 @@ public class BlurPanel extends WebPanel implements BlurComponent{
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
-        if(isMainColor)
-            GlassUI.applyTopLayer(parameter);
-        else
-            GlassUI.applyBottomLayer(parameter);
+        if(component == this){
+            if(isMainColor)
+                GlassUI.applyTopLayer(parameter);
+            else
+                GlassUI.applyBottomLayer(parameter);
 
-        Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
+            parameter.setVisible(isVisible() && isDisplayable());
+            parameter.setDebugName("Panel." + getName());
 
-        parameter.setVisible(isVisible() && isDisplayable());
-        parameter.setShape(new RoundRectangle2D.Double(location.x, location.y, getWidth(), getHeight(), 25, 25));
+            if(isDisplayable() && isVisible())
+                parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 25, 25, ALL_CORNERS));
+        }
     }
 
     public Screen getScreen() {

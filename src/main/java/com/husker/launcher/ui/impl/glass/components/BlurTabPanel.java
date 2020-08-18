@@ -15,9 +15,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -127,11 +125,13 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             topTabPanel.add(tabLabel, new GridBagConstraints() {{
                 this.weightx = 1;
                 this.fill = 1;
+                this.insets = new Insets(0, 0, 0, 0);
             }});
         }else{
             bottomTabPanel.add(tabLabel, new GridBagConstraints() {{
                 this.weightx = 1;
                 this.fill = 1;
+                this.insets = new Insets(0, 0, 0, 0);
             }});
         }
 
@@ -227,7 +227,7 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             tabLabels.get(selectedTab).setText(tabText.get(tabLabels.get(selectedTab)));
             contentPanel.removeAll();
             contentPanel.add(tabContent.get(title));
-            updateUI();
+            screen.getLauncher().repaint();
         });
     }
 
@@ -246,6 +246,7 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
 
             GlassUI.applyTopLayer(parameter);
             parameter.setVisible(isVisible() && isDisplayable());
+            parameter.setDebugName("TabPanel.Tab." + getName());
             parameter.setShape(shape);
             parameter.setShadowClip(getShadowClip());
             return;
@@ -256,6 +257,7 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             GlassUI.applyTopLayer(parameter);
             parameter.setVisible(isVisible() && isDisplayable());
             parameter.setShape(getContentShape());
+            parameter.setDebugName("TabPanel.Content." + getName());
             parameter.setShadowClip(getShadowClip());
             return;
         }
@@ -268,8 +270,6 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
     }
 
     protected Shape getShadowClip(){
-        int selectedIndex = getSelectedTabIndex();
-
         Area shadowArea = new Area();
         int x = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this).x;
         int y = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this).y;

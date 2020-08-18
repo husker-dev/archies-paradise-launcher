@@ -68,20 +68,23 @@ public class BlurTextField extends WebTextField implements BlurComponent{
         parameter.setShadowSize(5);
         parameter.setShadowColor(new Color(0, 0, 0, 40));
         parameter.setShadowType(BlurParameter.ShadowType.INNER);
+        parameter.setDebugName("TextField." + getName());
         parameter.setVisible(isVisible() && isDisplayable());
 
-        updateShape();
-        Point mouse = screen.getLauncher().getContentPane().getMousePosition();
+        if(isDisplayable() && isVisible()) {
+            updateShape();
+            parameter.setShape(shape);
 
-        if(mouse != null && shape != null){
-            if(shape.contains(mouse))
-                parameter.setAdditionColor(GlassUI.Colors.textFieldHovered);
-            if(isFocusOwner()) {
-                parameter.setAdditionColor(GlassUI.Colors.textFieldFocused);
+            Point mouse = screen.getLauncher().getContentPane().getMousePosition();
+
+            if(mouse != null){
+                if(shape.contains(mouse))
+                    parameter.setAdditionColor(GlassUI.Colors.textFieldHovered);
+                if(isFocusOwner()) {
+                    parameter.setAdditionColor(GlassUI.Colors.textFieldFocused);
+                }
             }
         }
-
-        parameter.setShape(shape);
     }
 
     public Screen getScreen() {

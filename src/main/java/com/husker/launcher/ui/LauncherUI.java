@@ -46,13 +46,14 @@ public abstract class LauncherUI extends JPanel {
             ConsoleUtils.printResult("OK");
         }catch (Exception ex){
             ConsoleUtils.printResult("ERROR");
+            ex.printStackTrace();
         }
     }
 
     public void setScreen(String name, String... parameters){
         nextScreen = name;
         nextScreenParameters = parameters;
-        System.out.println("[LauncherUI] Changing screen to: " + name);
+        ConsoleUtils.printDebug(getClass(), "Changing screen to: " + name);
 
         if(animated)
             getLauncher().beginAnimation();

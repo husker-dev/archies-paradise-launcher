@@ -1,7 +1,10 @@
 package com.husker.launcher.components;
 
+import com.husker.launcher.utils.RenderUtils;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
 public class ScalableImage extends JComponent {
@@ -15,6 +18,7 @@ public class ScalableImage extends JComponent {
 
     private BufferedImage image;
     private FitType fitType = FitType.FIT_X;
+    private int round = 0;
 
     public ScalableImage(){}
 
@@ -29,6 +33,8 @@ public class ScalableImage extends JComponent {
     public ScalableImage(BufferedImage image, FitType type){
         setImage(image);
         this.fitType = type;
+        setOpaque(true);
+        setBackground(new Color(0, 0, 0, 0));
     }
 
     public void setImage(BufferedImage image){
@@ -41,10 +47,12 @@ public class ScalableImage extends JComponent {
 
     public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        g2d.addRenderingHints(new RenderingHints(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY));
 
         int newWidth = 0;
         int newHeight = 0;
+
+        if(image == null)
+            return;
 
         if(fitType == FitType.FIT_X){
             float scalePercent = (float)getWidth() / (float)image.getWidth(null);
@@ -79,7 +87,13 @@ public class ScalableImage extends JComponent {
             newHeight = getHeight();
         }
 
-        g2d.drawImage(image, (getWidth() - newWidth) / 2 - 1, (getHeight() - newHeight) / 2 - 1, newWidth + 2, newHeight + 2, null);
+        RoundRectangle2D.Double imageShape = new RoundRectangle2D.Double((getWidth() - newWidth) / 2d - 1, (getHeight() - newHeight) / 2d - 1, newWidth + 2, newHeight + 2, round, round);
+        RoundRectangle2D.Double componentShape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), round, round);
+
+        RenderUtils.enableAntialiasing(g2d);
+        g2d.setPaint(new TexturePaint(image, imageShape.getBounds()));
+        g2d.setClip(imageShape.getBounds());
+        g2d.fill(componentShape);
     }
 
     public void setFitType(FitType fitType){
@@ -88,5 +102,13 @@ public class ScalableImage extends JComponent {
 
     public FitType getFitType() {
         return fitType;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void setRound(int round) {
+        this.round = round;
     }
 }

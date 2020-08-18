@@ -5,6 +5,7 @@ import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.impl.glass.screens.BackgroundSelection;
 import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
 import com.husker.launcher.ui.impl.glass.screens.login.AuthProcess;
 import com.husker.launcher.ui.impl.glass.screens.login.Login;
@@ -17,7 +18,7 @@ public class GlassUI extends LauncherUI {
     public static class Colors{
         public static final Color first = new Color(255, 255, 255, 200);
         public static final Color second = new Color(255, 255, 255, 140);
-        public static final Color third = new Color(255, 255, 255, 100);
+        public static final Color third = new Color(255, 255, 255, 225);
 
         public static final Color textField = new Color(255, 255, 255, 110);
         public static final Color textFieldHovered = new Color(255, 255, 255, 90);
@@ -39,6 +40,8 @@ public class GlassUI extends LauncherUI {
 
     public void onInit() {
         setAnimated(true);
+
+        addScreen("backgroundSelection", new BackgroundSelection());
 
         // Message
         addScreen("message", new Message());
@@ -89,14 +92,6 @@ public class GlassUI extends LauncherUI {
 
     public static void applyBottomLayer(BlurParameter parameter){
         parameter.setAdditionColor(GlassUI.Colors.second);
-        parameter.setUseTexture(false);
-        parameter.setBlurFactor(25);
-        parameter.setShadowSize(10);
-        parameter.setShadowColor(new Color(0, 0, 0, 40));
-    }
-
-    public static void applyThirdLayer(BlurParameter parameter){
-        parameter.setAdditionColor(Colors.third);
         parameter.setUseTexture(false);
         parameter.setBlurFactor(25);
         parameter.setShadowSize(10);

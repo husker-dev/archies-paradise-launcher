@@ -1,6 +1,9 @@
 package com.husker.launcher.ui.blur;
 
+import com.husker.launcher.Resources;
+
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class BlurParameter {
 
@@ -12,12 +15,16 @@ public class BlurParameter {
 
     private Shape shape;
     private int blurFactor = 5;
-    private boolean useTexture = true;
+    private boolean useTexture = false;
+    private BufferedImage texture = null;
+    private float textureAlpha = 0.015f;
     private Color additionColor = new Color(0, 0, 0, 0);
     private Color shadowColor = new Color(0, 0, 0, 60);
     private ShadowType shadowType = ShadowType.OUTER;
     private int shadowSize = 0;
     private Shape shadowClip = null;
+    private Shape clip = null;
+    private String debugName = null;
 
     private boolean visible = true;
 
@@ -91,5 +98,39 @@ public class BlurParameter {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public Shape getClip() {
+        return clip;
+    }
+
+    public void setClip(Shape clip) {
+        this.clip = clip;
+    }
+
+    public String getDebugName() {
+        return debugName;
+    }
+
+    public void setDebugName(String debugName) {
+        this.debugName = debugName;
+    }
+
+    public BufferedImage getTexture() {
+        if(texture == null)
+            return Resources.blurDefaultTexture;
+        return texture;
+    }
+
+    public void setTexture(BufferedImage texture) {
+        this.texture = texture;
+    }
+
+    public float getTextureAlpha() {
+        return textureAlpha;
+    }
+
+    public void setTextureAlpha(float textureAlpha) {
+        this.textureAlpha = textureAlpha;
     }
 }

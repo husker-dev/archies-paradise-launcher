@@ -13,24 +13,32 @@ import com.husker.launcher.utils.ConsoleUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.io.File;
 
 public class LauncherWindow extends JFrame {
 
     public static final String VERSION = "1.0";
 
     private ScalableImage backgroundImage;
+    private ScalableImage animationBackgroundImage;
     private LauncherUI currentUI;
-    private String currentUIName;
+    private final String currentUIName;
 
     private float currentAlpha = 0;
     private boolean isAnimating = false;
     private WebPanel animationPanel;
 
-    private final SettingsFile config = new SettingsFile("launcher.cfg");
+    private final SettingsFile config = new SettingsFile("launcher_config.cfg");
+    private final SettingsFile settings = new SettingsFile(new File("launcher.cfg")){{
+        setDefault("auto_auth", "true");
+        setDefault("background", "1");
+        setDefault("windowed", "false");
+        setDefault("ram", "256");
+    }};
 
     public final Resources Resources = new Resources(this);
     public final NetManager NetManager = new NetManager(this);
+    public final BrowserManager BrowserManager = new BrowserManager(this);
 
     public LauncherWindow(){
         ConsoleUtils.printDebug(getClass(), "Installing the WebLaF library");
@@ -51,14 +59,14 @@ public class LauncherWindow extends JFrame {
             currentUI = new GlassUI(this);
         }
 
-        setContentPane(new JPanel(){{
+        setContentPane(new WebPanel(StyleId.panelTransparent){{
             setLayout(new OverlayLayout(this));
 
             // For animation
             add(animationPanel = new WebPanel(){
                 {
                     setLayout(new BorderLayout());
-                    add(new ScalableImage(Resources.Background, ScalableImage.FitType.FIT_XY));
+                    add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
                     setOpaque(false);
                     setBackground(new Color(0, 0, 0, 0));
                     setVisible(false);
@@ -99,7 +107,7 @@ public class LauncherWindow extends JFrame {
             // Background
             add(new JPanel(){{
                 setLayout(new BorderLayout());
-                add(backgroundImage = new ScalableImage(Resources.Background, ScalableImage.FitType.FIT_XY));
+                add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
             }});
 
 
@@ -119,6 +127,14 @@ public class LauncherWindow extends JFrame {
 
     public void setBackgroundImage(BufferedImage image){
         backgroundImage.setImage(image);
+        animationBackgroundImage.setImage(image);
+    }
+
+    public BufferedImage getBackgroundFromSettings(){
+        if(getSettings().get("background").equals("0") && Resources.Background[0] == null)
+            getSettings().set("background", "1");
+
+        return Resources.Background[Integer.parseInt(getSettings().get("background"))];
     }
 
     public BufferedImage getBackgroundImage(){
@@ -139,6 +155,10 @@ public class LauncherWindow extends JFrame {
 
     public SettingsFile getConfig() {
         return config;
+    }
+
+    public SettingsFile getSettings() {
+        return settings;
     }
 
     public void beginAnimation(){
@@ -199,6 +219,11 @@ public class LauncherWindow extends JFrame {
         if(currentUIName.contains("."))
             return currentUIName.split("\\.")[currentUIName.split("\\.").length - 1];
         return currentUIName;
+    }
+
+    public void updateUI(){
+        ((WebPanel)getContentPane()).updateUI();
+        ((WebPanel)getContentPane()).repaint();
     }
 
 }

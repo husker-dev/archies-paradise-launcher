@@ -6,7 +6,7 @@ public class ConsoleUtils {
 
     private static String lastDebug = null;
 
-    public static void printDebug(Class clazz, String text){
+    public static void printDebug(Class clazz, Object text){
         if(lastDebug != null)
             System.out.println();
         lastDebug = "[" + clazz.getSimpleName() + "] " + text;

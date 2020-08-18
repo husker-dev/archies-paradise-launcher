@@ -22,7 +22,10 @@ public class UIUtils {
         int round = 0;
         if(parameter.getShape() instanceof RoundRectangle2D)
             round = (int)((RoundRectangle2D)parameter.getShape()).getArcWidth();
+        return keepShadow(parameter, round, shadows);
+    }
 
+    public static Shape keepShadow(BlurParameter parameter, int round, ShadowSide... shadows){
         ArrayList<ShadowSide> sides = new ArrayList<>(Arrays.asList(shadows));
 
         int shadow = parameter.getShadowSize();

@@ -9,6 +9,7 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.laf.scroll.WebScrollPane;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.LauncherWindow;
+import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -21,6 +22,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.awt.geom.Area;
+import java.awt.geom.RoundRectangle2D;
 import java.net.URI;
 import java.util.Map;
 
@@ -62,7 +65,15 @@ public class InfoPanel extends WebPanel {
             public void onBlurApply(BlurParameter parameter, Component component) {
                 super.onBlurApply(parameter, component);
                 parameter.setShadowType(BlurParameter.ShadowType.INNER);
-                parameter.setShape(parameter.getShape().getBounds());
+
+                if(parameter.getShape() != null) {
+                    parameter.setShape(parameter.getShape().getBounds());
+                    Rectangle shape = parameter.getShape().getBounds();
+
+                    shape.x += 10;
+                    shape.width -= 20;
+                    parameter.setClip(shape);
+                }
             }
         });
         add(new WebPanel(StyleId.panelTransparent){{
@@ -164,16 +175,7 @@ public class InfoPanel extends WebPanel {
 
         MouseAdapter linkAdapter = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                if(Desktop.isDesktopSupported()){
-                    try {
-                        Desktop.getDesktop().browse(new URI(link));
-                    } catch (Exception ex) { }
-                }else{
-                    try {
-                        Runtime.getRuntime().exec("xdg-open " + link);
-                    } catch (Exception ex) {
-                    }
-                }
+                NetManager.openLink(link);
             }
         };
 

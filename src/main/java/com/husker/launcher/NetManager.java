@@ -1,13 +1,18 @@
 package com.husker.launcher;
 
 import com.alee.laf.label.WebLabel;
+import com.husker.launcher.utils.ConsoleUtils;
 
 import java.awt.*;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 public class NetManager {
 
@@ -131,4 +136,36 @@ public class NetManager {
         }
         return true;
     }
+
+    public static void openLink(String url){
+        if(Desktop.isDesktopSupported()){
+            try {
+                Desktop.getDesktop().browse(new URI(url));
+            } catch (Exception ignored) { }
+        }else{
+            try {
+                Runtime.getRuntime().exec("xdg-open " + url);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    public static String getURLContent(String url){
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+            StringBuilder stringBuilder = new StringBuilder();
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(System.lineSeparator());
+            }
+            return stringBuilder.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+
 }

@@ -69,6 +69,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonDefaultAlpha);
 
         parameter.setBlurFactor(25);
+        parameter.setDebugName("Button." + getName());
         parameter.setShadowSize(5);
         parameter.setShadowColor(new Color(0, 0, 0, 40));
         parameter.setVisible(isVisible() && isDisplayable());
