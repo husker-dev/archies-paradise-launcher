@@ -28,6 +28,12 @@ public class BlurParameter {
 
     private boolean visible = true;
 
+    private final BlurSegment parent;
+
+    public BlurParameter(BlurSegment parent){
+        this.parent = parent;
+    }
+
     public Shape getShape() {
         return shape;
     }
@@ -132,5 +138,9 @@ public class BlurParameter {
 
     public void setTextureAlpha(float textureAlpha) {
         this.textureAlpha = textureAlpha;
+    }
+
+    public BlurSegment getBlurSegment() {
+        return parent;
     }
 }

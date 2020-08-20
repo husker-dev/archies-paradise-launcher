@@ -17,6 +17,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     private int oldHeight = -1;
     private BufferedImage img;
     private final Screen screen;
+    private boolean disposed = false;
 
     public BlurScalableImage(Screen screen, BufferedImage image){
         super(image);
@@ -43,6 +44,8 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
+        checkForDispose(parameter);
+
         parameter.setBlurFactor(0);
         parameter.setShadowSize(5);
 
@@ -62,5 +65,13 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
 
     public Screen getScreen() {
         return null;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 }

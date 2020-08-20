@@ -10,7 +10,6 @@ import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.impl.glass.components.BlurPanel;
 import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
 import com.husker.launcher.utils.UIUtils;
 
@@ -29,6 +28,8 @@ public abstract class SocialPanel extends BlurPanel {
     private final Color defaultTitleColor = GlassUI.Colors.labelLightText;
     private final Color hoveredTitleColor = GlassUI.Colors.labelText;
 
+    private boolean isSelectable = true;
+
     public SocialPanel(Screen screen) {
         super(screen, true);
 
@@ -38,10 +39,12 @@ public abstract class SocialPanel extends BlurPanel {
 
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                titleLabel.setForeground(hoveredTitleColor);
+                if(isSelectable)
+                    titleLabel.setForeground(hoveredTitleColor);
             }
             public void mouseExited(MouseEvent e) {
-                titleLabel.setForeground(defaultTitleColor);
+                if(isSelectable)
+                    titleLabel.setForeground(defaultTitleColor);
             }
             public void mouseClicked(MouseEvent e) {
                 onClick();
@@ -49,10 +52,12 @@ public abstract class SocialPanel extends BlurPanel {
         });
         addMouseMotionListener(new MouseAdapter() {
             public void mouseMoved(MouseEvent e) {
-                titleLabel.setForeground(hoveredTitleColor);
+                if(isSelectable)
+                    titleLabel.setForeground(hoveredTitleColor);
             }
             public void mouseDragged(MouseEvent e) {
-                titleLabel.setForeground(hoveredTitleColor);
+                if(isSelectable)
+                    titleLabel.setForeground(hoveredTitleColor);
             }
         });
 
@@ -65,7 +70,6 @@ public abstract class SocialPanel extends BlurPanel {
             setLayout(new BorderLayout());
             add(titleLabel = createTitleLabel(), BorderLayout.SOUTH);
         }}, 0);
-
     }
 
     public WebStyledLabel getTitleLabel(){
@@ -93,7 +97,7 @@ public abstract class SocialPanel extends BlurPanel {
             parameter.setShadowSize(5);
             parameter.setDebugName("SocialPanelLabel");
 
-            if(getForeground() == defaultTitleColor)
+            if(titleLabel.getForeground() == defaultTitleColor)
                 parameter.setAdditionColor(GlassUI.Colors.third);
             else
                 parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
@@ -104,6 +108,11 @@ public abstract class SocialPanel extends BlurPanel {
     }
 
     public void setIcon(BufferedImage image){
+        if(image == null){
+            titleLabel.setIcon(null);
+            return;
+        }
+
         float width = image.getWidth();
         float height = image.getHeight();
 
@@ -136,6 +145,8 @@ public abstract class SocialPanel extends BlurPanel {
                 setForeground(defaultTitleColor);
                 setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(10f));
 
+                setMaximumTextWidth(160);
+
                 getScreen().addBlurSegment(parameter -> onBlurApply(parameter, this));
             }
             public void setText(String text) {
@@ -159,4 +170,12 @@ public abstract class SocialPanel extends BlurPanel {
     public abstract void onContentInit(WebPanel panel);
 
     public void onClick(){}
+
+    public boolean isSelectable() {
+        return isSelectable;
+    }
+
+    public void setSelectable(boolean selectable) {
+        isSelectable = selectable;
+    }
 }

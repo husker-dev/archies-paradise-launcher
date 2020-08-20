@@ -2,19 +2,23 @@ package com.husker.launcher.ui.impl.glass.components.social.vk;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.alee.utils.swing.extensions.SizeMethods;
+import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.impl.glass.components.social.ImageSocialPanel;
-import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
+
+import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static java.awt.FlowLayout.LEFT;
 
 
 public class VkPostPanel extends ImageSocialPanel {
@@ -30,8 +34,11 @@ public class VkPostPanel extends ImageSocialPanel {
         getTitleLabel().setMaximumHeight(80);
         getTitleLabel().setMinimumHeight(35);
         getTitleLabel().setPreferredHeight(SizeMethods.UNDEFINED);
-
         setTitle(parameter.getText());
+    }
+
+    public void onClick() {
+        NetManager.openLink(parameter.getUrl());
     }
 
     public static VkPostPanel create(Screen screen, VkPostParameter parameter){
@@ -49,24 +56,26 @@ public class VkPostPanel extends ImageSocialPanel {
 
     public static class Video extends VkPostPanel{
 
-        WebStyledLabel videoText;
+        WebStyledLabel tagText;
 
         public Video(Screen screen, VkPostParameter.Video parameter) {
             super(screen, parameter);
 
             setImage(parameter.getImage());
-            getTitleLabel().setPreferredHeight(100);
 
             add(new WebPanel(StyleId.panelTransparent){{
-                setLayout(new VerticalFlowLayout());
-                setMargin(10, 0, 20, 0);
+                setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+                setMargin(5, 5, 20, 5);
 
-                add(videoText = new WebStyledLabel("Видео"){{
+                add(tagText = new WebStyledLabel("Видео"){{
+                    setMargin(0, 10, 0, 10);
                     setVerticalAlignment(CENTER);
                     setHorizontalAlignment(CENTER);
-                    setForeground(new Color(255, 255, 255));
+                    setForeground(GlassUI.Colors.labelText);
                     setPreferredHeight(20);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(11f));
+                    setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(11f));
+                    screen.addBlurSegment(parameter1 -> onBlurApply(parameter1, tagText));
+                    setIcon(new ImageIcon(getScreen().getLauncher().Resources.Icon_Play.getScaledInstance(14, 14, Image.SCALE_SMOOTH)));
                 }});
 
             }}, 1);
@@ -76,7 +85,13 @@ public class VkPostPanel extends ImageSocialPanel {
             super.onBlurApply(parameter, component);
 
             if(component == getBlurScalableImage())
-                parameter.setAdditionColor(new Color(0, 0, 0, 100));
+                parameter.setAdditionColor(new Color(0, 0, 0, 0));
+            if(component == tagText){
+                parameter.setBlurFactor(0);
+                parameter.setShadowSize(5);
+                parameter.setAdditionColor(GlassUI.Colors.first);
+                parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), tagText, 15, 15, ALL_CORNERS));
+            }
         }
     }
 
@@ -84,7 +99,7 @@ public class VkPostPanel extends ImageSocialPanel {
 
         public Youtube(Screen screen, VkPostParameter.Youtube parameter) {
             super(screen, parameter);
-            videoText.setText("YouTube");
+            tagText.setText("YouTube");
         }
     }
 
@@ -103,10 +118,11 @@ public class VkPostPanel extends ImageSocialPanel {
             super(screen, parameter);
 
             setImage(parameter.getImage());
+            getTitleLabel().setMaximumRows(2);
 
             add(new WebPanel(StyleId.panelTransparent){{
                 setLayout(new VerticalFlowLayout());
-                setMargin(40, 0, 20, 0);
+                setMargin(35, 0, 20, 0);
 
                 add(new WebStyledLabel(parameter.getSnippetTitle()){{
                     setVerticalAlignment(CENTER);

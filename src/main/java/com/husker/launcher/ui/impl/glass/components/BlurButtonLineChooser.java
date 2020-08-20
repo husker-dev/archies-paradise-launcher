@@ -25,7 +25,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
     private final Screen screen;
     private int selected = 0;
     private final HashMap<WebLabel, Boolean> active = new HashMap<>();
-    private ArrayList<Consumer<Integer>> selectedListeners = new ArrayList<>();
+    private final ArrayList<Consumer<Integer>> selectedListeners = new ArrayList<>();
+    private boolean disposed = false;
 
     public BlurButtonLineChooser(Screen screen){
         super(StyleId.panelTransparent);
@@ -35,6 +36,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
 
         // Selected segment
         screen.addBlurSegment(parameter -> {
+            checkForDispose(parameter);
+
             int x = 0;
             int width = 0;
             for(int i = 0; i < getComponentCount(); i++){
@@ -63,6 +66,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
 
         // Left segment
         screen.addBlurSegment(parameter -> {
+            checkForDispose(parameter);
+
             int width = 0;
             for(int i = 0; i < getComponentCount(); i++){
                 if(i < selected)
@@ -84,6 +89,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
 
         // Right segment
         screen.addBlurSegment(parameter -> {
+            checkForDispose(parameter);
+
             int width = 0;
             int x = 0;
             for(int i = 0; i < getComponentCount(); i++)
@@ -158,7 +165,7 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
-
+        checkForDispose(parameter);
     }
 
     public void paint(Graphics g) {
@@ -177,6 +184,14 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 
     public void addSelectedListener(Consumer<Integer> listener){

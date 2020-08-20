@@ -10,13 +10,15 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public class BrowserManager {
 
-    private LauncherWindow launcher;
+    private final LauncherWindow launcher;
 
     private final ArrayList<YoutubeVideoParameters> youtubeParameters = new ArrayList<>();
     private final ArrayList<VkPostParameter> vkPostParameters = new ArrayList<>();
@@ -25,6 +27,10 @@ public class BrowserManager {
     private boolean isVkReady = false;
 
     private boolean isStarted = false;
+
+    private ChromeDriver driver;
+
+    private Thread mainThread;
 
     public BrowserManager(LauncherWindow launcher){
         this.launcher = launcher;
@@ -35,28 +41,48 @@ public class BrowserManager {
             return;
         else
             isStarted = true;
-        new Thread(() -> {
+        mainThread = new Thread(() -> {
             try {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--headless");
                 options.addArguments("window-size=1200x600");
 
-                ChromeDriver driver = new ChromeDriver(new ChromeDriverService.Builder().usingDriverExecutable(new File("./chromedriver_win.exe")).build(), options);
+                ChromeDriverService service = new ChromeDriverService.Builder()
+                        .usingDriverExecutable(new File("./chromedriver_win.exe"))
+                        .build();
 
+                // Mute chrome service output
+                System.setProperty(ChromeDriverService.CHROME_DRIVER_SILENT_OUTPUT_PROPERTY, "true");
+                java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.OFF);
+                service.sendOutputTo(new OutputStream(){public void write(int b){}});
+
+                driver = new ChromeDriver(service, options);
                 driver.get(launcher.getConfig().get("vkGroupUrl"));
                 processVkGroupParsing(driver.getPageSource());
 
                 driver.get(launcher.getConfig().get("youtubeUrl") + "/videos");
                 processYoutubeParsing(driver.getPageSource());
 
-
-
-                driver.quit();
-
+                close();
             }catch (Exception ex){
-                ex.printStackTrace();
+                //ex.printStackTrace();
             }
-        }).start();
+        });
+        mainThread.start();
+    }
+
+    public void close(){
+        if(mainThread.isAlive()){
+            isYoutubeReady = true;
+            isVkReady = true;
+            mainThread.interrupt();
+            if(driver != null) {
+                driver.close();
+                driver.quit();
+                driver = null;
+            }
+            ConsoleUtils.printDebug(getClass(), "ChromeDriver was closed");
+        }
     }
 
     private void processYoutubeParsing(String text){
@@ -117,7 +143,7 @@ public class BrowserManager {
 
                 youtubeParameters.add(new YoutubeVideoParameters(preview, title, videoUrl, dateTime));
             }catch (Exception ex){
-                ex.printStackTrace();
+                //ex.printStackTrace();
             }
         }
 
@@ -141,6 +167,9 @@ public class BrowserManager {
                 while(title.contains("<") && title.contains(">"))
                     title = title.replace(title.substring(title.indexOf("<"), title.indexOf(">") + 1), "");
 
+                // Url
+                String url = "https://vk.com/" + post.split("class=\"post_link\"")[1].split("href=\"")[1].split("\"")[0];
+
 
                 // Snippet
                 if(content.contains("article_snippet__image_wrap")){
@@ -148,38 +177,34 @@ public class BrowserManager {
                     String snippet_title = content.split("article_snippet__title\">")[1].split("</div>")[0];
                     String snippet_author = content.split("article_snippet__author\">")[1].split("<span")[0];
 
-                    vkPostParameters.add(new VkPostParameter.Snippet(title, ImageIO.read(new URL(img)), snippet_title, snippet_author));
+                    vkPostParameters.add(new VkPostParameter.Snippet(title, url, ImageIO.read(new URL(img)), snippet_title, snippet_author));
                     continue;
                 }
 
                 // Pictures
                 if(content.contains("page_post_sized_thumbs") && content.contains("фотография")){
                     String img = content.split("page_post_sized_thumbs")[1].split("url\\(")[1].split("\\);\"")[0];
-                    ConsoleUtils.printDebug(getClass(), img);
-                    vkPostParameters.add(new VkPostParameter.Picture(title, ImageIO.read(new URL(img))));
+                    vkPostParameters.add(new VkPostParameter.Picture(title, url, ImageIO.read(new URL(img))));
                     continue;
                 }
 
                 // Youtube video
                 if(content.contains("page_post_sized_thumbs") && content.contains("/video-") && content.contains("video_thumb_label_item\">YouTube")){
                     String img = content.split("page_post_sized_thumbs")[1].split("url\\(")[1].split("\\);\"")[0];
-
-                    vkPostParameters.add(new VkPostParameter.Youtube(title, ImageIO.read(new URL(img))));
+                    vkPostParameters.add(new VkPostParameter.Youtube(title, url, ImageIO.read(new URL(img))));
                     continue;
                 }
 
                 // Video
                 if(content.contains("page_post_sized_thumbs") && content.contains("/video")){
                     String img = content.split("page_post_sized_thumbs")[1].split("url\\(")[1].split("\\);\"")[0];
-
-                    vkPostParameters.add(new VkPostParameter.Video(title, ImageIO.read(new URL(img))));
+                    vkPostParameters.add(new VkPostParameter.Video(title, url, ImageIO.read(new URL(img))));
                     continue;
                 }
 
-                vkPostParameters.add(new VkPostParameter(title));
+                vkPostParameters.add(new VkPostParameter(title, url));
             }catch (Exception ex){
                 ex.printStackTrace();
-
             }
         }
 

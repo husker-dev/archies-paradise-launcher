@@ -87,6 +87,8 @@ public class Resources {
     public final BufferedImage Icon_Settings;
     public final BufferedImage Icon_Book;
     public final BufferedImage Icon_Videos;
+    public final BufferedImage Icon_Image;
+    public final BufferedImage Icon_Frame;
 
     public final BufferedImage Logo_Youtube;
     public final BufferedImage Logo_VK;
@@ -116,6 +118,8 @@ public class Resources {
         Icon_Settings = getBufferedImage("settings_icon.png");
         Icon_Book = getBufferedImage("book_icon.png");
         Icon_Videos = getBufferedImage("videos_icon.png");
+        Icon_Image = getBufferedImage("image_icon.png");
+        Icon_Frame = getBufferedImage("frame_icon.png");
 
         Logo_Youtube = getBufferedImage("youtube_logo.png");
         Logo_VK = getBufferedImage("vk_logo.png");

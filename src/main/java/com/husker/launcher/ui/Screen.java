@@ -2,18 +2,21 @@ package com.husker.launcher.ui;
 
 import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.ui.blur.BlurPainter;
+import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.blur.BlurSegment;
 import com.husker.launcher.ui.shadow.ShadowSegment;
+import com.husker.launcher.utils.ConsoleUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public abstract class Screen extends JPanel {
 
     private LauncherUI launcherUI;
-    private final ArrayList<BlurPainter> blurSegments = new ArrayList<>();
+    private final ArrayList<BlurPainter> blurPainters = new ArrayList<>();
     private final ArrayList<ShadowSegment> shadowSegments = new ArrayList<>();
     private String[] parameters;
 
@@ -28,7 +31,25 @@ public abstract class Screen extends JPanel {
     }
 
     public void addBlurSegment(BlurSegment segment){
-        blurSegments.add(new BlurPainter(getLauncher(), segment));
+        blurPainters.add(new BlurPainter(getLauncher(), segment));
+    }
+
+    public void removeBlurSegment(BlurSegment segment){
+        BlurPainter toRemove = null;
+        for(BlurPainter painter : blurPainters) {
+            if (painter.getBlurSegment() == segment) {
+                toRemove = painter;
+                break;
+            }
+        }
+        if(toRemove != null)
+            blurPainters.remove(toRemove);
+
+        ConsoleUtils.printDebug(getClass(), "Blur segment was removed");
+    }
+
+    public void removeBlurSegment(BlurParameter parameter){
+        removeBlurSegment(parameter.getBlurSegment());
     }
 
     public void addShadowSegment(ShadowSegment segment){
@@ -36,7 +57,7 @@ public abstract class Screen extends JPanel {
     }
 
     public BlurPainter[] getBlurPainters(){
-        return blurSegments.toArray(new BlurPainter[0]);
+        return blurPainters.toArray(new BlurPainter[0]);
     }
 
     public ShadowSegment[] getShadowSegments(){
@@ -70,7 +91,7 @@ public abstract class Screen extends JPanel {
     }
 
     public void doCaching(){
-        for(BlurPainter painter : blurSegments)
+        for(BlurPainter painter : blurPainters)
             painter.doCaching();
     }
 }

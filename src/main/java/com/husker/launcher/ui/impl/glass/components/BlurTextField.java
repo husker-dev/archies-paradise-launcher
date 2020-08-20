@@ -19,6 +19,7 @@ public class BlurTextField extends WebTextField implements BlurComponent{
 
     private RoundRectangle2D.Double shape;
     private final Screen screen;
+    private boolean disposed = false;
 
     public BlurTextField(Screen screen){
         super(StyleId.textfieldTransparent);
@@ -63,6 +64,8 @@ public class BlurTextField extends WebTextField implements BlurComponent{
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
+        checkForDispose(parameter);
+
         parameter.setAdditionColor(GlassUI.Colors.textField);
         parameter.setBlurFactor(25);
         parameter.setShadowSize(5);
@@ -89,5 +92,13 @@ public class BlurTextField extends WebTextField implements BlurComponent{
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 }

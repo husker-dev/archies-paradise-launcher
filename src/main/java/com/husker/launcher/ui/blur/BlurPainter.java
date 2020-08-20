@@ -81,7 +81,7 @@ public class BlurPainter {
     }
 
     public void doCaching(){
-        parameter = new BlurParameter();
+        parameter = new BlurParameter(segment);
         segment.get(parameter);
 
         Shape shape = parameter.getShape();
@@ -235,6 +235,10 @@ public class BlurPainter {
         shape2 = AffineTransform.getTranslateInstance(-shape2.getBounds().x, -shape2.getBounds().y).createTransformedShape(shape2);
 
         return new Area(shape1).equals(new Area(shape2));
+    }
+
+    public BlurSegment getBlurSegment(){
+        return segment;
     }
 }
 

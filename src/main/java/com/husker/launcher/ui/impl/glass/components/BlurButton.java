@@ -9,8 +9,6 @@ import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
 
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -21,6 +19,7 @@ public class BlurButton extends WebButton implements BlurComponent{
     private final Screen screen;
     private boolean pressed;
     private Color color = GlassUI.Colors.buttonDefault;
+    private boolean disposed = false;
 
     public BlurButton(Screen screen, String text){
         super(StyleId.buttonUndecorated, text);
@@ -66,6 +65,8 @@ public class BlurButton extends WebButton implements BlurComponent{
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
+        checkForDispose(parameter);
+
         Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonDefaultAlpha);
 
         parameter.setBlurFactor(25);
@@ -93,5 +94,13 @@ public class BlurButton extends WebButton implements BlurComponent{
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 }

@@ -18,6 +18,7 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
     private final Screen screen;
     private boolean checked = false;
     private Runnable runnable;
+    private boolean disposed = false;
 
     public BlurCheckbox(Screen screen){
         this(screen, "", false);
@@ -50,6 +51,8 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
+        checkForDispose(parameter);
+
         GlassUI.applyBottomLayer(parameter);
 
         Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
@@ -67,6 +70,14 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 
 

@@ -12,6 +12,8 @@ import com.husker.launcher.utils.ConsoleUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -49,6 +51,17 @@ public class LauncherWindow extends JFrame {
         System.setProperty("sun.awt.noerasebackground", "true");
 
         ConsoleUtils.printResult("OK");
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                new Thread(() -> {
+                    ConsoleUtils.printDebug(LauncherWindow.class, "Closing");
+                    BrowserManager.close();
+                    ConsoleUtils.printDebug(LauncherWindow.class, "Closed");
+                    System.exit(0);
+                }).start();
+            }
+        });
 
         currentUIName = config.get("ui", GlassUI.class.getCanonicalName());
         try {
@@ -116,7 +129,7 @@ public class LauncherWindow extends JFrame {
         setTitle(config.get("title"));
         setIconImage(Resources.Icon);
 
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
         setSize(currentUI.getDefaultSize());
         setLocationRelativeTo(null);
 

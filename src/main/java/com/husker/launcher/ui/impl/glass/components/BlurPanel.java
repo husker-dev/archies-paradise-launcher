@@ -5,8 +5,6 @@ import com.alee.managers.style.StyleId;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
 
 import java.awt.*;
@@ -17,6 +15,7 @@ public class BlurPanel extends WebPanel implements BlurComponent{
 
     private final boolean isMainColor;
     private final Screen screen;
+    private boolean disposed = false;
 
     public BlurPanel(Screen screen){
         this(screen, false);
@@ -31,6 +30,8 @@ public class BlurPanel extends WebPanel implements BlurComponent{
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
+        checkForDispose(parameter);
+
         if(component == this){
             if(isMainColor)
                 GlassUI.applyTopLayer(parameter);
@@ -47,5 +48,13 @@ public class BlurPanel extends WebPanel implements BlurComponent{
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 }

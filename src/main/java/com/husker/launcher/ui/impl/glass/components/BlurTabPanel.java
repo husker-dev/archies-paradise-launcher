@@ -33,6 +33,8 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
 
     private final LinkedHashMap<WebLabel, String> tabText = new LinkedHashMap<>();
 
+    private boolean disposed = false;
+
     public BlurTabPanel(Screen screen){
         super(StyleId.panelTransparent);
         this.screen = screen;
@@ -232,7 +234,7 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
-
+        checkForDispose(parameter);
         // Tab
         if(component instanceof WebLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component){
             Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
@@ -297,5 +299,13 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
 
     public Screen getScreen() {
         return screen;
+    }
+
+    public void dispose() {
+        disposed = true;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
     }
 }
