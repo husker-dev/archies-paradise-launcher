@@ -81,20 +81,20 @@ public abstract class TitledScreen extends CenteredMenuScreen {
         }, 0, Integer.parseInt(getLauncher().getConfig().get("connectionTimeout", "3000")) * 3 + 3000);
 
         // Under logo
-        addBlurSegment(parameter -> {
+        addBlurSegment("TitledScreen.BottomPlate", parameter -> {
             GlassUI.applyBottomLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getCenteredPanel().getX(), getCenteredPanel().getY(), getCenteredPanel().getWidth(), getCenteredPanel().getHeight(), 25, 25));
         });
 
         // Status bar
-        addBlurSegment(parameter -> {
+        addBlurSegment("TitledScreen.StatusBar", parameter -> {
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getCenteredPanel().getX(), getCenteredPanel().getY(), getCenteredPanel().getWidth(), statusSize, 25, 25));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, BOTTOM));
         });
 
         // Login main borders
-        addBlurSegment(parameter -> {
+        addBlurSegment("TitledScreen.TopPlate", parameter -> {
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getCenteredPanel().getX(), getCenteredPanel().getY() + logoSize + statusSize, getCenteredPanel().getWidth(), getCenteredPanel().getHeight() - logoSize - statusSize - 39, 25, 25));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, TOP, BOTTOM));

@@ -18,4 +18,20 @@ public interface BlurComponent {
         }
         return false;
     }
+
+    default boolean returnOnInvisible(BlurParameter parameter, Component component){
+        if(!component.isDisplayable() || !component.isVisible()) {
+            parameter.setVisible(false);
+            return true;
+        }
+        return false;
+    }
+
+    static boolean isReturnOnInvisible(BlurParameter parameter, Component component){
+        if(!component.isDisplayable()) {
+            parameter.setVisible(false);
+            return true;
+        }
+        return false;
+    }
 }

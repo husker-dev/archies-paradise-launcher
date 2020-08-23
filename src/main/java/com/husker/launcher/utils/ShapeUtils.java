@@ -50,6 +50,8 @@ public class ShapeUtils {
     }
 
     public static Shape translateShape(Shape shape, int x, int y){
+        if(shape == null)
+            return null;
         return AffineTransform.getTranslateInstance(x, y).createTransformedShape(shape);
     }
 }

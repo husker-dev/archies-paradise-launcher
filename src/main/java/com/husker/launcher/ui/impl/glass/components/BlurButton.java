@@ -25,7 +25,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         super(StyleId.buttonUndecorated, text);
         this.screen = screen;
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
+        screen.addBlurSegment("Button", parameter -> onBlurApply(parameter, this));
 
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -44,6 +44,7 @@ public class BlurButton extends WebButton implements BlurComponent{
 
         setFont(Resources.Fonts.ChronicaPro_ExtraBold);
         setPreferredHeight(30);
+        setForeground(GlassUI.Colors.labelText);
         setMargin(5, 0, 0, 0);
     }
 
@@ -67,29 +68,30 @@ public class BlurButton extends WebButton implements BlurComponent{
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
 
-        Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonDefaultAlpha);
+        if(component == this){
+            if(returnOnInvisible(parameter, component))
+                return;
 
-        parameter.setBlurFactor(25);
-        parameter.setDebugName("Button." + getName());
-        parameter.setShadowSize(5);
-        parameter.setShadowColor(new Color(0, 0, 0, 40));
-        parameter.setVisible(isVisible() && isDisplayable());
+            Color newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonDefaultAlpha);
 
-        updateShape();
-        Point mouse = screen.getLauncher().getContentPane().getMousePosition();
+            parameter.setBlurFactor(25);
 
-        if(mouse != null && shape != null && isEnabled()){
-            if(shape.contains(mouse))
-                newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonHoveredAlpha);
-            if(isFocusOwner())
-                newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonHoveredAlpha);
-            if(pressed)
-                newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonPressedAlpha);
+            parameter.setShadowSize(5);
+            parameter.setShadowColor(new Color(0, 0, 0, 40));
+
+            updateShape();
+            Point mouse = screen.getLauncher().getContentPane().getMousePosition();
+
+            if(mouse != null && shape != null && isEnabled()){
+                if(shape.contains(mouse))
+                    newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonHoveredAlpha);
+                if(pressed)
+                    newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonPressedAlpha);
+            }
+
+            parameter.setAdditionColor(newColor);
+            parameter.setShape(shape);
         }
-
-        parameter.setAdditionColor(newColor);
-
-        parameter.setShape(shape);
     }
 
     public Screen getScreen() {

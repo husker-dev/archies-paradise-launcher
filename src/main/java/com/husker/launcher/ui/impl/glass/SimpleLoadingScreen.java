@@ -14,12 +14,12 @@ public abstract class SimpleLoadingScreen extends CenteredMenuScreen {
     private WebLabel text;
 
     public void onMenuInit() {
-        addBlurSegment(parameter -> {
+        addBlurSegment("LoadingScreen.Menu", parameter -> {
             GlassUI.applyBottomLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), getMenuHeight(), 25, 25));
         });
 
-        addBlurSegment(parameter -> {
+        addBlurSegment("LoadingScreen.Title", parameter -> {
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), title_size, 25, 25));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, BOTTOM));

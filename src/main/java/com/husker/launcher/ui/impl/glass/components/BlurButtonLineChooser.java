@@ -35,8 +35,10 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
         setLayout(new GridBagLayout());
 
         // Selected segment
-        screen.addBlurSegment(parameter -> {
+        screen.addBlurSegment("ButtonLineChooser.Selected", parameter -> {
             checkForDispose(parameter);
+            if(returnOnInvisible(parameter, BlurButtonLineChooser.this))
+                return;
 
             int x = 0;
             int width = 0;
@@ -48,25 +50,24 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
                     break;
                 }
             }
-            if(isDisplayable() && isVisible()) {
-                Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
 
-                GlassUI.applyTopLayer(parameter);
-                parameter.setShadowSize(2);
-                if (selected == 0)
-                    parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_LEFT, BOTTOM_LEFT));
-                if (selected > 0 && selected < getComponentCount() - 1)
-                    parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25));
-                if (selected == getComponentCount() - 1)
-                    parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_RIGHT, BOTTOM_RIGHT));
-            }
-            parameter.setDebugName("ButtonLineChooser.Selected." + getName());
-            parameter.setVisible(isDisplayable() && isVisible());
+            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
+
+            GlassUI.applyTopLayer(parameter);
+            parameter.setShadowSize(2);
+            if (selected == 0)
+                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_LEFT, BOTTOM_LEFT));
+            if (selected > 0 && selected < getComponentCount() - 1)
+                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25));
+            if (selected == getComponentCount() - 1)
+                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_RIGHT, BOTTOM_RIGHT));
         });
 
         // Left segment
-        screen.addBlurSegment(parameter -> {
+        screen.addBlurSegment("ButtonLineChooser.Left", parameter -> {
             checkForDispose(parameter);
+            if(returnOnInvisible(parameter, BlurButtonLineChooser.this))
+                return;
 
             int width = 0;
             for(int i = 0; i < getComponentCount(); i++){
@@ -75,21 +76,20 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
                 else
                     break;
             }
-            if(isDisplayable() && isVisible()) {
-                Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
 
-                GlassUI.applyTopLayer(parameter);
-                parameter.setShadowSize(5);
-                parameter.setDebugName("ButtonLineChooser.Left." + getName());
-                parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
-                parameter.setShape(ShapeUtils.createRoundRectangle(location.x, location.y, width, getHeight(), 25, 25, TOP_LEFT, BOTTOM_LEFT));
-                parameter.setVisible(isDisplayable() && isVisible());
-            }
+            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
+
+            GlassUI.applyTopLayer(parameter);
+            parameter.setShadowSize(5);
+            parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
+            parameter.setShape(ShapeUtils.createRoundRectangle(location.x, location.y, width, getHeight(), 25, 25, TOP_LEFT, BOTTOM_LEFT));
         });
 
         // Right segment
-        screen.addBlurSegment(parameter -> {
+        screen.addBlurSegment("ButtonLineChooser.Right", parameter -> {
             checkForDispose(parameter);
+            if(returnOnInvisible(parameter, BlurButtonLineChooser.this))
+                return;
 
             int width = 0;
             int x = 0;
@@ -99,16 +99,13 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
                 else
                     width += getComponent(i).getWidth();
 
-            if(isDisplayable() && isVisible()) {
-                Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
+            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
 
-                GlassUI.applyTopLayer(parameter);
-                parameter.setShadowSize(5);
-                parameter.setDebugName("ButtonLineChooser.Right." + getName());
-                parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
-                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_RIGHT, BOTTOM_RIGHT));
-                parameter.setVisible(isDisplayable() && isVisible());
-            }
+            GlassUI.applyTopLayer(parameter);
+            parameter.setShadowSize(5);
+
+            parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
+            parameter.setShape(ShapeUtils.createRoundRectangle(location.x + x, location.y, width, getHeight(), 25, 25, TOP_RIGHT, BOTTOM_RIGHT));
         });
     }
 
@@ -127,7 +124,6 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
             this.fill = 1;
             this.insets = new Insets(0, 0, 0, 0);
         }});
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, label));
         setEnabled(index, true);
     }
 
@@ -166,6 +162,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
+        if(returnOnInvisible(parameter, BlurButtonLineChooser.this))
+            return;
     }
 
     public void paint(Graphics g) {
@@ -176,9 +174,8 @@ public class BlurButtonLineChooser extends WebPanel implements BlurComponent{
         for(int i = 0; i < getComponentCount(); i++){
             cur_x += getComponent(i).getWidth();
 
-            if(i != selected && i != selected - 1 && i != getComponentCount() - 1){
+            if(i != selected && i != selected - 1 && i != getComponentCount() - 1)
                 g.drawLine(cur_x, 10, cur_x, getHeight() - 10);
-            }
         }
     }
 

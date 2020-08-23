@@ -24,7 +24,7 @@ public class LauncherWindow extends JFrame {
     private ScalableImage backgroundImage;
     private ScalableImage animationBackgroundImage;
     private LauncherUI currentUI;
-    private final String currentUIName;
+    private String currentUIName;
 
     private float currentAlpha = 0;
     private boolean isAnimating = false;
@@ -42,100 +42,119 @@ public class LauncherWindow extends JFrame {
     public final NetManager NetManager = new NetManager(this);
     public final BrowserManager BrowserManager = new BrowserManager(this);
 
+    public LoadingWindow loadingWindow;
+
     public LauncherWindow(){
-        ConsoleUtils.printDebug(getClass(), "Installing the WebLaF library");
-
-        WebLookAndFeel.install();
-
-        Toolkit.getDefaultToolkit().setDynamicLayout(true);
-        System.setProperty("sun.awt.noerasebackground", "true");
-
-        ConsoleUtils.printResult("OK");
-
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                new Thread(() -> {
-                    ConsoleUtils.printDebug(LauncherWindow.class, "Closing");
-                    BrowserManager.close();
-                    ConsoleUtils.printDebug(LauncherWindow.class, "Closed");
-                    System.exit(0);
-                }).start();
-            }
-        });
-
-        currentUIName = config.get("ui", GlassUI.class.getCanonicalName());
         try {
-            Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
-            currentUI = c.getConstructor(LauncherWindow.class).newInstance(this);
+            loadingWindow = new LoadingWindow(this);
         }catch (Exception ex){
             ex.printStackTrace();
-            currentUI = new GlassUI(this);
         }
+        try {
+            ConsoleUtils.printDebug(getClass(), "Installing the WebLaF library");
+            WebLookAndFeel.install();
 
-        setContentPane(new WebPanel(StyleId.panelTransparent){{
-            setLayout(new OverlayLayout(this));
+            Toolkit.getDefaultToolkit().setDynamicLayout(true);
+            System.setProperty("sun.awt.noerasebackground", "true");
 
-            // For animation
-            add(animationPanel = new WebPanel(){
-                {
-                    setLayout(new BorderLayout());
-                    add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
-                    setOpaque(false);
-                    setBackground(new Color(0, 0, 0, 0));
-                    setVisible(false);
-                }
+            ConsoleUtils.printResult("OK");
 
-                public void paint(Graphics g) {
-                    Graphics2D g2d = (Graphics2D)g;
-                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentAlpha / 255f));
-
-                    super.paint(g2d);
+            addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    new Thread(() -> {
+                        ConsoleUtils.printDebug(LauncherWindow.class, "Closing");
+                        BrowserManager.close();
+                        ConsoleUtils.printDebug(LauncherWindow.class, "Closed");
+                        System.exit(0);
+                    }).start();
                 }
             });
 
-            // UI
-            add(new WebPanel(StyleId.panelTransparent){{
-                setLayout(new BorderLayout());
-                add(currentUI);
-            }});
+            currentUIName = config.get("ui", GlassUI.class.getCanonicalName());
+            try {
+                Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
+                currentUI = c.getConstructor(LauncherWindow.class).newInstance(this);
+            }catch (Exception ex){
+                ex.printStackTrace();
+                currentUI = new GlassUI(this);
+            }
 
-            // Blur, Shadow, etc...
-            add(new JPanel(){
-                {
-                    setOpaque(false);
-                    setBackground(new Color(0, 0, 0, 0));
-                    setLayout(new BorderLayout());
-                }
-                public void paint(Graphics g) {
-                    if(currentUI != null && currentUI.getScreen() != null){
-                        Graphics2D g2d = (Graphics2D)g;
-                        for(BlurPainter painter : currentUI.getScreen().getBlurPainters())
-                            painter.paint(g2d);
+            setContentPane(new WebPanel(StyleId.panelTransparent){{
+                setLayout(new OverlayLayout(this));
+
+                // For animation
+                add(animationPanel = new WebPanel(){
+                    {
+                        setLayout(new BorderLayout());
+                        add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
+                        setOpaque(false);
+                        setBackground(new Color(0, 0, 0, 0));
+                        setVisible(false);
                     }
 
-                    super.paint(g);
-                }
-            });
+                    public void paint(Graphics g) {
+                        Graphics2D g2d = (Graphics2D)g;
+                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentAlpha / 255f));
 
-            // Background
-            add(new JPanel(){{
-                setLayout(new BorderLayout());
-                add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
+                        super.paint(g2d);
+                    }
+                });
+
+                // UI
+                add(new WebPanel(StyleId.panelTransparent){{
+                    setLayout(new BorderLayout());
+                    add(currentUI);
+                }});
+
+                // Blur, Shadow, etc...
+                add(new JPanel(){
+                    {
+                        setOpaque(false);
+                        setBackground(new Color(0, 0, 0, 0));
+                        setLayout(new BorderLayout());
+                    }
+                    public void paint(Graphics g) {
+                        if(currentUI != null && currentUI.getScreen() != null){
+                            Graphics2D g2d = (Graphics2D)g;
+                            long start = System.currentTimeMillis();
+                            for(BlurPainter painter : currentUI.getScreen().getBlurPainters()) {
+                                if(painter != null)
+                                    painter.paint(g2d);
+                            }
+                            //ConsoleUtils.printDebug(getClass(), "Repaint in " + (System.currentTimeMillis() - start) / 1000f);
+                        }
+
+                        super.paint(g);
+                    }
+                });
+
+                // Background
+                add(new JPanel(){{
+                    setLayout(new BorderLayout());
+                    add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
+                }});
+
+
             }});
 
+            setTitle(config.get("title"));
+            setIconImage(Resources.Icon);
 
-        }});
+            setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            setSize(currentUI.getDefaultSize());
+            setLocationRelativeTo(null);
 
-        setTitle(config.get("title"));
-        setIconImage(Resources.Icon);
+            currentUI.onInit();
+            if(currentUI.isAnimated())
+                currentAlpha = 255;
 
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(currentUI.getDefaultSize());
-        setLocationRelativeTo(null);
-
-        currentUI.onInit();
-        if(currentUI.isAnimated())
-            currentAlpha = 255;
+            if(loadingWindow != null && loadingWindow.isOK()) {
+                setVisible(true);
+                loadingWindow.setVisible(false);
+            }
+        }catch (Exception ex){
+            loadingWindow.onError();
+        }
     }
 
     public void setBackgroundImage(BufferedImage image){

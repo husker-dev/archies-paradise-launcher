@@ -10,27 +10,30 @@ import java.awt.image.BufferedImage;
 
 
 public class MainScreen extends AbstractMainScreen {
-    BlurTabPanel panel;
 
     void onMenuInit(WebPanel menu) {
         menu.setLayout(new BorderLayout());
 
-        menu.add(panel = new BlurTabPanel(this){{
+        menu.add(new BlurTabPanel(this){{
+            VkGroupPanel vkPanel;
+            YoutubePanel youtubePanel;
+
             setPreferredHeight(450);
             addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), new WebPanel(StyleId.panelTransparent){{
 
             }});
-            addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), new WebPanel(StyleId.panelTransparent){{
-
-            }});
-            addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), new WebPanel(StyleId.panelTransparent){{
-
-            }});
-            addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), new WebPanel(StyleId.panelTransparent){{
-
-            }});
+            addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), new ProfilePanel(MainScreen.this));
+            addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
+            addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
             addBottomTab("settings", "Настройки", getIcon(getLauncher().Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
             addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), new InfoPanel(MainScreen.this));
+
+            addTabChangedListener(id -> {
+                if(id.equals("news"))
+                    vkPanel.onShow();
+                if(id.equals("videos"))
+                    youtubePanel.onShow();
+            });
         }});
     }
 

@@ -11,6 +11,7 @@ import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
+import com.husker.launcher.ui.impl.glass.components.BlurScalableImage;
 import com.husker.launcher.ui.impl.glass.components.social.ImageSocialPanel;
 import com.husker.launcher.utils.ShapeUtils;
 
@@ -18,23 +19,43 @@ import javax.swing.*;
 import java.awt.*;
 
 import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_LEFT;
+import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_RIGHT;
 import static java.awt.FlowLayout.LEFT;
 
 
 public class VkPostPanel extends ImageSocialPanel {
 
-    private VkPostParameter parameter;
+    private final VkPostParameter parameter;
 
     public VkPostPanel(Screen screen, VkPostParameter parameter) {
         super(screen);
         this.parameter = parameter;
 
+        setUseTransparentTitle(true);
         setIcon(getScreen().getLauncher().Resources.Logo_VK);
+        setTitle(parameter.getText());
+
         getTitleLabel().setMaximumRows(6);
         getTitleLabel().setMaximumHeight(80);
         getTitleLabel().setMinimumHeight(35);
         getTitleLabel().setPreferredHeight(SizeMethods.UNDEFINED);
-        setTitle(parameter.getText());
+    }
+
+    public void onContentInit(WebPanel panel) {
+        super.onContentInit(panel);
+        panel.setMargin(0);
+    }
+
+    public void onBlurApply(BlurParameter parameter, Component component) {
+        super.onBlurApply(parameter, component);
+        if(returnOnInvisible(parameter, component))
+            return;
+
+        if(component == getBlurScalableImage()){
+            Rectangle bounds = parameter.getShape().getBounds();
+            parameter.setShape(ShapeUtils.createRoundRectangle(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15, ALL_CORNERS));
+        }
     }
 
     public void onClick() {
@@ -74,7 +95,7 @@ public class VkPostPanel extends ImageSocialPanel {
                     setForeground(GlassUI.Colors.labelText);
                     setPreferredHeight(20);
                     setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(11f));
-                    screen.addBlurSegment(parameter1 -> onBlurApply(parameter1, tagText));
+                    screen.addBlurSegment("VkPostPanel.Video.Tag", parameter1 -> onBlurApply(parameter1, tagText));
                     setIcon(new ImageIcon(getScreen().getLauncher().Resources.Icon_Play.getScaledInstance(14, 14, Image.SCALE_SMOOTH)));
                 }});
 
@@ -83,10 +104,17 @@ public class VkPostPanel extends ImageSocialPanel {
 
         public void onBlurApply(BlurParameter parameter, Component component) {
             super.onBlurApply(parameter, component);
+            if(returnOnInvisible(parameter, component))
+                return;
 
             if(component == getBlurScalableImage())
                 parameter.setAdditionColor(new Color(0, 0, 0, 0));
             if(component == tagText){
+
+                if(returnOnInvisible(parameter, component))
+                    return;
+
+                parameter.setVisible(component.isDisplayable());
                 parameter.setBlurFactor(0);
                 parameter.setShadowSize(5);
                 parameter.setAdditionColor(GlassUI.Colors.first);

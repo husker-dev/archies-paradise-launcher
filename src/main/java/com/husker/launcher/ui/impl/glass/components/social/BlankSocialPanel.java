@@ -23,7 +23,7 @@ public class BlankSocialPanel extends ImageSocialPanel{
 
     public BlankSocialPanel(Screen screen) {
         super(screen);
-        setImage(screen.getLauncher().Resources.Icon_Image);
+        setImage(screen.getLauncher().Resources.Social_Loading_Logo);
         setSelectable(false);
 
         add(new WebPanel(StyleId.panelTransparent){{
@@ -41,8 +41,8 @@ public class BlankSocialPanel extends ImageSocialPanel{
 
         }});
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, emptyTitle));
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, emptyTitleIcon));
+        screen.addBlurSegment("BlankSocialPanel.Title", parameter -> onBlurApply(parameter, emptyTitle));
+        screen.addBlurSegment("BlankSocialPanel.TitleIcon", parameter -> onBlurApply(parameter, emptyTitleIcon));
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
@@ -52,25 +52,27 @@ public class BlankSocialPanel extends ImageSocialPanel{
             parameter.setTextureAlpha(0.1f);
 
         if(component != null && component == emptyTitle){
+            if(returnOnInvisible(parameter, component))
+                return;
+
             parameter.setAdditionColor(new Color(0, 0, 0, 30));
             parameter.setBlurFactor(0);
 
-            if(component.isDisplayable()) {
-                Point location = ComponentUtils.getComponentLocationOnScreen(getScreen().getLauncher(), component);
-                int size = 20;
-                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + 10, location.y + (35d - size) / 2d, component.getWidth() - 20, size, 5, 5, ALL_CORNERS));
-            }
+            Point location = ComponentUtils.getComponentLocationOnScreen(getScreen().getLauncher(), component);
+            int size = 20;
+            parameter.setShape(ShapeUtils.createRoundRectangle(location.x + 10, location.y + (35d - size) / 2d, component.getWidth() - 20, size, 5, 5, ALL_CORNERS));
         }
 
         if(component != null && component == emptyTitleIcon){
+            if(returnOnInvisible(parameter, component))
+                return;
+
             parameter.setAdditionColor(new Color(0, 0, 0, 30));
             parameter.setBlurFactor(0);
 
-            if(component.isDisplayable()) {
-                Point location = ComponentUtils.getComponentLocationOnScreen(getScreen().getLauncher(), component);
-                int size = 21;
-                parameter.setShape(ShapeUtils.createRoundRectangle(location.x + 7, location.y + (35d - size) / 2d, size, size, 5, 5, ALL_CORNERS));
-            }
+            Point location = ComponentUtils.getComponentLocationOnScreen(getScreen().getLauncher(), component);
+            int size = 21;
+            parameter.setShape(ShapeUtils.createRoundRectangle(location.x + 7, location.y + (35d - size) / 2d, size, size, 5, 5, ALL_CORNERS));
         }
 
         if(hidden)

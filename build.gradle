@@ -2,18 +2,15 @@ plugins {
     id 'java'
 }
 
+group 'com.husker.launcher'
 
 sourceSets {
     main {
         resources {
             srcDirs "src/main/resources"
-
         }
     }
 }
-
-group 'org.example'
-version '1.0'
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
@@ -32,11 +29,12 @@ repositories {
     mavenCentral()
 }
 
-
-
 dependencies {
-    implementation 'com.weblookandfeel:weblaf-ui:1.2.12'
+    implementation 'com.weblookandfeel:weblaf-ui:1.2.13'
     implementation 'org.apache.commons:commons-lang3:3.0'
     implementation 'org.seleniumhq.selenium:selenium-java:3.141.5'
+    implementation 'net.lingala.zip4j:zip4j:2.6.1'
+    implementation 'org.jogamp.jogl:jogl-all-main:2.3.2'
 
+    implementation 'org.jogamp.gluegen:gluegen-rt-main:2.3.2'
 }

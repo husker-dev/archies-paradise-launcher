@@ -30,8 +30,8 @@ public abstract class Screen extends JPanel {
     public void onShow(){
     }
 
-    public void addBlurSegment(BlurSegment segment){
-        blurPainters.add(new BlurPainter(getLauncher(), segment));
+    public void addBlurSegment(String name, BlurSegment segment){
+        blurPainters.add(new BlurPainter(getLauncher(), segment, name));
     }
 
     public void removeBlurSegment(BlurSegment segment){

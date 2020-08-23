@@ -10,6 +10,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class BrowserManager {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--headless");
                 options.addArguments("window-size=1200x600");
+                options.addArguments("--lang=ru");
 
                 ChromeDriverService service = new ChromeDriverService.Builder()
                         .usingDriverExecutable(new File("./chromedriver_win.exe"))
@@ -203,7 +205,8 @@ public class BrowserManager {
                 }
 
                 vkPostParameters.add(new VkPostParameter(title, url));
-            }catch (Exception ex){
+            }catch (IOException ignored){
+            } catch (Exception ex){
                 ex.printStackTrace();
             }
         }

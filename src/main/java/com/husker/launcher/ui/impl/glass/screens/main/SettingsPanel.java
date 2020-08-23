@@ -7,10 +7,7 @@ import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.impl.glass.GlassUI;
-import com.husker.launcher.ui.impl.glass.components.BlurButton;
-import com.husker.launcher.ui.impl.glass.components.BlurButtonLineChooser;
-import com.husker.launcher.ui.impl.glass.components.BlurCheckbox;
-import com.husker.launcher.ui.impl.glass.components.BlurTextField;
+import com.husker.launcher.ui.impl.glass.components.*;
 import com.husker.launcher.utils.ComponentUtils;
 import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
@@ -47,12 +44,7 @@ public class SettingsPanel extends WebPanel {
             add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().get("auto_auth", "true").equals("true")){{
                 setOnAction(() -> screen.getLauncher().getSettings().set("auto_auth", isChecked() + ""));
             }});
-            /*
-            add(new BlurCheckbox(screen, "Автоматически запускать игру", screen.getLauncher().getSettings().get("auto_play", "false").equals("true")){{
-                setOnAction(() -> screen.getLauncher().getSettings().set("auto_play", isChecked() + ""));
-            }});
 
-             */
             add(new WebPanel(StyleId.panelTransparent){{
                 setLayout(new FlowLayout(LEFT, 0, 0));
 
@@ -172,7 +164,10 @@ public class SettingsPanel extends WebPanel {
             setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(23f));
             setMargin(1, 10, 0, 10);
 
-            screen.addBlurSegment(parameter -> {
+            screen.addBlurSegment("SettingsPanel.Label", parameter -> {
+                if(BlurComponent.isReturnOnInvisible(parameter, this))
+                    return;
+
                 GlassUI.applyTopLayer(parameter);
                 parameter.setAdditionColor(GlassUI.Colors.third);
                 if (isDisplayable()) {

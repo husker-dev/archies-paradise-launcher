@@ -8,6 +8,7 @@ import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
 
 import javax.swing.*;
@@ -16,9 +17,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
+import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 import static com.husker.launcher.utils.ShapeUtils.Corner.*;
 
 public class BlurTabPanel extends WebPanel implements BlurComponent {
@@ -33,6 +37,8 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
 
     private final LinkedHashMap<WebLabel, String> tabText = new LinkedHashMap<>();
 
+    private final ArrayList<Consumer<String>> listeners = new ArrayList<>();
+
     private boolean disposed = false;
 
     public BlurTabPanel(Screen screen){
@@ -40,7 +46,8 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
         this.screen = screen;
         setLayout(new BorderLayout());
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, contentPanel.getFirstComponent()));
+        screen.addBlurSegment("TabPanel.Content", parameter -> onBlurApply(parameter, contentPanel.getFirstComponent()));
+        screen.addBlurSegment("TabPanel.Tab", parameter -> onBlurApply(parameter, getSelectedTabLabel()));
 
         add(topTabPanel = new WebPanel(StyleId.panelTransparent){
             {
@@ -122,7 +129,6 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
         tabText.put(tabLabel, title);
 
         tabLabels.put(id, tabLabel);
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, tabLabel));
         if(isTop) {
             topTabPanel.add(tabLabel, new GridBagConstraints() {{
                 this.weightx = 1;
@@ -229,16 +235,23 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             tabLabels.get(selectedTab).setText(tabText.get(tabLabels.get(selectedTab)));
             contentPanel.removeAll();
             contentPanel.add(tabContent.get(title));
+
+            for(Consumer<String> listener : listeners)
+                listener.accept(title);
+
             screen.getLauncher().repaint();
         });
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
+        if(returnOnInvisible(parameter, component))
+            return;
+
         // Tab
         if(component instanceof WebLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component){
-            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
 
+            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
             Area shape;
             if(topTabPanel.contains(component))
                 shape = new Area(ShapeUtils.createRoundRectangle(location.x, location.y, component.getWidth(), component.getHeight() + 25, 25, 25, TOP_LEFT, TOP_RIGHT));
@@ -247,8 +260,6 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             shape.subtract(new Area(getContentShape()));
 
             GlassUI.applyTopLayer(parameter);
-            parameter.setVisible(isVisible() && isDisplayable());
-            parameter.setDebugName("TabPanel.Tab." + getName());
             parameter.setShape(shape);
             parameter.setShadowClip(getShadowClip());
             return;
@@ -257,18 +268,14 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
         // Content
         if(tabContent.containsValue(component)){
             GlassUI.applyTopLayer(parameter);
-            parameter.setVisible(isVisible() && isDisplayable());
             parameter.setShape(getContentShape());
-            parameter.setDebugName("TabPanel.Content." + getName());
             parameter.setShadowClip(getShadowClip());
             return;
         }
     }
 
-    protected RoundRectangle2D.Double getContentShape(){
-        Component component = contentPanel.getFirstComponent();
-        Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
-        return new RoundRectangle2D.Double(location.x, location.y, component.getWidth(), component.getHeight(), 25, 25);
+    protected Shape getContentShape(){
+        return ShapeUtils.createRoundRectangle(getScreen().getLauncher(), contentPanel.getFirstComponent(), 25, 25, ALL_CORNERS);
     }
 
     protected Shape getShadowClip(){
@@ -307,5 +314,9 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
 
     public boolean isDisposed() {
         return disposed;
+    }
+
+    public void addTabChangedListener(Consumer<String> listener){
+        listeners.add(listener);
     }
 }

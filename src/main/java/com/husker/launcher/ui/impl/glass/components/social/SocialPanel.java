@@ -1,7 +1,6 @@
 package com.husker.launcher.ui.impl.glass.components.social;
 
 import com.alee.extended.label.WebStyledLabel;
-import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
@@ -29,6 +28,8 @@ public abstract class SocialPanel extends BlurPanel {
     private final Color hoveredTitleColor = GlassUI.Colors.labelText;
 
     private boolean isSelectable = true;
+
+    private boolean useTransparentTitle = false;
 
     public SocialPanel(Screen screen) {
         super(screen, true);
@@ -82,27 +83,27 @@ public abstract class SocialPanel extends BlurPanel {
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         super.onBlurApply(parameter, component);
+        if(returnOnInvisible(parameter, component))
+            return;
 
         if(component == this) {
             parameter.setShadowSize(5);
             parameter.setBlurFactor(0);
-            parameter.setDebugName("SocialPanel");
-            if (parameter.getShape() != null) {
-                Rectangle bounds = parameter.getShape().getBounds();
-                parameter.setShape(ShapeUtils.createRoundRectangle(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15, ALL_CORNERS));
-            }
+
+            Rectangle bounds = parameter.getShape().getBounds();
+            parameter.setShape(ShapeUtils.createRoundRectangle(bounds.x, bounds.y, bounds.width, bounds.height, 15, 15, ALL_CORNERS));
         }
         if(component == titleLabel){
             GlassUI.applyTopLayer(parameter);
             parameter.setShadowSize(5);
-            parameter.setDebugName("SocialPanelLabel");
+            parameter.setBlurFactor(useTransparentTitle ? 0 : 25);
 
             if(titleLabel.getForeground() == defaultTitleColor)
                 parameter.setAdditionColor(GlassUI.Colors.third);
             else
                 parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
-            parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), titleLabel, 15, 15, ALL_CORNERS));
 
+            parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), titleLabel, 15, 15, ALL_CORNERS));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, 15, UIUtils.ShadowSide.TOP));
         }
     }
@@ -143,11 +144,11 @@ public abstract class SocialPanel extends BlurPanel {
                 setVerticalAlignment(CENTER);
                 setMaximumRows(2);
                 setForeground(defaultTitleColor);
-                setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(10f));
+                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(10f));
 
                 setMaximumTextWidth(160);
 
-                getScreen().addBlurSegment(parameter -> onBlurApply(parameter, this));
+                getScreen().addBlurSegment("SocialPanel.Title", parameter -> onBlurApply(parameter, this));
             }
             public void setText(String text) {
                 super.setText(text);
@@ -177,5 +178,13 @@ public abstract class SocialPanel extends BlurPanel {
 
     public void setSelectable(boolean selectable) {
         isSelectable = selectable;
+    }
+
+    public boolean isUseTransparentTitle() {
+        return useTransparentTitle;
+    }
+
+    public void setUseTransparentTitle(boolean useTransparentTitle) {
+        this.useTransparentTitle = useTransparentTitle;
     }
 }

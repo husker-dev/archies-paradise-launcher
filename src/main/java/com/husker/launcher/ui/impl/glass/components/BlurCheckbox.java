@@ -39,7 +39,7 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
         setVerticalAlignment(CENTER);
         setForeground(GlassUI.Colors.labelText);
         setFont(Resources.Fonts.ChronicaPro_ExtraBold);
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
+        screen.addBlurSegment("Checkbox", parameter -> onBlurApply(parameter, this));
 
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -52,20 +52,23 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
+        if(returnOnInvisible(parameter, component))
+            return;
 
-        GlassUI.applyBottomLayer(parameter);
+        if(component == this){
+            GlassUI.applyBottomLayer(parameter);
 
-        Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
-        location.x += 4;
-        location.y += 4;
+            Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
+            location.x += 4;
+            location.y += 4;
 
-        if(isDisplayable() && isVisible()) {
             parameter.setShape(new RoundRectangle2D.Double(location.x, location.y, 16, 16, 5, 5));
+
+            parameter.setShadowSize(3);
+            parameter.setShadowType(BlurParameter.ShadowType.INNER);
+            parameter.setVisible(isDisplayable() && isVisible());
         }
-        parameter.setShadowSize(3);
-        parameter.setDebugName("Chackbox." + getName());
-        parameter.setShadowType(BlurParameter.ShadowType.INNER);
-        parameter.setVisible(isDisplayable() && isVisible());
+
     }
 
     public Screen getScreen() {

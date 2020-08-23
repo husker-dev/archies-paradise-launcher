@@ -24,7 +24,6 @@ public class BlurParameter {
     private int shadowSize = 0;
     private Shape shadowClip = null;
     private Shape clip = null;
-    private String debugName = null;
 
     private boolean visible = true;
 
@@ -112,14 +111,6 @@ public class BlurParameter {
 
     public void setClip(Shape clip) {
         this.clip = clip;
-    }
-
-    public String getDebugName() {
-        return debugName;
-    }
-
-    public void setDebugName(String debugName) {
-        this.debugName = debugName;
     }
 
     public BufferedImage getTexture() {

@@ -22,10 +22,10 @@ public class GlassUI extends LauncherUI {
 
         public static final Color textField = new Color(255, 255, 255, 110);
         public static final Color textFieldHovered = new Color(255, 255, 255, 90);
-        public static final Color textFieldFocused = new Color(255, 255, 255, 40);
+        public static final Color textFieldFocused = new Color(255, 255, 255, 60);
 
         public static final Color buttonDefault = new Color(255, 255, 255);
-        public static final int buttonDefaultAlpha = 230;
+        public static final int buttonDefaultAlpha = 240;
         public static final int buttonHoveredAlpha = 255;
         public static final int buttonPressedAlpha = 180;
 
@@ -65,7 +65,7 @@ public class GlassUI extends LauncherUI {
     }
 
     public Dimension getDefaultSize() {
-        return new Dimension(1100, 700);
+        return new Dimension(1150, 750);
     }
 
     public static WebLabel createTitleLabel(String text){

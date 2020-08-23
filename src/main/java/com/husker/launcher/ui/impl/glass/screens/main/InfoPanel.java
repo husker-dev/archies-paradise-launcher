@@ -54,7 +54,7 @@ public class InfoPanel extends WebPanel {
                 setPreferredWidth(200);
                 setPreferredHeight(225);
                 setLayout(new FlowLayout(CENTER));
-                setMargin(20, 0, 0, 0);
+                setMargin(20, 20, 0, 20);
                 add(createInfoParameter("Версия", LauncherWindow.VERSION));
                 add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
                 add(createInfoParameter("Владелец", screen.getLauncher().getConfig().get("owner", "Никто"), screen.getLauncher().getConfig().get("ownerLink")));

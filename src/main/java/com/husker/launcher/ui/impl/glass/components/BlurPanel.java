@@ -26,11 +26,13 @@ public class BlurPanel extends WebPanel implements BlurComponent{
         this.isMainColor = isMain;
         this.screen = screen;
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
+        screen.addBlurSegment("Panel", parameter -> onBlurApply(parameter, this));
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
+        if(returnOnInvisible(parameter, component))
+            return;
 
         if(component == this){
             if(isMainColor)
@@ -38,11 +40,7 @@ public class BlurPanel extends WebPanel implements BlurComponent{
             else
                 GlassUI.applyBottomLayer(parameter);
 
-            parameter.setVisible(isVisible() && isDisplayable());
-            parameter.setDebugName("Panel." + getName());
-
-            if(isDisplayable() && isVisible())
-                parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 25, 25, ALL_CORNERS));
+            parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 25, 25, ALL_CORNERS));
         }
     }
 

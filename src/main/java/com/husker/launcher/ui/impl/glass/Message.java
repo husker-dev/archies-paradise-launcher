@@ -27,12 +27,12 @@ public class Message extends CenteredMenuScreen {
 
     public void onMenuInit() {
 
-        addBlurSegment(parameter -> {
+        addBlurSegment("Message.Menu", parameter -> {
             GlassUI.applyBottomLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), getMenuHeight() - 15, 25, 25));
         });
 
-        addBlurSegment(parameter -> {
+        addBlurSegment("Message.Title", parameter -> {
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), title_size, 25, 25));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, BOTTOM));

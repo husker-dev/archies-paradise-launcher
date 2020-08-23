@@ -25,7 +25,7 @@ public class BlurTextField extends WebTextField implements BlurComponent{
         super(StyleId.textfieldTransparent);
         this.screen = screen;
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
+        screen.addBlurSegment("TextField", parameter -> onBlurApply(parameter, this));
 
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
@@ -66,15 +66,17 @@ public class BlurTextField extends WebTextField implements BlurComponent{
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
 
-        parameter.setAdditionColor(GlassUI.Colors.textField);
-        parameter.setBlurFactor(25);
-        parameter.setShadowSize(5);
-        parameter.setShadowColor(new Color(0, 0, 0, 40));
-        parameter.setShadowType(BlurParameter.ShadowType.INNER);
-        parameter.setDebugName("TextField." + getName());
-        parameter.setVisible(isVisible() && isDisplayable());
+        if(component == this){
+            if(returnOnInvisible(parameter, component))
+                return;
 
-        if(isDisplayable() && isVisible()) {
+            parameter.setAdditionColor(GlassUI.Colors.textField);
+            parameter.setBlurFactor(25);
+            parameter.setShadowSize(5);
+            parameter.setShadowColor(new Color(0, 0, 0, 40));
+            parameter.setShadowType(BlurParameter.ShadowType.INNER);
+            parameter.setVisible(isVisible() && isDisplayable());
+
             updateShape();
             parameter.setShape(shape);
 

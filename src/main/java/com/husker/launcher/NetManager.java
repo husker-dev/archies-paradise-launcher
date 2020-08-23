@@ -151,6 +151,8 @@ public class NetManager {
     }
 
     public static String getURLContent(String url){
+        if(url == null)
+            return null;
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
             StringBuilder stringBuilder = new StringBuilder();

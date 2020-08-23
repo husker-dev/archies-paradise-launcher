@@ -1,7 +1,5 @@
 package com.husker.launcher;
 
-import com.husker.launcher.utils.ConsoleUtils;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -17,7 +15,6 @@ public class SettingsFile {
     private boolean isSaveEnabled = true;
 
     public SettingsFile(String resourcePath){
-
         init(new BufferedReader(new InputStreamReader(Resources.get(resourcePath, false))).lines().collect(Collectors.toList()));
         isSaveEnabled = false;
     }

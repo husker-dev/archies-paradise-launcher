@@ -24,7 +24,7 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
         super(StyleId.textfieldTransparent);
         this.screen = screen;
 
-        screen.addBlurSegment(parameter -> onBlurApply(parameter, this));
+        screen.addBlurSegment("PasswordField", parameter -> onBlurApply(parameter, this));
 
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
@@ -68,27 +68,30 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
 
     public void onBlurApply(BlurParameter parameter, Component component) {
         checkForDispose(parameter);
+        if(returnOnInvisible(parameter, component))
+            return;
 
-        parameter.setAdditionColor(GlassUI.Colors.textField);
-        parameter.setBlurFactor(25);
-        parameter.setShadowSize(5);
-        parameter.setShadowColor(new Color(0, 0, 0, 40));
-        parameter.setShadowType(BlurParameter.ShadowType.INNER);
-        parameter.setDebugName("PasswordField." + getName());
-        parameter.setVisible(isVisible() && isDisplayable());
+        if(component == this){
+            parameter.setAdditionColor(GlassUI.Colors.textField);
+            parameter.setBlurFactor(25);
+            parameter.setShadowSize(5);
+            parameter.setShadowColor(new Color(0, 0, 0, 40));
+            parameter.setShadowType(BlurParameter.ShadowType.INNER);
+            parameter.setVisible(isVisible() && isDisplayable());
 
-        updateShape();
-        Point mouse = screen.getLauncher().getContentPane().getMousePosition();
+            updateShape();
+            Point mouse = screen.getLauncher().getContentPane().getMousePosition();
 
-        if(mouse != null && shape != null){
-            if(shape.contains(mouse))
-                parameter.setAdditionColor(GlassUI.Colors.textFieldHovered);
-            if(isFocusOwner()) {
-                parameter.setAdditionColor(GlassUI.Colors.textFieldFocused);
+            if(mouse != null && shape != null){
+                if(shape.contains(mouse))
+                    parameter.setAdditionColor(GlassUI.Colors.textFieldHovered);
+                if(isFocusOwner()) {
+                    parameter.setAdditionColor(GlassUI.Colors.textFieldFocused);
+                }
             }
-        }
 
-        parameter.setShape(shape);
+            parameter.setShape(shape);
+        }
     }
 
     public Screen getScreen() {

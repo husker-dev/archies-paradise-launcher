@@ -9,7 +9,11 @@ public class RenderUtils {
 
     public static void enableAntialiasing(Graphics2D g2d){
         RenderingHints qualityHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        qualityHints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHints(qualityHints);
+    }
+
+    public static void disableAntialiasing(Graphics2D g2d){
+        RenderingHints qualityHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         g2d.setRenderingHints(qualityHints);
     }
 
@@ -142,5 +146,19 @@ public class RenderUtils {
         g2d.setPaint(shadowPaint);
         g2d.fill(new Rectangle(parameter.getPosition().x, parameter.getPosition().y, parameter.getSize().width, parameter.getSize().height));
     }
+
+    /*
+    public void drawImage(Graphics2D g2d){
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setPaint ( Color.WHITE );
+        g2d.fillRoundRect ( 0, 0, icon.getIconWidth (), icon.getIconHeight (), 10, 10 );
+        g2d.setComposite ( AlphaComposite.getInstance ( AlphaComposite.SRC_IN ) );
+        g2d.drawImage ( icon.getImage (), 0, 0, null );
+        g2d.dispose ();
+
+        ImageIcon roundedIcon = new ImageIcon ( roundedImage );
+    }
+
+     */
 
 }
