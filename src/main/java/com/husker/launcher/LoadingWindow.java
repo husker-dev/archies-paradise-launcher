@@ -1,33 +1,31 @@
 package com.husker.launcher;
 
 
-import com.alee.utils.FileUtils;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.RenderUtils;
 import com.husker.launcher.utils.ShapeUtils;
-import net.lingala.zip4j.ZipFile;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
 
 import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 
 public class LoadingWindow extends JFrame {
 
-    public static String latestVersion = null;
+    private static final Color defaultColor = new Color(255, 255, 255, 200);
+    private static final Color hoveredColor = new Color(255, 255, 255, 200);
+
+    private static final Color defaultTextColor = new Color(160, 160, 160);
+    private static final Color hoveredTextColor = new Color(90, 90, 90);
+
+    private static final int shadow = 5;
+
     private final LauncherWindow launcher;
 
     private JLabel statusLabel;
@@ -41,26 +39,27 @@ public class LoadingWindow extends JFrame {
     private boolean error = false;
     private boolean starting = false;
 
-    private static final SettingsFile config = new SettingsFile("update_config.cfg");
-
-    private static final boolean checkUpdates = false;
-
     public LoadingWindow(LauncherWindow launcher){
         super("Launcher loading");
         setIconImage(launcher.Resources.Icon);
         this.launcher = launcher;
 
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        setSize(300,220);
+        setSize(310,230);
         setUndecorated(true);
         setLocationRelativeTo(null);
         setBackground(Color.GRAY);
+
+        FrameDragListener frameDragListener = new FrameDragListener(this);
+        addMouseListener(frameDragListener);
+        addMouseMotionListener(frameDragListener);
 
         setBackground(new Color(0, 0, 0, 0));
 
         getRootPane().setLayout(new BorderLayout());
         getRootPane().add(new JPanel(){
             {
+                setBorder(BorderFactory.createEmptyBorder(shadow, shadow, shadow, shadow));
                 setLayout(new OverlayLayout(this));
 
                 add(new JPanel(){{
@@ -70,103 +69,112 @@ public class LoadingWindow extends JFrame {
                     setLayout(new BorderLayout());
                     add(new ScalableImage(launcher.Resources.Logo));
 
-                    add(statusLabel = new JLabel("Проверка обновлений..."){{
+                    add(statusLabel = new JLabel(){{
+                        setBorder(BorderFactory.createEmptyBorder(-10, 0, 0, 0));
                         setOpaque(true);
-                        setPreferredSize(new Dimension(0, 50));
-                        setBackground(new Color(255, 255, 255, 150));
+                        setPreferredSize(new Dimension(0, 60));
+                        setBackground(defaultColor);
                         setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
+                        setForeground(GlassUI.Colors.labelText);
                         setVerticalAlignment(CENTER);
                         setHorizontalAlignment(CENTER);
                     }}, BorderLayout.SOUTH);
 
-                    add(new JPanel(){{
-                        setBackground(new Color(0, 0, 0, 0));
-                        setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-                        int width = 40;
-                        int height = 25;
+                    add(new JPanel(){
+                        {
+                            setBackground(new Color(0, 0, 0, 0));
+                            setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+                            int width = 40;
+                            int height = 25;
 
-                        add(hideLabel = new JLabel("-"){
-                            boolean hovered = false;
-                            {
-                                setHorizontalAlignment(CENTER);
-                                setVerticalAlignment(CENTER);
-                                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
-                                setPreferredSize(new Dimension(width, height));
-                                setForeground(new Color(130, 130, 130));
-                                addMouseListener(new MouseAdapter() {
-                                    public void mouseClicked(MouseEvent mouseEvent) {
-                                        LoadingWindow.this.setState(Frame.ICONIFIED);
-                                    }
-                                    public void mouseEntered(MouseEvent mouseEvent) {
-                                        super.mouseEntered(mouseEvent);
-                                        setForeground(new Color(122, 122, 122));
-                                        hovered = true;
-                                        LoadingWindow.this.repaint();
-                                    }
-                                    public void mouseExited(MouseEvent mouseEvent) {
-                                        super.mouseExited(mouseEvent);
-                                        setForeground(new Color(130, 130, 130));
-                                        hovered = false;
-                                        LoadingWindow.this.repaint();
-                                    }
-                                });
-                            }
-                            public void paint(Graphics graphics) {
-                                Graphics2D g2d = (Graphics2D) graphics;
-                                if(hovered)
-                                    g2d.setColor(new Color(220, 220, 220, 200));
-                                else
-                                    g2d.setColor(new Color(230, 230, 230, 120));
-                                g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10, ShapeUtils.Corner.BOTTOM_LEFT));
-                                super.paint(graphics);
-                            }
-                        });
-                        add(closeLabel = new JLabel("X"){
-                            boolean hovered = false;
-                            {
-                                setHorizontalAlignment(CENTER);
-                                setVerticalAlignment(CENTER);
-                                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
-                                setPreferredSize(new Dimension(width, height));
-                                setForeground(new Color(140, 0, 0));
-                                addMouseListener(new MouseAdapter() {
-                                    public void mouseClicked(MouseEvent mouseEvent) {
-                                        System.exit(0);
-                                    }
-                                    public void mouseEntered(MouseEvent mouseEvent) {
-                                        super.mouseEntered(mouseEvent);
-                                        setForeground(new Color(110, 10, 10));
-                                        hovered = true;
-                                        LoadingWindow.this.repaint();
-                                    }
-                                    public void mouseExited(MouseEvent mouseEvent) {
-                                        super.mouseExited(mouseEvent);
-                                        setForeground(new Color(140, 0, 0));
-                                        hovered = false;
-                                        LoadingWindow.this.repaint();
-                                    }
-                                });
-                            }
-                            public void paint(Graphics graphics) {
-                                Graphics2D g2d = (Graphics2D) graphics;
-                                if(hovered)
-                                    g2d.setColor(new Color(160, 60, 60, 200));
-                                else
-                                    g2d.setColor(new Color(180, 80, 80, 140));
-                                g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10));
-                                super.paint(graphics);
-                            }
-                        });
+                            add(hideLabel = new JLabel("-"){
+                                boolean hovered = false;
+                                {
+                                    setHorizontalAlignment(CENTER);
+                                    setVerticalAlignment(CENTER);
+                                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
+                                    setPreferredSize(new Dimension(width, height));
+                                    setForeground(defaultTextColor);
+                                    addMouseListener(new MouseAdapter() {
+                                        public void mouseClicked(MouseEvent mouseEvent) {
+                                            LoadingWindow.this.setState(Frame.ICONIFIED);
+                                        }
+                                        public void mouseEntered(MouseEvent mouseEvent) {
+                                            setForeground(hoveredTextColor);
+                                            hovered = true;
+                                            LoadingWindow.this.repaint();
+                                        }
+                                        public void mouseExited(MouseEvent mouseEvent) {
+                                            setForeground(defaultTextColor);
+                                            hovered = false;
+                                            LoadingWindow.this.repaint();
+                                        }
+                                    });
+                                }
+                                public void paint(Graphics graphics) {
+                                    Graphics2D g2d = (Graphics2D) graphics;
+                                    if(hovered)
+                                        g2d.setColor(hoveredColor);
+                                    else
+                                        g2d.setColor(defaultColor);
+                                    g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10, ShapeUtils.Corner.BOTTOM_LEFT));
+                                    super.paint(graphics);
+                                }
+                            });
+                            add(closeLabel = new JLabel("X"){
+                                boolean hovered = false;
+                                {
+                                    setHorizontalAlignment(CENTER);
+                                    setVerticalAlignment(CENTER);
+                                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
+                                    setPreferredSize(new Dimension(width, height));
+                                    setForeground(defaultTextColor);
+                                    addMouseListener(new MouseAdapter() {
+                                        public void mouseClicked(MouseEvent mouseEvent) {
+                                            System.exit(0);
+                                        }
+                                        public void mouseEntered(MouseEvent mouseEvent) {
+                                            super.mouseEntered(mouseEvent);
+                                            setForeground(hoveredTextColor);
+                                            hovered = true;
+                                            LoadingWindow.this.repaint();
+                                        }
+                                        public void mouseExited(MouseEvent mouseEvent) {
+                                            super.mouseExited(mouseEvent);
+                                            setForeground(defaultTextColor);
+                                            hovered = false;
+                                            LoadingWindow.this.repaint();
+                                        }
+                                    });
+                                }
+                                public void paint(Graphics graphics) {
+                                    Graphics2D g2d = (Graphics2D) graphics;
+                                    if(hovered)
+                                        g2d.setColor(hoveredColor);
+                                    else
+                                        g2d.setColor(defaultColor);
+                                    g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10));
+                                    super.paint(graphics);
+                                }
+                            });
 
-                    }}, BorderLayout.NORTH);
+                        }
+                        public void paint(Graphics graphics) {
+                            super.paint(graphics);
+                            graphics.setColor(new Color(0, 0, 0, 50));
+                            int cur_x = getComponent(0).getX();
+                            for(int i = 0; i < getComponentCount() - 1; i++){
+                                cur_x += getComponent(i).getWidth();
+                                graphics.drawLine(cur_x, 8, cur_x, getHeight() - 8);
+                            }
+
+                        }
+                    }, BorderLayout.NORTH);
                 }});
-
 
                 add(new JPanel(){{
                     setBackground(new Color(255, 255, 255, 10));
                 }});
-
-
 
                 add(new JPanel(){{
                     setLayout(new BorderLayout());
@@ -185,132 +193,94 @@ public class LoadingWindow extends JFrame {
                 g2d.setPaint(new TexturePaint(tmp, new Rectangle(0, -1, tmp.getWidth(), tmp.getHeight())));
                 RenderUtils.enableAntialiasing(g2d);
                 g2d.fill(getWindowShape());
-                RenderUtils.disableAntialiasing(g2d);
-                g2d.fill(getWindowShape());
 
                 Point hideLocation = ComponentUtils.getComponentLocationOnScreen(LoadingWindow.this, hideLabel);
 
+                g2d.setClip(getWindowShape());
                 RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(hideLocation.x, hideLocation.y, hideLabel.getWidth() + closeLabel.getWidth(), hideLabel.getHeight() - 1, 10, 10, ShapeUtils.Corner.BOTTOM_LEFT), new Color(0, 0, 0, 60), 10);
-
                 RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(LoadingWindow.this, statusLabel, 0, 0), new Color(0, 0, 0, 60), 10);
 
+                g2d.setClip(null);
+                RenderUtils.drawOuterShade(g2d, getWindowShape(), new Color(0, 0, 0, 50), shadow);
                 g2d.dispose();
             }
         });
 
         new Thread(() -> {
-            if(checkUpdates) {
-                html = NetManager.getURLContent(config.get("github") + "/releases/latest");
+            setStatusText("Проверка обновлений...");
+            try {
+                if(launcher.UpdateManager.hasUpdate()){
+                    setStatusText("Обновление...");
+                    launcher.UpdateManager.downloadUpdate(percent -> setStatusText("Скачивание обновления...   " + percent + "%"));
 
-                if (html == null) {
-                    latestVersion = "unknown";
-                    return;
+                    setStatusText("Распаковка...");
+                    launcher.UpdateManager.unzipUpdate(percent -> setStatusText("Распаковка...   " + percent + "%"));
+
+                    setStatusText("Завершение...");
+                    launcher.UpdateManager.unpackUpdateFolder(percent -> setStatusText("Завершение...   " + percent + "%"));
+
+                    setStatusText("Перезапуск...");
+                    launcher.UpdateManager.rebootToApplyUpdate();
+                }else {
+                    starting = true;
+                    if (error)
+                        setErrorText();
+                    else
+                        setStartingText();
                 }
 
-                latestVersion = html.split("<li class=\"d-block mb-1\">")[1].split("class=\"css-truncate-target\"")[1].split("\">")[1].split("</span>")[0];
-            }
-
-            if(checkUpdates && !latestVersion.equals(LauncherWindow.VERSION)){
-                ConsoleUtils.printDebug(getClass(), "Current version: " + LauncherWindow.VERSION + ", Latest version: " + latestVersion);
-
-                SwingUtilities.invokeLater(() -> {
-                    statusLabel.setText("Обновление...");
-                    LoadingWindow.this.repaint();
-                });
-
-                String url = "https://github.com/" + html.split("d-flex flex-justify-between flex-items-center py-1 py-md-2 Box-body px-2")[1].split("href=\"")[1].split("\"")[0];
-
-                BufferedInputStream in = null;
-                try {
-                    URLConnection connection = new URL(url).openConnection();
-                    connection.connect();
-
-                    fileSize = connection.getContentLength();
-
-                    in = new BufferedInputStream(new URL(url).openStream());
-
-                    Files.createDirectories(Paths.get("./update"));
-                    for(File fileToDelete : Objects.requireNonNull(new File("./update").listFiles()))
-                        FileUtils.deleteFile(fileToDelete);
-
-                    FileOutputStream fileOutputStream = new FileOutputStream("./update/archive.zip");
-                    byte[] dataBuffer = new byte[1024];
-                    int bytesRead;
-                    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                        fileOutputStream.write(dataBuffer, 0, bytesRead);
-
-                        currentSize += bytesRead;
-                        SwingUtilities.invokeLater(() -> {
-                            statusLabel.setText("Обновление...    " + (int)((float)currentSize / (float)fileSize * 100f) + "%");
-                            LoadingWindow.this.repaint();
-                        });
-                    }
-                    fileOutputStream.close();
-
-                    SwingUtilities.invokeLater(() -> {
-                        statusLabel.setText("Распаковка...");
-                        LoadingWindow.this.repaint();
-                    });
-
-                    ZipFile file = new ZipFile("./update/archive.zip");
-                    file.extractAll("./update");
-
-                    while(Files.exists(Paths.get("./update/archive.zip")))
-                        Files.deleteIfExists(Paths.get("./update/archive.zip"));
-
-                    SwingUtilities.invokeLater(() -> {
-                        statusLabel.setText("Завершение...");
-                        LoadingWindow.this.repaint();
-                    });
-
-                    try {
-                        String folder = Objects.requireNonNull(new File("./update").list())[0];
-
-                        for(String fileToMove : Objects.requireNonNull(new File("./update/" + folder).list()))
-                            Files.move(Paths.get("./update/" + folder + "/" + fileToMove), Paths.get( "./update/" + fileToMove));
-                        FileUtils.deleteFile(new File("./update/" + folder));
-                    }catch (Exception ex){
-                        ex.printStackTrace();
-                    }
-
-                    Runtime.getRuntime().exec("java -jar starter.jar launcher.cfg");
-                    System.exit(0);
-
-                } catch (Exception e) {
-                    try {
-                        if (in != null)
-                            in.close();
-                    }catch (Exception ig){}
-                    e.printStackTrace();
+            }catch (UpdateManager.UpdateException ex){
+                switch (ex.getStage()) {
+                    case VERSION_GET:
+                        setStatusText("Возникла ошибка при", "проверке обновления!   (" + ex.getCode() + ")");
+                        break;
+                    case DOWNLOAD:
+                        setStatusText("Возникла ошибка при", "скачивании обновления!   (" + ex.getCode() + ")");
+                        break;
+                    case UNZIP:
+                        setStatusText("Возникла ошибка при", "распаковке обновления!   (" + ex.getCode() + ")");
+                        break;
+                    case UNPACK:
+                        setStatusText("Возникла ошибка при", "распаковке папки обновления!   (" + ex.getCode() + ")");
+                        break;
+                    case REBOOT:
+                        setStatusText("Возникла ошибка при", "перезапуске приложения!   (" + ex.getCode() + ")");
+                        break;
                 }
-            }else {
-                starting = true;
-                if(error)
-                    setErrorText();
-                else
-                    setStartingText();
-
+                logException(ex.getException());
             }
         }).start();
 
         setVisible(true);
     }
 
+    private void logException(Exception exception){
+        try {
+            PrintWriter pw = new PrintWriter(new File("./log.txt"));
+            exception.printStackTrace(pw);
+            pw.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public Shape getWindowShape(){
-        return ShapeUtils.createRoundRectangle(0, 0, getWidth() - 1, getHeight() - 1, 20, 20, ALL_CORNERS);
+        return ShapeUtils.createRoundRectangle(shadow, shadow, getWidth() - 1 - shadow * 2, getHeight() - 1 - shadow * 2, 20, 20, ALL_CORNERS);
     }
 
     public boolean isOK(){
-        if(!checkUpdates)
-            return true;
-        while(true){
-            if(latestVersion != null)
-                break;
-            try {
-                Thread.sleep(10);
-            }catch (Exception ex){}
+        try {
+            return !launcher.UpdateManager.hasUpdate();
+        }catch (Exception ex){
+            return false;
         }
-        return latestVersion.equals(LauncherWindow.VERSION);
+    }
+
+    public void setStatusText(String... text){
+        SwingUtilities.invokeLater(() -> {
+            statusLabel.setText("<html><center>" + String.join("<br><center>", text) + "</html>");
+            LoadingWindow.this.repaint();
+        });
     }
 
     public void onError(){
@@ -320,23 +290,37 @@ public class LoadingWindow extends JFrame {
     }
 
     private void setStartingText(){
-        SwingUtilities.invokeLater(() -> {
-            statusLabel.setText("Запуск...");
-            LoadingWindow.this.repaint();
-        });
+        setStatusText("Запуск...");
     }
 
     private void setErrorText(){
         if(!System.getProperty("java.version").startsWith("1.8"))
-            SwingUtilities.invokeLater(() -> {
-                statusLabel.setText("<html><center>Ошибка при запуске!<br>Попробуйте установить Java 1.8</html>");
-                LoadingWindow.this.repaint();
-            });
+            setStatusText("Ошибка при запуске!", "Попробуйте установить Java 1.8");
         else
-            SwingUtilities.invokeLater(() -> {
-                statusLabel.setText("Ошибка при запуске!");
-                LoadingWindow.this.repaint();
-            });
+            setStatusText("Ошибка при запуске!");
+    }
+
+    public static class FrameDragListener extends MouseAdapter {
+
+        private final JFrame frame;
+        private Point mouseDownCompCoords = null;
+
+        public FrameDragListener(JFrame frame) {
+            this.frame = frame;
+        }
+
+        public void mouseReleased(MouseEvent e) {
+            mouseDownCompCoords = null;
+        }
+
+        public void mousePressed(MouseEvent e) {
+            mouseDownCompCoords = e.getPoint();
+        }
+
+        public void mouseDragged(MouseEvent e) {
+            Point currCoords = e.getLocationOnScreen();
+            frame.setLocation(currCoords.x - mouseDownCompCoords.x, currCoords.y - mouseDownCompCoords.y);
+        }
     }
 
 }

@@ -59,7 +59,7 @@ public class VkPostPanel extends ImageSocialPanel {
     }
 
     public void onClick() {
-        NetManager.openLink(parameter.getUrl());
+        getScreen().getLauncher().NetManager.openLink(parameter.getUrl());
     }
 
     public static VkPostPanel create(Screen screen, VkPostParameter parameter){

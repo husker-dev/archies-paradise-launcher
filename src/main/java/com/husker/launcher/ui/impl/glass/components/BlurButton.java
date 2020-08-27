@@ -18,6 +18,7 @@ public class BlurButton extends WebButton implements BlurComponent{
     private RoundRectangle2D.Double shape;
     private final Screen screen;
     private boolean pressed;
+    private boolean hovered = false;
     private Color color = GlassUI.Colors.buttonDefault;
     private boolean disposed = false;
 
@@ -45,7 +46,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         setFont(Resources.Fonts.ChronicaPro_ExtraBold);
         setPreferredHeight(30);
         setForeground(GlassUI.Colors.labelText);
-        setMargin(5, 0, 0, 0);
+        setMargin(3, 0, 0, 0);
     }
 
     public void setColor(Color color){
@@ -83,8 +84,11 @@ public class BlurButton extends WebButton implements BlurComponent{
             Point mouse = screen.getLauncher().getContentPane().getMousePosition();
 
             if(mouse != null && shape != null && isEnabled()){
-                if(shape.contains(mouse))
+                if(shape.contains(mouse)) {
+                    hovered = true;
                     newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonHoveredAlpha);
+                }else
+                    hovered = false;
                 if(pressed)
                     newColor = new Color(color.getRed(), color.getGreen(), color.getBlue(), GlassUI.Colors.buttonPressedAlpha);
             }
@@ -92,6 +96,10 @@ public class BlurButton extends WebButton implements BlurComponent{
             parameter.setAdditionColor(newColor);
             parameter.setShape(shape);
         }
+    }
+
+    public boolean isHovered(){
+        return hovered;
     }
 
     public Screen getScreen() {

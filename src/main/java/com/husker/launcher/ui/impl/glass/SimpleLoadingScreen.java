@@ -4,6 +4,7 @@ import com.alee.laf.label.WebLabel;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.utils.UIUtils;
 
+import javax.swing.*;
 import java.awt.geom.RoundRectangle2D;
 
 import static com.husker.launcher.utils.UIUtils.ShadowSide.BOTTOM;
@@ -40,6 +41,6 @@ public abstract class SimpleLoadingScreen extends CenteredMenuScreen {
     }
 
     public void setText(String text){
-        this.text.setText(text);
+        SwingUtilities.invokeLater(() -> this.text.setText(text));
     }
 }

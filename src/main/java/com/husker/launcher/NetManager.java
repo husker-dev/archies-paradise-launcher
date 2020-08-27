@@ -3,29 +3,48 @@ package com.husker.launcher;
 import com.alee.laf.label.WebLabel;
 import com.husker.launcher.utils.ConsoleUtils;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.*;
-import java.nio.charset.Charset;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Scanner;
 
 public class NetManager {
 
+    public static boolean enable = true;
+
+    public static final int DEFAULT_AUTH_SERVER_PORT = 15565;
+
+    public static final String KEY = "key";
+    public static final String LOGIN = "login";
+    public static final String EMAIL = "email";
+    public static final String STATUS = "status";
+    public static final String SKIN_NAME = "skinName";
+    public static final String PASSWORD = "password";
+    public static final String CURRENT_PASSWORD = "current_password";
+    public static final String HAS_SKIN = "hasSkin";
+    public static final String ID = "id";
+
     public ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
+    private final LauncherWindow launcher;
 
     public NetManager(LauncherWindow launcher){
+        this.launcher = launcher;
         new Thread(() -> {
             try {
-                if(launcher != null){
-                    statusList = new ArrayList<>(NetManager.getServerOnlineStatus(launcher));
-                    Thread.sleep(Integer.parseInt(launcher.getConfig().get("connectionTimeout", "3000")) * 3 + 3000);
-                }else
-                    Thread.sleep(200);
+                if(enable) {
+                    while(true) {
+                        if (launcher != null) {
+                            statusList = new ArrayList<>(getServerOnlineStatus());
+                            Thread.sleep(Integer.parseInt(launcher.getConfig().get("connectionTimeout", "3000")) * 3 + 3000);
+                        } else
+                            Thread.sleep(200);
+                    }
+                }
             } catch (InterruptedException e) {
             }
         }).start();
@@ -66,12 +85,12 @@ public class NetManager {
         MINECRAFT_SERVER_ONLINE,
     }
 
-    public static List<ServerStatus> getServerOnlineStatus(LauncherWindow launcherWindow){
+    public List<ServerStatus> getServerOnlineStatus(){
         ArrayList<ServerStatus> status = new ArrayList<>();
-        int timeout = Integer.parseInt(launcherWindow.getConfig().get("connectionTimeout", "3000"));
+        int timeout = Integer.parseInt(launcher.getConfig().get("connectionTimeout", "3000"));
 
         try {
-            if(ping(launcherWindow.getConfig().get("authServerIp"), 2540, timeout))
+            if(ping(launcher.getConfig().get("authServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("authServerPort", DEFAULT_AUTH_SERVER_PORT + "")), timeout))
                 status.add(ServerStatus.AUTH_ONLINE);
             else
                 status.add(ServerStatus.AUTH_OFFLINE);
@@ -79,7 +98,7 @@ public class NetManager {
             status.add(ServerStatus.AUTH_OFFLINE);
         }
         try{
-            if(ping(launcherWindow.getConfig().get("minecraftServerIp"), 25565, timeout))
+            if(ping(launcher.getConfig().get("minecraftServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("minecraftServerPort", "25565")), timeout))
                 status.add(ServerStatus.MINECRAFT_SERVER_ONLINE);
             else
                 status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
@@ -98,7 +117,7 @@ public class NetManager {
         return status;
     }
 
-    public static boolean ping(String ip, int port, int timeout){
+    public boolean ping(String ip, int port, int timeout){
         boolean out = false;
         try{
             Socket client = new Socket();
@@ -110,34 +129,7 @@ public class NetManager {
         return out;
     }
 
-    public static boolean checkNickname(String name){
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    public static boolean sendEmailCode(String email){
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    public static boolean confirmEmail(String login, String password, String email, String code){
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
-    public static void openLink(String url){
+    public void openLink(String url){
         if(Desktop.isDesktopSupported()){
             try {
                 Desktop.getDesktop().browse(new URI(url));
@@ -150,24 +142,332 @@ public class NetManager {
         }
     }
 
-    public static String getURLContent(String url){
+    public String getURLContent(String url) throws IOException {
         if(url == null)
             return null;
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-            StringBuilder stringBuilder = new StringBuilder();
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(System.lineSeparator());
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+        StringBuilder stringBuilder = new StringBuilder();
+
+        String line;
+        while ((line = reader.readLine()) != null) {
+            stringBuilder.append(line);
+            stringBuilder.append(System.lineSeparator());
+        }
+        return stringBuilder.toString();
+    }
+
+    private Socket socket;
+    private BufferedReader in;
+    private BufferedWriter out;
+
+    public Players Players = new Players(this);
+    public Email Email = new Email(this);
+    public Auth Auth = new Auth(this);
+    public ProfileInfo PlayerInfo = new ProfileInfo(this);
+
+    public void connect() throws IOException {
+        socket = new Socket(launcher.getConfig().get("authServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("authServerPort", DEFAULT_AUTH_SERVER_PORT + "")));
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+    }
+
+    public GetParameters getString(GetParameters parameters) throws IOException {
+        connect();
+
+        String text = parameters.toString();
+
+        ConsoleUtils.printDebug(getClass(), "Send: " + text.replace("\n", ""));
+        out.write(text + "\n");
+        out.flush();
+        String inLine = in.readLine();
+
+        socket.close();
+        in.close();
+        out.close();
+
+        ConsoleUtils.printDebug(getClass(), "Received: " + inLine);
+        return GetParameters.create(inLine);
+    }
+
+    public BufferedImage getImage(GetParameters parameters) throws IOException {
+        connect();
+
+        String text = parameters.toString();
+
+        ConsoleUtils.printDebug(getClass(), "Send: " + text.replace("\n", ""));
+        out.write(text + "\n");
+        out.flush();
+
+        ConsoleUtils.printDebug(getClass(), "Receiving image...");
+        byte[] sizeAr = new byte[4];
+        socket.getInputStream().read(sizeAr);
+        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+
+        byte[] imageAr = new byte[size];
+        socket.getInputStream().read(imageAr);
+
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+
+        ConsoleUtils.printResult("OK");
+
+        socket.close();
+        in.close();
+        out.close();
+
+        return image;
+    }
+
+    public static class Players {
+
+        private final NetManager manager;
+        public Players(NetManager manager){
+            this.manager = manager;
+        }
+
+        public final int ERROR = -1;
+        public final int NAME_NOT_TAKEN = 0;
+        public final int NAME_TAKEN = 1;
+
+        public final int SUCCESSFUL_REGISTRATION = 0;
+        public final int BAD_PASSWORD = 2;
+
+        public int checkNickname(String name){
+            try {
+                return Integer.parseInt(manager.getString(new GetParameters("is_nickname_taken", "name", name)).get("result"));
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
-            return stringBuilder.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
+            return -1;
+        }
+
+        public int register(String login, String password){
+            try {
+                return Integer.parseInt(manager.getString(new GetParameters("register", LOGIN, login, PASSWORD, password)).get("result"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return -1;
+        }
+    }
+
+    public static class Email {
+
+        public final int ERROR = -1;
+        public final int OK = 0;
+
+        private final NetManager manager;
+        public Email(NetManager manager){
+            this.manager = manager;
+        }
+
+        public int sendConfirmCode(String login, String password, String email, boolean encrypted){
+            try {
+                return Integer.parseInt(manager.getString(new GetParameters("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, "encrypted", encrypted ? "1" : "0")).get("result"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return -1;
+        }
+
+        public int confirmMail(String login, String password, String email, String code, boolean encrypted){
+            try {
+                return Integer.parseInt(manager.getString(new GetParameters("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, "email_code", code, "encrypted", encrypted ? "1" : "0")).get("result"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return -1;
+        }
+    }
+
+    public static class Auth {
+
+        public final int OK = 0;
+        public final int WRONG_DATA = 1;
+        public final int CONNECTION_ERROR = -1;
+
+        private final NetManager manager;
+        public Auth(NetManager manager){
+            this.manager = manager;
+        }
+
+        public int auth(String login, String password, boolean encrypted){
+            try {
+                String result = manager.getString(new GetParameters("get_key", LOGIN, login, PASSWORD, password, "encrypted", encrypted ? "1" : "0")).get("key");
+                if(result.equals("-1"))
+                    return WRONG_DATA;
+                else {
+                    manager.PlayerInfo.applyKey(result);
+                    return OK;
+                }
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return CONNECTION_ERROR;
         }
     }
 
 
+    public static class ProfileInfo {
+
+        private String key = "";
+
+        private String name = "";
+        private String email = "";
+        private String status = "";
+        private long id = -1;
+        private boolean has_skin = false;
+        private String skin_name = "";
+        private BufferedImage skin;
+        private boolean emailConfirmed = false;
+
+        private String encryptedPassword;
+
+        public final int DATASET_BAD_EMAIL = 4;
+        public final int DATASET_NAME_TAKEN = 3;
+        public final int DATASET_BAD_NAME = 2;
+        public final int DATASET_WRONG_PASSWORD = 1;
+        public final int DATASET_OK = 0;
+        public final int DATASET_SERVER_ERROR = -1;
+        public final int DATASET_ERROR = -2;
+
+        private final NetManager manager;
+        public ProfileInfo(NetManager manager){
+            this.manager = manager;
+        }
+
+        void applyKey(String key) throws IOException{
+            this.key = key;
+
+            updateData();
+        }
+
+        public void updateData() throws IOException{
+            GetParameters parameters = manager.getString(new GetParameters("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS}), KEY, key));
+            name = parameters.get(LOGIN);
+            email = parameters.get(EMAIL);
+            id = Long.parseLong(parameters.get(ID));
+            has_skin = parameters.get(HAS_SKIN).equals("1");
+            skin_name = parameters.get(SKIN_NAME).equals("null") ? null : parameters.get(SKIN_NAME);
+            status = parameters.get(STATUS);
+
+            encryptedPassword = manager.getString(new GetParameters("get_encrypted_password", KEY, key)).get(PASSWORD);
+
+            emailConfirmed = manager.getString(new GetParameters("is_email_confirmed", KEY, key)).get("result").equals("1");
+
+            if(has_skin)
+                skin = manager.getImage(new GetParameters("skin", "key", key));
+            else
+                skin = manager.launcher.Resources.Skin_Steve;
+        }
+
+        public String getNickname(){
+            return name;
+        }
+
+        public String getEmail(){
+            return email;
+        }
+
+        public String getKey(){
+            return key;
+        }
+
+        public long getId(){
+            return id;
+        }
+
+        public BufferedImage getSkin(){
+            return skin;
+        }
+
+        public String getSkinName(){
+            return skin_name;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public String getEncryptedPassword(){
+            return encryptedPassword;
+        }
+
+        public boolean isEmailConfirmed() {
+            return emailConfirmed;
+        }
+
+        public int setData(String currentPassword, String... data){
+            try {
+                ArrayList<String> dataList = new ArrayList<>(Arrays.asList(data));
+                dataList.add(CURRENT_PASSWORD);
+                dataList.add(currentPassword);
+                dataList.add(KEY);
+                dataList.add(key);
+                int result = Integer.parseInt(manager.getString(new GetParameters("set_profile_data", dataList.toArray(new String[0]))).get("result"));
+                if(result == DATASET_OK)
+                    updateData();
+                return result;
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return DATASET_ERROR;
+        }
+
+        public void logout(){
+            key = "";
+            name = "";
+            email = "";
+            id = -1;
+            has_skin = false;
+            skin_name = "";
+        }
+
+
+    }
+
+    private static class GetParameters extends HashMap<String, String>{
+        private final String title;
+
+        public GetParameters(String title, String... parameters){
+            this.title = title;
+
+            if(parameters.length % 2 == 1)
+                throw new RuntimeException("Bad parameters");
+
+            for(int i = 0; i < parameters.length; i += 2)
+                put(parameters[i], parameters[i + 1]);
+        }
+
+        public String toString(){
+            StringBuilder values = new StringBuilder();
+
+            int index = 0;
+            for(Map.Entry<String, String> entry : entrySet()) {
+                values.append(entry.getKey()).append("=").append("\"").append(entry.getValue()).append("\"");
+
+                if(index != size() - 1)
+                    values.append(";");
+                index ++;
+            }
+
+            return title + "{" + values + "}";
+        }
+
+        public String getTitle(){
+            return title;
+        }
+
+        public static GetParameters create(String text){
+            String title = text.split("\\{")[0];
+            ArrayList<String> parameters = new ArrayList<>();
+
+            for(String par : text.split("\\{")[1].split("}")[0].split(";")) {
+                parameters.add(par.split("=")[0]);
+                parameters.add(par.split("\"")[1].split("\"")[0]);
+            }
+
+            return new GetParameters(title, parameters.toArray(new String[0]));
+        }
+    }
 }

@@ -9,6 +9,8 @@ import com.husker.launcher.ui.impl.glass.screens.BackgroundSelection;
 import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
 import com.husker.launcher.ui.impl.glass.screens.login.AuthProcess;
 import com.husker.launcher.ui.impl.glass.screens.login.Login;
+import com.husker.launcher.ui.impl.glass.screens.main.profile.InfoApplying;
+import com.husker.launcher.ui.impl.glass.screens.main.profile.InfoEdit;
 import com.husker.launcher.ui.impl.glass.screens.registration.*;
 
 import java.awt.*;
@@ -21,8 +23,9 @@ public class GlassUI extends LauncherUI {
         public static final Color third = new Color(255, 255, 255, 225);
 
         public static final Color textField = new Color(255, 255, 255, 110);
-        public static final Color textFieldHovered = new Color(255, 255, 255, 90);
-        public static final Color textFieldFocused = new Color(255, 255, 255, 60);
+        public static final Color textFieldHovered = new Color(255, 255, 255, 100);
+        public static final Color textFieldFocused = new Color(255, 255, 255, 80);
+        public static final Color textFieldText = new Color(30, 30, 30);
 
         public static final Color buttonDefault = new Color(255, 255, 255);
         public static final int buttonDefaultAlpha = 240;
@@ -41,8 +44,6 @@ public class GlassUI extends LauncherUI {
     public void onInit() {
         setAnimated(true);
 
-        addScreen("backgroundSelection", new BackgroundSelection());
-
         // Message
         addScreen("message", new Message());
 
@@ -60,8 +61,21 @@ public class GlassUI extends LauncherUI {
 
         // Main
         addScreen("main", new MainScreen());
+        addScreen("backgroundSelection", new BackgroundSelection());
+        addScreen("info_edit", new InfoEdit());
+        addScreen("info_edit_apply", new InfoApplying());
 
-        setScreen("main");
+        boolean hasAccount = false;
+        if(getLauncher().getSettings().get("auto_auth", "false").equals("true")){
+            if (getLauncher().getUserConfig().get("login") != null && getLauncher().getUserConfig().get("password") != null) {
+                if (!getLauncher().getUserConfig().get("login").equals("null") && !getLauncher().getUserConfig().get("password").equals("null")) {
+                    hasAccount = true;
+                    setScreen("authProcess", getLauncher().getUserConfig().get("login"), getLauncher().getUserConfig().get("password"), "true");
+                }
+            }
+        }
+        if(!hasAccount)
+            setScreen("login");
     }
 
     public Dimension getDefaultSize() {
@@ -70,7 +84,7 @@ public class GlassUI extends LauncherUI {
 
     public static WebLabel createTitleLabel(String text){
         return new WebLabel(text){{
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(35f));
+            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(30f));
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(CENTER);
         }};

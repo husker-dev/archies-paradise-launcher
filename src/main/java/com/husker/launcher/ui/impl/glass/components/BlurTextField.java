@@ -1,6 +1,5 @@
 package com.husker.launcher.ui.impl.glass.components;
 
-import com.alee.laf.text.WebPasswordField;
 import com.alee.laf.text.WebTextField;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
@@ -30,6 +29,7 @@ public class BlurTextField extends WebTextField implements BlurComponent{
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
         setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
+        setForeground(GlassUI.Colors.textFieldText);
     }
 
     private void updateShape(){

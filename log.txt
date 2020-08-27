@@ -1,0 +1,5 @@
+java.lang.Exception: Failed to get html from url: https://github.com/husker-dev/minecraft-launcher
+	at com.husker.launcher.UpdateManager.getLatestVersion(UpdateManager.java:39)
+	at com.husker.launcher.UpdateManager.hasUpdate(UpdateManager.java:56)
+	at com.husker.launcher.LoadingWindow.lambda$new$3(LoadingWindow.java:222)
+	at java.lang.Thread.run(Thread.java:748)

@@ -60,7 +60,18 @@ public class R_5_CodeConfirm extends TitledScreen {
             }});
             add(resendButton = createButton(1, "Повторить", () -> {
                 seconds = Integer.parseInt(getLauncher().getConfig().get("emailCodeTimeout", "60"));
-                NetManager.sendEmailCode(getParameters()[2]);
+
+                new Thread(() -> {
+                    int result = getLauncher().NetManager.Email.sendConfirmCode(getParameterLogin(), getParameterPassword(), getParameterMail(), getParameters()[0].equals("[encrypted]"));
+
+                    if(result == getLauncher().NetManager.Email.ERROR) {
+                        String encryptedCase = "";
+                        if(getParameters()[0].equals("[encrypted]"))
+                            encryptedCase += "," + getParameters()[3];
+
+                        getLauncherUI().setScreen("message", "emailConfirm," + getParameters()[0] + "," + getParameters()[1] + "," + getParameters()[2] + encryptedCase, "Ошибка", "Ошибка отправки кода");
+                    }
+                }).start();
             }));
         }});
     }
@@ -71,7 +82,10 @@ public class R_5_CodeConfirm extends TitledScreen {
         });
         nextButton.setEnabled(false);
         panel.add(createButton(2, "Назад", () -> {
-            getLauncherUI().setScreen("registration_1", getParameters()[0], getParameters()[1]);
+            if(getParameters()[0].equals("[encrypted]"))
+                getLauncherUI().setScreen("registration_1", getParameters()[0], getParameters()[1], getParameters()[2]);
+            else
+                getLauncherUI().setScreen("registration_1", getParameters()[1], getParameters()[2]);
         }));
         panel.add(nextButton);
 
@@ -85,6 +99,27 @@ public class R_5_CodeConfirm extends TitledScreen {
         super.onShow();
         seconds = Integer.parseInt(getLauncher().getConfig().get("emailCodeTimeout", "60"));
         resendButton.setEnabled(false);
-        emailLabel.setText("Код подтверждения был отправлен на {" + getParameters()[2] + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
+        emailLabel.setText("Код подтверждения был отправлен на {" + getParameterMail() + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
+    }
+
+    private String getParameterLogin(){
+        if(getParameters()[0].equals("[encrypted]"))
+            return getParameters()[1];
+        else
+            return getParameters()[0];
+    }
+
+    private String getParameterPassword(){
+        if(getParameters()[0].equals("[encrypted]"))
+            return getParameters()[2];
+        else
+            return getParameters()[1];
+    }
+
+    private String getParameterMail(){
+        if(getParameters()[0].equals("[encrypted]"))
+            return getParameters()[3];
+        else
+            return getParameters()[2];
     }
 }

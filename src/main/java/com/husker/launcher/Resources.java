@@ -90,6 +90,7 @@ public class Resources {
     public final BufferedImage Icon_Image;
     public final BufferedImage Icon_Frame;
     public final BufferedImage Icon_Edit;
+    public final BufferedImage Icon_Edit_Selected;
 
     public final BufferedImage Social_Loading_Logo;
     public final BufferedImage Logo_Youtube;
@@ -128,6 +129,7 @@ public class Resources {
         Icon_Image = getBufferedImage("image_icon.png");
         Icon_Frame = getBufferedImage("frame_icon.png");
         Icon_Edit = getBufferedImage("edit_icon.png");
+        Icon_Edit_Selected = getBufferedImage("edit_icon_selected.png");
 
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");

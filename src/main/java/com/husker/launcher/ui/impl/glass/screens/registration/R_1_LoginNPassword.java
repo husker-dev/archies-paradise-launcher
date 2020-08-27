@@ -1,6 +1,7 @@
 package com.husker.launcher.ui.impl.glass.screens.registration;
 
 import com.alee.laf.panel.WebPanel;
+import com.husker.launcher.utils.FormatUtils;
 import com.husker.launcher.ui.impl.glass.TitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurPasswordField;
@@ -42,7 +43,7 @@ public class R_1_LoginNPassword extends TitledScreen {
     }
 
     public void updateButton(){
-        nextButton.setEnabled(passwordField.getText().equals(password1Field.getText()) && !passwordField.isEmpty() && passwordField.getPassword().length >= 5 && !loginField.getText().isEmpty());
+        nextButton.setEnabled(passwordField.getText().equals(password1Field.getText()) && FormatUtils.isCorrectPassword(passwordField.getText()) && FormatUtils.isCorrectName(loginField.getText()));
     }
 
     public void createComponents(WebPanel panel) {

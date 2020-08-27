@@ -1,10 +1,8 @@
 package com.husker.launcher.ui.impl.glass.components;
 
-import com.alee.managers.animation.AnimationManager;
+import com.alee.laf.panel.WebPanel;
 import com.alee.managers.animation.easing.Cubic;
-import com.alee.managers.animation.easing.Easing;
-import com.alee.managers.animation.easing.Exponential;
-import com.alee.managers.animation.easing.Quintic;
+import com.alee.managers.style.StyleId;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.utils.ConsoleUtils;
@@ -18,7 +16,6 @@ import com.jogamp.opengl.util.texture.TextureIO;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.AWTEventListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -26,13 +23,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
+import static com.jogamp.opengl.GL2ES1.*;
 import static com.jogamp.opengl.GL2GL3.*;
 
-public class SkinViewer extends BlurPanel {
+public class SkinViewer extends WebPanel {
 
     private static final float layerIndent = 0.5f;
     private static final float layerVerticalIndent = 0.5f;
@@ -43,21 +41,22 @@ public class SkinViewer extends BlurPanel {
     private float rotateX = -23;
     private float rotateY = 23;
 
+    private float camPointY = 16;
+    private float camZoom = 50;
+
     private BufferedImage playerTexture;
+    private boolean animated = false;
+    private boolean rotationEnabled = true;
 
-    private boolean disposed = false;
-
-    private final GLJPanel glPanel;
-
-    public SkinViewer(Screen screen){
-        this(screen, screen.getLauncher().Resources.Skin_Steve);
+    public SkinViewer(){
+        this(null);
     }
 
-    public SkinViewer(Screen screen, BufferedImage texture){
-        super(screen);
+    public SkinViewer(BufferedImage texture){
+        super(StyleId.panelTransparent);
         this.playerTexture = texture;
 
-        glPanel = new GLJPanel(new GLCapabilities(GLProfile.getDefault()){{
+        GLJPanel glPanel = new GLJPanel(new GLCapabilities(GLProfile.getDefault()) {{
             setBackgroundOpaque(false);
             setSampleBuffers(true);
             setNumSamples(16);
@@ -72,24 +71,20 @@ public class SkinViewer extends BlurPanel {
         });
         glPanel.addMouseMotionListener(new MouseAdapter() {
             public void mouseDragged(MouseEvent mouseEvent) {
-                rotateX += 0.3f * (mouseEvent.getX() - lastMouseX);
-                rotateY += 0.3f * (mouseEvent.getY() - lastMouseY);
+                if(rotationEnabled) {
+                    rotateX += 0.3f * (mouseEvent.getX() - lastMouseX);
+                    rotateY += 0.3f * (mouseEvent.getY() - lastMouseY);
 
-                if(rotateY > 90)
-                    rotateY = 90;
-                if(rotateY < -90)
-                    rotateY = -90;
+                    if (rotateY > 90)
+                        rotateY = 90;
+                    if (rotateY < -90)
+                        rotateY = -90;
 
-                lastMouseX = mouseEvent.getX();
-                lastMouseY = mouseEvent.getY();
-
-                //glPanel.display();
+                    lastMouseX = mouseEvent.getX();
+                    lastMouseY = mouseEvent.getY();
+                }
             }
         });
-
-        FPSAnimator animator = new FPSAnimator(glPanel, 60);
-        animator.start();
-        //glPanel.display();
 
         setLayout(new BorderLayout());
         setPreferredWidth(200);
@@ -100,20 +95,59 @@ public class SkinViewer extends BlurPanel {
         this.playerTexture = texture;
     }
 
-    public void onBlurApply(BlurParameter parameter, Component component) {
-        super.onBlurApply(parameter, component);
-        if(returnOnInvisible(parameter, component))
-            return;
-        if(component == this) {
-            parameter.setShadowType(BlurParameter.ShadowType.INNER);
-            parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), component, 15, 15, ALL_CORNERS));
-        }
+    public boolean isAnimated() {
+        return animated;
     }
 
-    public class SimpleGLEventListener implements GLEventListener {
+    public void setAnimated(boolean animated) {
+        this.animated = animated;
+    }
+
+    public float getCamY() {
+        return camPointY;
+    }
+
+    public void setCamY(float camPointY) {
+        this.camPointY = camPointY;
+    }
+
+    public float getCamZoom() {
+        return camZoom;
+    }
+
+    public void setCamZoom(float camZoom) {
+        this.camZoom = camZoom;
+    }
+
+    public boolean isRotationEnabled() {
+        return rotationEnabled;
+    }
+
+    public void setRotationEnabled(boolean rotationEnabled) {
+        this.rotationEnabled = rotationEnabled;
+    }
+
+    public float getRotationY() {
+        return rotateY;
+    }
+
+    public void setRotationY(float rotateY) {
+        this.rotateY = rotateY;
+    }
+
+    public float getRotationX() {
+        return rotateX;
+    }
+
+    public void setRotationX(float rotateX) {
+        this.rotateX = rotateX;
+    }
+
+    private class SimpleGLEventListener implements GLEventListener {
 
         private final GLU glu = new GLU();
 
+        private boolean disposed = false;
         private BufferedImage lastTexture;
 
         private int[] rightLeg = new int[6];
@@ -130,6 +164,7 @@ public class SkinViewer extends BlurPanel {
         private int[] rightHand_layer = new int[6];
         private int[] head_layer = new int[6];
 
+        private static final float maxAngle = 40;
         private float angle = 0;
         private boolean animType = true;
 
@@ -137,25 +172,48 @@ public class SkinViewer extends BlurPanel {
         private float currentRotateY = 0;
 
         private long lastTime = -1;
-        private double speed = 0;
+
+        private float alpha = 0;
+        private boolean textureLoaded = false;
 
         public void display(GLAutoDrawable drawable) {
             float delta = (System.currentTimeMillis() - lastTime) / 100f;
             lastTime = System.currentTimeMillis();
 
-            speed = 1 - new Cubic.In().calculate(0, 1, Math.abs(angle), 35);
-            double value = 0.5 + delta * speed * 10;
-            if(animType){
-                angle += value;
-                if(angle > 35) {
-                    animType = false;
-                    angle = 35;
+            if(animated) {
+                double speed = 1 - new Cubic.In().calculate(0, 1, Math.abs(angle), maxAngle);
+                double value = 0.5 + delta * speed * 10;
+
+                if (animType) {
+                    angle += value;
+                    if (angle > maxAngle) {
+                        animType = false;
+                        angle = maxAngle;
+                    }
+                } else {
+                    angle -= value;
+                    if (angle < -maxAngle) {
+                        animType = true;
+                        angle = -maxAngle;
+                    }
                 }
             }else{
-                angle -= value;
-                if(angle < -35) {
-                    animType = true;
-                    angle = -35;
+                if(angle != 0){
+                    float speed = 1f - (Math.abs(angle) / maxAngle);
+                    double value = 1.0 + delta * speed * 20;
+
+                    if(angle > 0) {
+                        animType = false;
+                        angle -= value;
+                        if(angle < 0)
+                            angle = 0;
+                    }
+                    if(angle < 0){
+                        animType = true;
+                        angle += value;
+                        if(angle > 0)
+                            angle = 0;
+                    }
                 }
             }
 
@@ -169,22 +227,28 @@ public class SkinViewer extends BlurPanel {
 
             checkForTextureChanges(gl);
 
-            gl.glTranslatef(0f, 0, -50.0f);
+            gl.glTranslatef(0f, 0, -camZoom);
             gl.glRotatef(currentRotateY, 1, 0, 0);
             gl.glRotatef(currentRotateX, 0, 1, 0);
-            gl.glTranslatef(0f, -16, -0);
+            gl.glTranslatef(0, -camPointY, -0);
+
+            if(textureLoaded && alpha < 1)
+                alpha += 0.15;
+            if(alpha > 1)
+                alpha = 1;
+            gl.glColor4f(1, 1, 1, alpha);
 
             drawLeg(gl, new Point3D(0, 0, -2), angle, rightLeg);
             drawLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg);
-            drawHand(gl, new Point3D(-8, 12, -2), -angle, leftHand);
-            drawHand(gl, new Point3D(4, 12, -2), angle, rightHand);
+            drawHand(gl, new Point3D(-8, 12, -2), angle, leftHand);
+            drawHand(gl, new Point3D(4, 12, -2), -angle, rightHand);
             drawCuboid(gl, new Point3D(-4, 12, -2), 8, 12, 4, body);
             drawCuboid(gl, new Point3D(-4, 24, -4), 8, 8, 8, head);
 
             drawFatLeg(gl, new Point3D(0, 0, -2), angle, rightLeg_layer);
             drawFatLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg_layer);
-            drawFatHand(gl, new Point3D(-8, 12, -2), -angle, leftHand_layer);
-            drawFatHand(gl, new Point3D(4, 12, -2), angle, rightHand_layer);
+            drawFatHand(gl, new Point3D(-8, 12, -2), angle, leftHand_layer);
+            drawFatHand(gl, new Point3D(4, 12, -2), -angle, rightHand_layer);
             drawCuboid(gl, new Point3D(-4 - layerIndent, 12 - layerVerticalIndent, -2 - layerIndent), 8 + layerIndent * 2f, 12 + layerVerticalIndent * 2f, 4 + layerIndent * 2f, body_layer);
             drawCuboid(gl, new Point3D(-4 - layerIndent, 24 - layerVerticalIndent, -4 - layerIndent), 8 + layerIndent * 2f, 8 + layerVerticalIndent * 2f, 8 + layerIndent * 2f, head_layer);
 
@@ -260,6 +324,8 @@ public class SkinViewer extends BlurPanel {
         public void init(GLAutoDrawable drawable) {
             final GL2 gl = drawable.getGL().getGL2();
 
+            currentRotateX = rotateX;
+            currentRotateY = rotateY;
             lastTime = System.currentTimeMillis();
 
             gl.glShadeModel(GL2.GL_SMOOTH);
@@ -282,26 +348,47 @@ public class SkinViewer extends BlurPanel {
             disposed = true;
         }
 
-        public void checkForTextureChanges(GL2 gl){
-            if(lastTexture != playerTexture || disposed){
-
-                ConsoleUtils.printDebug(SkinViewer.class, "Reload player texture");
-
+        int currentLoad = -1;
+        ArrayList<Consumer<GL2>> loadingQueue = new ArrayList<Consumer<GL2>>(){{
+            add(gl -> {
                 rightLeg = getHandOrLeg(gl, 16, 48);
                 leftLeg = getHandOrLeg(gl, 0, 16);
+            });
+            add(gl -> {
                 leftHand = getHandOrLeg(gl, 40, 16);
                 rightHand = getHandOrLeg(gl, 32, 48);
+            });
+            add(gl -> {
                 body = getBody(gl, 16, 16);
                 head = getHead(gl, 0, 0);
-
+            });
+            add(gl -> {
                 rightLeg_layer = getHandOrLeg(gl, 0, 48);
                 leftLeg_layer = getHandOrLeg(gl, 0, 32);
+            });
+            add(gl -> {
                 leftHand_layer = getHandOrLeg(gl, 48, 48);
                 rightHand_layer = getHandOrLeg(gl, 40, 32);
+            });
+            add(gl -> {
                 body_layer = getBody(gl, 16, 32);
                 head_layer = getHead(gl, 32, 0);
+            });
+        }};
+
+        public void checkForTextureChanges(GL2 gl){
+            if(currentLoad != -1)
+                loadingQueue.get(currentLoad++).accept(gl);
+            if(currentLoad == loadingQueue.size()) {
+                currentLoad = -1;
+                textureLoaded = true;
+            }
+            if(lastTexture != playerTexture || disposed){
                 lastTexture = playerTexture;
                 disposed = false;
+                currentLoad = 0;
+                alpha = 0;
+                textureLoaded = false;
             }
         }
 
@@ -341,15 +428,17 @@ public class SkinViewer extends BlurPanel {
         public int getSubTexture(GL2 gl, int x, int y, int width, int height){
             Texture texture = null;
             try {
-                texture = TextureIO.newTexture(getInputStream(playerTexture.getSubimage(x, y, width, height)), true, "png");
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                gl.glGenerateMipmap(GL_TEXTURE_2D);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
+                if(playerTexture != null) {
+                    texture = TextureIO.newTexture(getInputStream(playerTexture.getSubimage(x, y, width, height)), false, "png");
+                    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                    gl.glGenerateMipmap(GL_TEXTURE_2D);
+                    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+                    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
 
-                FloatBuffer buffer = FloatBuffer.allocate(1);
-                gl.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, buffer);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, buffer.get());
+                    FloatBuffer buffer = FloatBuffer.allocate(1);
+                    gl.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, buffer);
+                    gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, buffer.get());
+                }
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -392,7 +481,7 @@ public class SkinViewer extends BlurPanel {
         public void drawTexture(GL2 gl, int texture, Point3D p1, Point3D p2, Point3D p3, Point3D p4){
             gl.glBindTexture(GL_TEXTURE_2D, texture);
             gl.glBegin(GL2.GL_QUADS);
-            gl.glColor3f(1, 1, 1);
+            //gl.glColor3f(1, 1, 1);
 
             gl.glTexCoord2f(1.0f, 0.0f);
 

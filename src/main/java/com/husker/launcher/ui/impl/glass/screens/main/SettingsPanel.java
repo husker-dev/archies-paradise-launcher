@@ -42,7 +42,16 @@ public class SettingsPanel extends WebPanel {
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 8));
             add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().get("auto_auth", "true").equals("true")){{
-                setOnAction(() -> screen.getLauncher().getSettings().set("auto_auth", isChecked() + ""));
+                setOnAction(() -> {
+                    screen.getLauncher().getSettings().set("auto_auth", isChecked() + "");
+                    if(isChecked()) {
+                        screen.getLauncher().getUserConfig().set("login", screen.getLauncher().NetManager.PlayerInfo.getNickname());
+                        screen.getLauncher().getUserConfig().set("password", screen.getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
+                    }else{
+                        screen.getLauncher().getUserConfig().set("login", "null");
+                        screen.getLauncher().getUserConfig().set("password", "null");
+                    }
+                });
             }});
 
             add(new WebPanel(StyleId.panelTransparent){{

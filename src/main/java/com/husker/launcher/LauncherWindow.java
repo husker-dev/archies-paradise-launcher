@@ -19,8 +19,6 @@ import java.io.File;
 
 public class LauncherWindow extends JFrame {
 
-    public static final String VERSION = "1.0";
-
     private ScalableImage backgroundImage;
     private ScalableImage animationBackgroundImage;
     private LauncherUI currentUI;
@@ -37,7 +35,9 @@ public class LauncherWindow extends JFrame {
         setDefault("windowed", "false");
         setDefault("ram", "256");
     }};
+    private final SettingsFile user = new SettingsFile(new File("user.cfg"));
 
+    public final UpdateManager UpdateManager = new UpdateManager(this);
     public final Resources Resources = new Resources(this);
     public final NetManager NetManager = new NetManager(this);
     public final BrowserManager BrowserManager = new BrowserManager(this);
@@ -191,6 +191,10 @@ public class LauncherWindow extends JFrame {
 
     public SettingsFile getSettings() {
         return settings;
+    }
+
+    public SettingsFile getUserConfig() {
+        return user;
     }
 
     public void beginAnimation(){

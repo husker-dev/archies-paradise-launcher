@@ -17,6 +17,6 @@ public class YoutubeVideoPanel extends ImageSocialPanel {
     }
 
     public void onClick() {
-        NetManager.openLink(parameters.getUrl());
+        getScreen().getLauncher().NetManager.openLink(parameters.getUrl());
     }
 }

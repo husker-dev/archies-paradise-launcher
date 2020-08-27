@@ -19,6 +19,8 @@ import java.util.logging.Level;
 
 public class BrowserManager {
 
+    public static boolean enabled = true;
+
     private final LauncherWindow launcher;
 
     private final ArrayList<YoutubeVideoParameters> youtubeParameters = new ArrayList<>();
@@ -43,6 +45,19 @@ public class BrowserManager {
         else
             isStarted = true;
         mainThread = new Thread(() -> {
+            if(!enabled) {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                for(int i = 0; i < 6; i++) {
+                    youtubeParameters.add(new YoutubeVideoParameters(launcher.Resources.Social_Loading_Logo, "Debug mode", "", 100));
+                    vkPostParameters.add(new VkPostParameter.Picture("Debug mode", "", launcher.Resources.Social_Loading_Logo));
+                }
+                close();
+                return;
+            }
             try {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--headless");

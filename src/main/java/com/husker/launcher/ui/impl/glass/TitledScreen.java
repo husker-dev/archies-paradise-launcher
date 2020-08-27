@@ -7,6 +7,7 @@ import com.alee.managers.style.StyleId;
 import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
+import com.husker.launcher.UpdateManager;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.utils.UIUtils;
@@ -48,37 +49,6 @@ public abstract class TitledScreen extends CenteredMenuScreen {
                 getLauncher().NetManager.updateStatusLabel(statusLabel);
             }
         }, 0, 500);
-
-        new Timer().schedule(new TimerTask() {
-            public void run() {
-                java.util.List<NetManager.ServerStatus> statusList = NetManager.getServerOnlineStatus(getLauncher());
-
-                Color red = new Color(160, 0, 0);
-                Color yellow = new Color(140, 140, 0);
-                Color green = new Color(0, 160, 0);
-
-                boolean internet = statusList.contains(NetManager.ServerStatus.INTERNET_OFFLINE);
-                boolean auth = statusList.contains(NetManager.ServerStatus.AUTH_ONLINE);
-                boolean minecraft = statusList.contains(NetManager.ServerStatus.MINECRAFT_SERVER_ONLINE);
-
-                if(internet && auth && minecraft){
-                    statusLabel.setText("Онлайн");
-                    statusLabel.setForeground(green);
-                }
-                if(internet && !auth && minecraft){
-                    statusLabel.setText("Авторизация недоступна");
-                    statusLabel.setForeground(yellow);
-                }
-                if(internet && auth && !minecraft){
-                    statusLabel.setText("Доступна авторизация");
-                    statusLabel.setForeground(yellow);
-                }
-                if(internet && !auth && !minecraft){
-                    statusLabel.setText("Офлайн");
-                    statusLabel.setForeground(red);
-                }
-            }
-        }, 0, Integer.parseInt(getLauncher().getConfig().get("connectionTimeout", "3000")) * 3 + 3000);
 
         // Under logo
         addBlurSegment("TitledScreen.BottomPlate", parameter -> {
@@ -125,7 +95,7 @@ public abstract class TitledScreen extends CenteredMenuScreen {
                 setPreferredHeight(statusSize);
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-                add(new WebLabel("v" + LauncherWindow.VERSION){{
+                add(new WebLabel("v" + UpdateManager.VERSION){{
                     setForeground(new Color(140, 140, 140, 100));
                     setPreferredHeight(15);
                     setFont(Resources.Fonts.ChronicaPro);

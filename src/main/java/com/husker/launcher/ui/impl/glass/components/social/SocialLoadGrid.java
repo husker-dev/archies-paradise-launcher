@@ -54,11 +54,13 @@ public class SocialLoadGrid extends WebPanel {
         content.remove(current);
         content.add(panel, current);
 
-        ((BlankSocialPanel)blankContent.getComponent(current)).hidePanel();
+        ((BlankSocialPanel) blankContent.getComponent(current)).hidePanel();
 
         current++;
 
         if(current == max)
             blankContent.removeAll();
+
+        screen.getLauncher().updateUI();
     }
 }

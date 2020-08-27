@@ -1,3 +1,4 @@
 rootProject.name = 'launcher'
 include 'updater'
+include 'server'
 

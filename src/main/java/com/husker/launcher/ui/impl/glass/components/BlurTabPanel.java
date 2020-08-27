@@ -228,6 +228,9 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
         if(!tabContent.containsKey(title))
             return;
 
+        if(title.equals(selectedTab))
+            return;
+
         SwingUtilities.invokeLater(() -> {
             if(selectedTab != null)
                 tabLabels.get(selectedTab).setText("");
@@ -235,11 +238,10 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             tabLabels.get(selectedTab).setText(tabText.get(tabLabels.get(selectedTab)));
             contentPanel.removeAll();
             contentPanel.add(tabContent.get(title));
+            screen.getLauncher().repaint();
 
             for(Consumer<String> listener : listeners)
                 listener.accept(title);
-
-            screen.getLauncher().repaint();
         });
     }
 
@@ -249,7 +251,7 @@ public class BlurTabPanel extends WebPanel implements BlurComponent {
             return;
 
         // Tab
-        if(component instanceof WebLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component){
+        if(component instanceof WebLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component && ((WebLabel)component).getText().length() > 0){
 
             Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
             Area shape;

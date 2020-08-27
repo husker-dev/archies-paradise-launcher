@@ -29,6 +29,7 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
         setFont(Resources.Fonts.ChronicaPro.deriveFont(15f));
+        setForeground(GlassUI.Colors.textFieldText);
     }
 
     private void updateShape(){

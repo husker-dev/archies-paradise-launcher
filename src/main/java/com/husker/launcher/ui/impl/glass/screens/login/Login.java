@@ -5,6 +5,7 @@ import com.husker.launcher.ui.impl.glass.TitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurPasswordField;
 import com.husker.launcher.ui.impl.glass.components.BlurTextField;
+import com.husker.launcher.utils.ConsoleUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -50,5 +51,4 @@ public class Login extends TitledScreen {
     public void createSubComponents(WebPanel panel) {
         panel.add(createSubLabel("Зарегистрироваться", () -> getLauncherUI().setScreen("registration")));
     }
-
 }

@@ -1,6 +1,5 @@
 package com.husker.launcher.utils;
 
-import org.apache.commons.lang3.StringUtils;
 
 public class ConsoleUtils {
 
@@ -14,8 +13,15 @@ public class ConsoleUtils {
     }
 
     public static void printResult(String result){
-        System.out.println(StringUtils.repeat(".", (lastDebug != null ? Math.max(0, 70 - lastDebug.length()) : 0)) + "[" + result + "]");
+        System.out.println(repeat(".", (lastDebug != null ? Math.max(0, 70 - lastDebug.length()) : 0)) + "[" + result + "]");
 
         lastDebug = null;
+    }
+
+    public static String repeat(String text, int count){
+        StringBuilder builder = new StringBuilder();
+        for(int i = 0; i < count; i++)
+            builder.append(text);
+        return builder.toString();
     }
 }

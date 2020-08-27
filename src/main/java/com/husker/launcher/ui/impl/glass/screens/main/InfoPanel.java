@@ -11,6 +11,7 @@ import com.alee.managers.style.StyleId;
 import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
+import com.husker.launcher.UpdateManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
@@ -55,7 +56,7 @@ public class InfoPanel extends WebPanel {
                 setPreferredHeight(225);
                 setLayout(new FlowLayout(CENTER));
                 setMargin(20, 20, 0, 20);
-                add(createInfoParameter("Версия", LauncherWindow.VERSION));
+                add(createInfoParameter("Версия", UpdateManager.VERSION));
                 add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
                 add(createInfoParameter("Владелец", screen.getLauncher().getConfig().get("owner", "Никто"), screen.getLauncher().getConfig().get("ownerLink")));
                 add(createInfoParameter("GitHub", "husker-dev/ minecraft-launcher", "https://github.com/husker-dev/minecraft-launcher"));
@@ -175,7 +176,7 @@ public class InfoPanel extends WebPanel {
 
         MouseAdapter linkAdapter = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                NetManager.openLink(link);
+                screen.getLauncher().NetManager.openLink(link);
             }
         };
 
