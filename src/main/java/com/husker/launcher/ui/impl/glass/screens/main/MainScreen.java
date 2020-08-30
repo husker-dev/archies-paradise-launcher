@@ -4,6 +4,8 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.ui.impl.glass.components.BlurTabPanel;
 import com.husker.launcher.ui.impl.glass.screens.main.profile.ProfilePanel;
+import com.husker.launcher.ui.impl.glass.screens.main.social.VkGroupPanel;
+import com.husker.launcher.ui.impl.glass.screens.main.social.YoutubePanel;
 
 import javax.swing.*;
 import java.awt.*;

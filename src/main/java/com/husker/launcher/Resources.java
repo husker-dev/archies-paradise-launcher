@@ -106,8 +106,8 @@ public class Resources {
     public final BufferedImage Icon_Checkbox_On;
     public final BufferedImage Icon_Checkbox_Off;
 
-    public Resources(LauncherWindow launcher){
-        Logo = getBufferedImage(launcher.getConfig().get("logo"));
+    public Resources(Launcher launcher){
+        Logo = getBufferedImage(launcher.getConfig().Launcher.getLogo());
 
         try{
             if(Files.exists(Paths.get("./background.jpg")))
@@ -118,7 +118,7 @@ public class Resources {
                 Background[i] = getBufferedImage("background/bg_" + i + ".jpg");
             }catch (Exception ex){}
         }
-        Icon = getBufferedImage(launcher.getConfig().get("icon"));
+        Icon = getBufferedImage(launcher.getConfig().Launcher.getIcon());
 
         Icon_Info = getBufferedImage("info_icon.png");
         Icon_Play = getBufferedImage("play_icon.png");

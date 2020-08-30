@@ -2,7 +2,6 @@ package com.husker.launcher.ui.impl.glass.screens;
 
 import com.alee.laf.panel.WebPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.ui.impl.glass.SimpleTitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurScalableImage;
 
@@ -40,7 +39,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
             scalableImage.addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent e) {
                     getLauncher().setBackgroundImage(getLauncher().Resources.Background[I]);
-                    getLauncher().getSettings().set("background", I + "");
+                    getLauncher().getSettings().setBackgroundIndex(I);
                     getLauncher().updateUI();
                 }
             });

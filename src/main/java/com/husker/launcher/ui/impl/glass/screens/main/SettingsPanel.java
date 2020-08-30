@@ -8,14 +8,11 @@ import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.impl.glass.components.*;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Area;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,16 +38,14 @@ public class SettingsPanel extends WebPanel {
         add(new WebPanel(StyleId.panelTransparent){{
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 8));
-            add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().get("auto_auth", "true").equals("true")){{
+            add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().isAutoAuth()){{
                 setOnAction(() -> {
-                    screen.getLauncher().getSettings().set("auto_auth", isChecked() + "");
+                    screen.getLauncher().getSettings().setAutoAuth(isChecked());
                     if(isChecked()) {
-                        screen.getLauncher().getUserConfig().set("login", screen.getLauncher().NetManager.PlayerInfo.getNickname());
-                        screen.getLauncher().getUserConfig().set("password", screen.getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
-                    }else{
-                        screen.getLauncher().getUserConfig().set("login", "null");
-                        screen.getLauncher().getUserConfig().set("password", "null");
-                    }
+                        screen.getLauncher().getUserConfig().setLogin(screen.getLauncher().NetManager.PlayerInfo.getNickname());
+                        screen.getLauncher().getUserConfig().setPassword(screen.getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
+                    }else
+                        screen.getLauncher().getUserConfig().reset();
                 });
             }});
 
@@ -69,8 +64,8 @@ public class SettingsPanel extends WebPanel {
         add(new WebPanel(StyleId.panelTransparent){{
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 5));
-            add(new BlurCheckbox(screen, "Запускать в окне", screen.getLauncher().getSettings().get("windowed", "false").equals("true")){{
-                setOnAction(() -> screen.getLauncher().getSettings().set("windowed", isChecked() + ""));
+            add(new BlurCheckbox(screen, "Запускать в окне", screen.getLauncher().getSettings().isWindowed()){{
+                setOnAction(() -> screen.getLauncher().getSettings().setWindowed(isChecked()));
             }});
 
             add(Box.createRigidArea(new Dimension(0, 0)));
@@ -80,7 +75,7 @@ public class SettingsPanel extends WebPanel {
             }});
 
             ArrayList<Integer> memories = new ArrayList<>(Arrays.asList(256, 512, 1024, 2048, 4096, 8192));
-            int value = Integer.parseInt(screen.getLauncher().getSettings().get("ram"));
+            int value = screen.getLauncher().getSettings().getRAM();
 
             add(ramChooser = new BlurButtonLineChooser(screen){{
                 OperatingSystemMXBean mxbean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
@@ -104,7 +99,7 @@ public class SettingsPanel extends WebPanel {
                             ramCustomValue.setText("256");
                         ramCustomValueType.setSelected(0);
                     }else{
-                        screen.getLauncher().getSettings().set("ram", memories.get(index) + "");
+                        screen.getLauncher().getSettings().setRAM(memories.get(index));
                         ramCustomValue.setVisible(false);
                         ramCustomValueType.setVisible(false);
                     }
@@ -115,10 +110,14 @@ public class SettingsPanel extends WebPanel {
                 setLayout(new BorderLayout(10, 0));
                 add(ramCustomValue = new BlurTextField(screen){{
                     addTextListener(text -> {
-                        if(ramCustomValueType.getSelectedIndex() == 0)
-                            screen.getLauncher().getSettings().set("ram", ramCustomValue.getText().isEmpty() ? "1024" : ramCustomValue.getText());
-                        else
-                            screen.getLauncher().getSettings().set("ram", ramCustomValue.getText().isEmpty() ? "256" : (Integer.parseInt(ramCustomValue.getText()) * 1024) + "");
+                        try {
+                            if (ramCustomValueType.getSelectedIndex() == 0)
+                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
+                            else
+                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
+                        }catch (Exception ex){
+                            screen.getLauncher().getSettings().setRAM(256);
+                        }
                     });
                 }});
                 add(ramCustomValueType = new BlurButtonLineChooser(screen){{
@@ -126,10 +125,14 @@ public class SettingsPanel extends WebPanel {
                     addButton("Мб");
                     addButton("Гб");
                     addSelectedListener(index -> {
-                        if(ramCustomValueType.getSelectedIndex() == 0)
-                            screen.getLauncher().getSettings().set("ram", ramCustomValue.getText().isEmpty() ? "1024" : ramCustomValue.getText());
-                        else
-                            screen.getLauncher().getSettings().set("ram", ramCustomValue.getText().isEmpty() ? "256" : (Integer.parseInt(ramCustomValue.getText()) * 1024) + "");
+                        try {
+                            if (ramCustomValueType.getSelectedIndex() == 0)
+                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
+                            else
+                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
+                        }catch (Exception ex){
+                            screen.getLauncher().getSettings().setRAM(256);
+                        }
                     });
                 }}, BorderLayout.EAST);
             }});

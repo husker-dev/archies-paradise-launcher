@@ -1,7 +1,7 @@
 package com.husker.launcher.ui.impl.glass.screens.registration;
 
-import com.husker.launcher.ui.impl.glass.Message;
-import com.husker.launcher.ui.impl.glass.SimpleLoadingScreen;
+import com.husker.launcher.ui.impl.glass.screens.Message;
+import com.husker.launcher.ui.impl.glass.screens.SimpleLoadingScreen;
 
 public class R_2_NameCheck extends SimpleLoadingScreen {
 

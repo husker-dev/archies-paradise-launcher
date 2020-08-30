@@ -2,13 +2,11 @@ package com.husker.launcher.ui.blur;
 
 import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ImageUtils;
-import com.husker.launcher.LauncherWindow;
-import com.husker.launcher.Resources;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.blur.GaussianBlur;
 import com.husker.launcher.utils.RenderUtils;
 import com.husker.launcher.utils.ShapeUtils;
 
-import javax.sound.sampled.Clip;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -21,7 +19,7 @@ import static com.husker.launcher.ui.blur.BlurParameter.ShadowType.*;
 public class BlurPainter {
 
     private final BlurSegment segment;
-    private final LauncherWindow launcher;
+    private final Launcher launcher;
     private final String name;
     private BlurParameter parameter;
 
@@ -39,7 +37,7 @@ public class BlurPainter {
     private VolatileImage full;
     private boolean drawShadowOnTop = false;
 
-    public BlurPainter(LauncherWindow launcher, BlurSegment segment, String name){
+    public BlurPainter(Launcher launcher, BlurSegment segment, String name){
         this.segment = segment;
         this.launcher = launcher;
         this.name = name;

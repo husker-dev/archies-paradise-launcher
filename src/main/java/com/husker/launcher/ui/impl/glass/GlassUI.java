@@ -1,12 +1,14 @@
 package com.husker.launcher.ui.impl.glass;
 
 import com.alee.laf.label.WebLabel;
-import com.husker.launcher.LauncherWindow;
+import com.husker.launcher.Launcher;
+import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.screens.BackgroundSelection;
+import com.husker.launcher.ui.impl.glass.screens.Message;
 import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
 import com.husker.launcher.ui.impl.glass.screens.login.AuthProcess;
 import com.husker.launcher.ui.impl.glass.screens.login.Login;
@@ -38,7 +40,7 @@ public class GlassUI extends LauncherUI {
     }
 
 
-    public GlassUI(LauncherWindow launcher) {
+    public GlassUI(Launcher launcher) {
         super(launcher);
     }
 
@@ -67,16 +69,16 @@ public class GlassUI extends LauncherUI {
         addScreen("info_edit_apply", new InfoApplying());
 
         boolean hasAccount = false;
-        if(getLauncher().getSettings().get("auto_auth", "false").equals("true")){
-            String login = getLauncher().getUserConfig().get("login");
-            String password = getLauncher().getUserConfig().get("password");
+        if(getLauncher().getSettings().isAutoAuth()){
+            String login = getLauncher().getUserConfig().getLogin();
+            String password = getLauncher().getUserConfig().getPassword();
 
             if (login != null && !login.equals("null") && password != null && !password.equals("null")) {
                 hasAccount = true;
                 setScreen("authProcess", new Screen.Parameters(){{
-                    put("login", login);
-                    put("password", password);
-                    put("encrypted", "true");
+                    put(NetManager.LOGIN, login);
+                    put(NetManager.PASSWORD, password);
+                    put(NetManager.ENCRYPTED, "true");
                 }});
             }
         }
@@ -128,8 +130,7 @@ public class GlassUI extends LauncherUI {
     public void logout(){
         String login = getLauncher().NetManager.PlayerInfo.getNickname();
         getLauncher().NetManager.PlayerInfo.logout();
-        getLauncher().getUserConfig().set("login", "null");
-        getLauncher().getUserConfig().set("password", "null");
+        getLauncher().getUserConfig().reset();
         setScreen("login", new Screen.Parameters("login", login));
     }
 }

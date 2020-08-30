@@ -1,6 +1,5 @@
 package com.husker.launcher.ui.impl.glass.components.social.youtube;
 
-import com.husker.launcher.NetManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.impl.glass.components.social.ImageSocialPanel;
 

@@ -1,6 +1,8 @@
-package com.husker.launcher;
+package com.husker.launcher.managers;
 
 import com.alee.laf.label.WebLabel;
+import com.husker.launcher.Launcher;
+import com.husker.launcher.settings.LauncherConfig;
 import com.husker.launcher.utils.ConsoleUtils;
 
 import javax.imageio.ImageIO;
@@ -9,7 +11,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.List;
 
@@ -33,9 +34,9 @@ public class NetManager {
     public static final String ID = "id";
 
     public ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
-    private final LauncherWindow launcher;
+    private final Launcher launcher;
 
-    public NetManager(LauncherWindow launcher){
+    public NetManager(Launcher launcher){
         this.launcher = launcher;
         new Thread(() -> {
             try {
@@ -43,7 +44,7 @@ public class NetManager {
                     while(true) {
                         if (launcher != null) {
                             statusList = new ArrayList<>(getServerOnlineStatus());
-                            Thread.sleep(Integer.parseInt(launcher.getConfig().get("connectionTimeout", "3000")) * 3 + 3000);
+                            Thread.sleep(launcher.getConfig().Net.Minecraft.getTimeout() + launcher.getConfig().Net.Internet.getTimeout() + launcher.getConfig().Net.Auth.getTimeout() + 3000);
                         } else
                             Thread.sleep(200);
                     }
@@ -90,10 +91,8 @@ public class NetManager {
 
     public List<ServerStatus> getServerOnlineStatus(){
         ArrayList<ServerStatus> status = new ArrayList<>();
-        int timeout = Integer.parseInt(launcher.getConfig().get("connectionTimeout", "3000"));
-
         try {
-            if(ping(launcher.getConfig().get("authServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("authServerPort", DEFAULT_AUTH_SERVER_PORT + "")), timeout))
+            if(ping(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort(), launcher.getConfig().Net.Auth.getTimeout()))
                 status.add(ServerStatus.AUTH_ONLINE);
             else
                 status.add(ServerStatus.AUTH_OFFLINE);
@@ -101,7 +100,7 @@ public class NetManager {
             status.add(ServerStatus.AUTH_OFFLINE);
         }
         try{
-            if(ping(launcher.getConfig().get("minecraftServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("minecraftServerPort", "25565")), timeout))
+            if(ping(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort(), launcher.getConfig().Net.Auth.getTimeout()))
                 status.add(ServerStatus.MINECRAFT_SERVER_ONLINE);
             else
                 status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
@@ -110,7 +109,7 @@ public class NetManager {
             status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
         }
         try{
-            if(InetAddress.getByName("google.com").isReachable(timeout))
+            if(InetAddress.getByName(launcher.getConfig().Net.Internet.getIp()).isReachable(launcher.getConfig().Net.Internet.getTimeout()))
                 status.add(ServerStatus.INTERNET_ONLINE);
             else
                 status.add(ServerStatus.INTERNET_OFFLINE);
@@ -170,7 +169,9 @@ public class NetManager {
     public ProfileInfo PlayerInfo = new ProfileInfo(this);
 
     public void connect() throws IOException {
-        socket = new Socket(launcher.getConfig().get("authServerIp", "127.0.0.1"), Integer.parseInt(launcher.getConfig().get("authServerPort", DEFAULT_AUTH_SERVER_PORT + "")));
+        socket = new Socket();
+        socket.connect(new InetSocketAddress(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort()), launcher.getConfig().Net.Auth.getTimeout());
+
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
     }
@@ -326,6 +327,7 @@ public class NetManager {
 
         private String encryptedPassword;
 
+        public final int DATASET_BAD_EMAIL_CODE = 5;
         public final int DATASET_BAD_EMAIL = 4;
         public final int DATASET_NAME_TAKEN = 3;
         public final int DATASET_BAD_NAME = 2;

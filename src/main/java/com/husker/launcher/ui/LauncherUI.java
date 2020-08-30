@@ -1,7 +1,7 @@
 package com.husker.launcher.ui;
 
 import com.husker.launcher.utils.ConsoleUtils;
-import com.husker.launcher.LauncherWindow;
+import com.husker.launcher.Launcher;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public abstract class LauncherUI extends JPanel {
 
-    private final LauncherWindow launcher;
+    private final Launcher launcher;
     private final HashMap<String, Screen> screens = new HashMap<>();
     private String currentScreen;
 
@@ -18,7 +18,7 @@ public abstract class LauncherUI extends JPanel {
     private Screen.Parameters nextScreenParameters;
     private boolean animated = false;
 
-    public LauncherUI(LauncherWindow launcher){
+    public LauncherUI(Launcher launcher){
         this.launcher = launcher;
 
         setOpaque(false);
@@ -29,7 +29,7 @@ public abstract class LauncherUI extends JPanel {
     public abstract void onInit();
     public abstract Dimension getDefaultSize();
 
-    public LauncherWindow getLauncher(){
+    public Launcher getLauncher(){
         return launcher;
     }
 

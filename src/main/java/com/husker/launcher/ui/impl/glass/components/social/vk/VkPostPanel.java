@@ -5,13 +5,11 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.alee.utils.swing.extensions.SizeMethods;
-import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
-import com.husker.launcher.ui.impl.glass.components.BlurScalableImage;
 import com.husker.launcher.ui.impl.glass.components.social.ImageSocialPanel;
 import com.husker.launcher.utils.ShapeUtils;
 
@@ -19,9 +17,6 @@ import javax.swing.*;
 import java.awt.*;
 
 import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
-import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_LEFT;
-import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_RIGHT;
-import static java.awt.FlowLayout.LEFT;
 
 
 public class VkPostPanel extends ImageSocialPanel {

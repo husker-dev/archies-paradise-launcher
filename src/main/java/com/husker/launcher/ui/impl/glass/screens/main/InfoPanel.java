@@ -1,17 +1,12 @@
 package com.husker.launcher.ui.impl.glass.screens.main;
 
-import com.alee.extended.label.StyleRange;
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.WebLookAndFeel;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
-import com.alee.laf.scroll.WebScrollPane;
 import com.alee.managers.style.StyleId;
-import com.husker.launcher.LauncherWindow;
-import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
-import com.husker.launcher.UpdateManager;
+import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
@@ -23,9 +18,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.awt.geom.Area;
-import java.awt.geom.RoundRectangle2D;
-import java.net.URI;
 import java.util.Map;
 
 import static java.awt.FlowLayout.CENTER;
@@ -47,7 +39,7 @@ public class InfoPanel extends WebPanel {
             setMaximumRows(30);
             setForeground(GlassUI.Colors.labelText);
             setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(28f));
-            setText(screen.getLauncher().getConfig().get("title"));
+            setText(screen.getLauncher().getConfig().getTitle());
         }});
 
         add(new BlurPanel(screen) {
@@ -58,9 +50,9 @@ public class InfoPanel extends WebPanel {
                 setMargin(20, 20, 0, 20);
                 add(createInfoParameter("Версия", UpdateManager.VERSION));
                 add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
-                add(createInfoParameter("Владелец", screen.getLauncher().getConfig().get("owner", "Никто"), screen.getLauncher().getConfig().get("ownerLink")));
+                add(createInfoParameter("Владелец", screen.getLauncher().getConfig().About.Owner.getName(), screen.getLauncher().getConfig().About.Owner.getURL()));
                 add(createInfoParameter("GitHub", "husker-dev/ minecraft-launcher", "https://github.com/husker-dev/minecraft-launcher"));
-                add(createInfoParameter("Поддержка", screen.getLauncher().getConfig().get("support"), screen.getLauncher().getConfig().get("supportLink")));
+                add(createInfoParameter("Поддержка", screen.getLauncher().getConfig().About.Support.getName(), screen.getLauncher().getConfig().About.Support.getURL()));
             }
 
             public void onBlurApply(BlurParameter parameter, Component component) {

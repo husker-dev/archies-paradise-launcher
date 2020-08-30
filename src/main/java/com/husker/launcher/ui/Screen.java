@@ -1,6 +1,6 @@
 package com.husker.launcher.ui;
 
-import com.husker.launcher.LauncherWindow;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.blur.BlurSegment;
@@ -70,7 +70,7 @@ public abstract class Screen extends JPanel {
         this.launcherUI = launcherUI;
     }
 
-    public LauncherWindow getLauncher(){
+    public Launcher getLauncher(){
         return getLauncherUI().getLauncher();
     }
 

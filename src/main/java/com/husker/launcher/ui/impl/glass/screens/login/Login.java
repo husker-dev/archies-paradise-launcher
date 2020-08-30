@@ -1,11 +1,10 @@
 package com.husker.launcher.ui.impl.glass.screens.login;
 
 import com.alee.laf.panel.WebPanel;
-import com.husker.launcher.ui.impl.glass.TitledScreen;
+import com.husker.launcher.ui.impl.glass.screens.TitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurPasswordField;
 import com.husker.launcher.ui.impl.glass.components.BlurTextField;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.FormatUtils;
 
 import javax.swing.*;

@@ -1,9 +1,10 @@
-package com.husker.launcher.ui.impl.glass;
+package com.husker.launcher.ui.impl.glass.screens;
 
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurPanel;
 import com.husker.launcher.utils.ShapeUtils;

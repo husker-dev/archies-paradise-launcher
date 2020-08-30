@@ -1,4 +1,4 @@
-package com.husker.launcher.ui.impl.glass;
+package com.husker.launcher.ui.impl.glass.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
@@ -6,14 +6,12 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.ui.LauncherUI;
+import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.UIUtils;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import static com.husker.launcher.utils.UIUtils.ShadowSide.BOTTOM;
 

@@ -1,7 +1,7 @@
 package com.husker.launcher.ui.impl.glass.screens.login;
 
-import com.husker.launcher.ui.impl.glass.SimpleLoadingScreen;
-import com.husker.launcher.ui.impl.glass.Message;
+import com.husker.launcher.ui.impl.glass.screens.SimpleLoadingScreen;
+import com.husker.launcher.ui.impl.glass.screens.Message;
 
 
 public class AuthProcess extends SimpleLoadingScreen {
@@ -21,13 +21,11 @@ public class AuthProcess extends SimpleLoadingScreen {
 
             int result = getLauncher().NetManager.Auth.auth(login, password, encrypted);
             if(result == getLauncher().NetManager.Auth.OK) {
-                if(getLauncher().getSettings().get("auto_auth", "false").equals("true")) {
-                    getLauncher().getUserConfig().set("login", login);
-                    getLauncher().getUserConfig().set("password", encrypted ? password : getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
-                }else{
-                    getLauncher().getUserConfig().set("login", "null");
-                    getLauncher().getUserConfig().set("password", "null");
-                }
+                if(getLauncher().getSettings().isAutoAuth()) {
+                    getLauncher().getUserConfig().setLogin(login);
+                    getLauncher().getUserConfig().setPassword(encrypted ? password : getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
+                }else
+                    getLauncher().getUserConfig().reset();
 
                 if(getLauncher().NetManager.PlayerInfo.isEmailConfirmed())
                     getLauncherUI().setScreen("main");

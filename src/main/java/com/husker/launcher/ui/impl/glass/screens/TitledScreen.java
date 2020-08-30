@@ -1,15 +1,14 @@
-package com.husker.launcher.ui.impl.glass;
+package com.husker.launcher.ui.impl.glass.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
-import com.husker.launcher.LauncherWindow;
-import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
-import com.husker.launcher.UpdateManager;
+import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.ui.CenteredMenuScreen;
+import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.UIUtils;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 

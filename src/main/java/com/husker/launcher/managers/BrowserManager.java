@@ -1,5 +1,6 @@
-package com.husker.launcher;
+package com.husker.launcher.managers;
 
+import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.impl.glass.components.social.vk.VkPostParameter;
 import com.husker.launcher.ui.impl.glass.components.social.youtube.YoutubeVideoParameters;
 import com.husker.launcher.utils.ConsoleUtils;
@@ -21,7 +22,7 @@ public class BrowserManager {
 
     public static boolean enabled = true;
 
-    private final LauncherWindow launcher;
+    private final Launcher launcher;
 
     private final ArrayList<YoutubeVideoParameters> youtubeParameters = new ArrayList<>();
     private final ArrayList<VkPostParameter> vkPostParameters = new ArrayList<>();
@@ -35,7 +36,7 @@ public class BrowserManager {
 
     private Thread mainThread;
 
-    public BrowserManager(LauncherWindow launcher){
+    public BrowserManager(Launcher launcher){
         this.launcher = launcher;
     }
 
@@ -74,10 +75,10 @@ public class BrowserManager {
                 service.sendOutputTo(new OutputStream(){public void write(int b){}});
 
                 driver = new ChromeDriver(service, options);
-                driver.get(launcher.getConfig().get("vkGroupUrl"));
+                driver.get("https://vk.com/" + launcher.getConfig().Social.getVkGroup());
                 processVkGroupParsing(driver.getPageSource());
 
-                driver.get(launcher.getConfig().get("youtubeUrl") + "/videos");
+                driver.get("https://www.youtube.com/channel/" + launcher.getConfig().Social.getYouTube() + "/videos");
                 processYoutubeParsing(driver.getPageSource());
 
                 close();

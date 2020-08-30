@@ -1,4 +1,4 @@
-package com.husker.launcher.ui.impl.glass;
+package com.husker.launcher.ui.impl.glass.screens;
 
 import com.husker.launcher.ui.Screen;
 

@@ -4,11 +4,10 @@ import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
-import com.husker.launcher.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.impl.glass.GlassUI;
-import com.husker.launcher.ui.impl.glass.Message;
-import com.husker.launcher.ui.impl.glass.TitledScreen;
+import com.husker.launcher.ui.impl.glass.screens.Message;
+import com.husker.launcher.ui.impl.glass.screens.TitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurTextField;
 
@@ -60,7 +59,7 @@ public class R_5_CodeConfirm extends TitledScreen {
                 addTextListener(text -> nextButton.setEnabled(code.getText().length() == 6));
             }});
             add(resendButton = createButton(1, "Повторить", () -> {
-                seconds = Integer.parseInt(getLauncher().getConfig().get("emailCodeTimeout", "60"));
+                seconds = 60;
 
                 new Thread(() -> {
                     String login = getParameterValue("login");
@@ -104,7 +103,7 @@ public class R_5_CodeConfirm extends TitledScreen {
     public void onShow() {
         super.onShow();
         code.setText("");
-        seconds = Integer.parseInt(getLauncher().getConfig().get("emailCodeTimeout", "60"));
+        seconds = 60;
         resendButton.setEnabled(false);
         emailLabel.setText("Код подтверждения был отправлен на {" + getParameterValue("email") + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
     }

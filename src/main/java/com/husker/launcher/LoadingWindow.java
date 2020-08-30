@@ -2,6 +2,7 @@ package com.husker.launcher;
 
 
 import com.husker.launcher.components.ScalableImage;
+import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
 import com.husker.launcher.utils.RenderUtils;
@@ -26,7 +27,7 @@ public class LoadingWindow extends JFrame {
 
     private static final int shadow = 5;
 
-    private final LauncherWindow launcher;
+    private final Launcher launcher;
 
     private JLabel statusLabel;
     private JLabel closeLabel;
@@ -39,7 +40,7 @@ public class LoadingWindow extends JFrame {
     private boolean error = false;
     private boolean starting = false;
 
-    public LoadingWindow(LauncherWindow launcher){
+    public LoadingWindow(Launcher launcher){
         super("Launcher loading");
         setIconImage(launcher.Resources.Icon);
         this.launcher = launcher;

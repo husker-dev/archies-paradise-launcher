@@ -1,6 +1,8 @@
-package com.husker.launcher;
+package com.husker.launcher.managers;
 
 import com.alee.utils.FileUtils;
+import com.husker.launcher.Launcher;
+import com.husker.launcher.utils.settings.SettingsFile;
 import com.husker.launcher.utils.ConsoleUtils;
 import net.lingala.zip4j.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
@@ -30,9 +32,9 @@ public class UpdateManager {
     private ZipFile file;
     private Exception lastUnzipException;
 
-    private LauncherWindow launcher;
+    private Launcher launcher;
 
-    public UpdateManager(LauncherWindow launcher){
+    public UpdateManager(Launcher launcher){
         this.launcher = launcher;
         ConsoleUtils.printDebug(getClass(), "Current launcher version: " + VERSION);
     }
@@ -181,9 +183,9 @@ public class UpdateManager {
         }
     }
 
-    static class UpdateException extends Exception{
+    static public class UpdateException extends Exception{
 
-        enum Stage{
+        public enum Stage{
             VERSION_GET,
             DOWNLOAD,
             UNZIP,

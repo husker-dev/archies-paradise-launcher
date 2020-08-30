@@ -1,7 +1,8 @@
-package com.husker.launcher.ui.impl.glass;
+package com.husker.launcher.ui.impl.glass.screens;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.launcher.ui.CenteredMenuScreen;
+import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.UIUtils;
 
 import javax.swing.*;

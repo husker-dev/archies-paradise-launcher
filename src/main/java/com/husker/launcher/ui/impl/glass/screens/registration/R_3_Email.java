@@ -3,7 +3,7 @@ package com.husker.launcher.ui.impl.glass.screens.registration;
 import com.alee.laf.panel.WebPanel;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.utils.FormatUtils;
-import com.husker.launcher.ui.impl.glass.TitledScreen;
+import com.husker.launcher.ui.impl.glass.screens.TitledScreen;
 import com.husker.launcher.ui.impl.glass.components.BlurButton;
 import com.husker.launcher.ui.impl.glass.components.BlurTextField;
 

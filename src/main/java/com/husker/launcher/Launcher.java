@@ -5,19 +5,21 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.components.ScalableImage;
 
+import com.husker.launcher.managers.*;
+import com.husker.launcher.settings.*;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.launcher.ui.impl.glass.GlassUI;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.utils.settings.SettingsFile;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
-public class LauncherWindow extends JFrame {
+public class Launcher extends JFrame {
 
     private ScalableImage backgroundImage;
     private ScalableImage animationBackgroundImage;
@@ -28,14 +30,9 @@ public class LauncherWindow extends JFrame {
     private boolean isAnimating = false;
     private WebPanel animationPanel;
 
-    private final SettingsFile config = new SettingsFile("launcher_config.cfg");
-    private final SettingsFile settings = new SettingsFile(new File("launcher.cfg")){{
-        setDefault("auto_auth", "true");
-        setDefault("background", "1");
-        setDefault("windowed", "false");
-        setDefault("ram", "256");
-    }};
-    private final SettingsFile user = new SettingsFile(new File("user.cfg"));
+    private final LauncherConfig config = new LauncherConfig();
+    private final LauncherSettings settings = new LauncherSettings();
+    private final UserSettings user = new UserSettings();
 
     public final UpdateManager UpdateManager = new UpdateManager(this);
     public final Resources Resources = new Resources(this);
@@ -44,7 +41,7 @@ public class LauncherWindow extends JFrame {
 
     public LoadingWindow loadingWindow;
 
-    public LauncherWindow(){
+    public Launcher(){
         try {
             loadingWindow = new LoadingWindow(this);
         }catch (Exception ex){
@@ -62,18 +59,18 @@ public class LauncherWindow extends JFrame {
             addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
                     new Thread(() -> {
-                        ConsoleUtils.printDebug(LauncherWindow.class, "Closing");
+                        ConsoleUtils.printDebug(Launcher.class, "Closing");
                         BrowserManager.close();
-                        ConsoleUtils.printDebug(LauncherWindow.class, "Closed");
+                        ConsoleUtils.printDebug(Launcher.class, "Closed");
                         System.exit(0);
                     }).start();
                 }
             });
 
-            currentUIName = config.get("ui", GlassUI.class.getCanonicalName());
+            currentUIName = config.Launcher.getUI();
             try {
                 Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
-                currentUI = c.getConstructor(LauncherWindow.class).newInstance(this);
+                currentUI = c.getConstructor(Launcher.class).newInstance(this);
             }catch (Exception ex){
                 ex.printStackTrace();
                 currentUI = new GlassUI(this);
@@ -116,12 +113,10 @@ public class LauncherWindow extends JFrame {
                     public void paint(Graphics g) {
                         if(currentUI != null && currentUI.getScreen() != null){
                             Graphics2D g2d = (Graphics2D)g;
-                            long start = System.currentTimeMillis();
                             for(BlurPainter painter : currentUI.getScreen().getBlurPainters()) {
                                 if(painter != null)
                                     painter.paint(g2d);
                             }
-                            //ConsoleUtils.printDebug(getClass(), "Repaint in " + (System.currentTimeMillis() - start) / 1000f);
                         }
 
                         super.paint(g);
@@ -133,11 +128,9 @@ public class LauncherWindow extends JFrame {
                     setLayout(new BorderLayout());
                     add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
                 }});
-
-
             }});
 
-            setTitle(config.get("title"));
+            setTitle(config.getTitle());
             setIconImage(Resources.Icon);
 
             setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -153,6 +146,7 @@ public class LauncherWindow extends JFrame {
                 loadingWindow.setVisible(false);
             }
         }catch (Exception ex){
+            ex.printStackTrace();
             loadingWindow.onError();
         }
     }
@@ -163,10 +157,10 @@ public class LauncherWindow extends JFrame {
     }
 
     public BufferedImage getBackgroundFromSettings(){
-        if(getSettings().get("background").equals("0") && Resources.Background[0] == null)
-            getSettings().set("background", "1");
+        if(getSettings().getBackgroundIndex() == 0 && Resources.Background[0] == null)
+            getSettings().setBackgroundIndex(1);
 
-        return Resources.Background[Integer.parseInt(getSettings().get("background"))];
+        return Resources.Background[getSettings().getBackgroundIndex()];
     }
 
     public BufferedImage getBackgroundImage(){
@@ -185,15 +179,15 @@ public class LauncherWindow extends JFrame {
         return getRootPane().getHeight();
     }
 
-    public SettingsFile getConfig() {
+    public LauncherConfig getConfig() {
         return config;
     }
 
-    public SettingsFile getSettings() {
+    public LauncherSettings getSettings() {
         return settings;
     }
 
-    public SettingsFile getUserConfig() {
+    public UserSettings getUserConfig() {
         return user;
     }
 
