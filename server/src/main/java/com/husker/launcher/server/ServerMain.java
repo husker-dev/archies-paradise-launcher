@@ -2,8 +2,6 @@ package com.husker.launcher.server;
 
 import com.husker.launcher.server.utils.ConsoleUtils;
 import com.husker.launcher.server.utils.MailManager;
-import com.husker.launcher.server.utils.ProfileUtils;
-import com.husker.launcher.server.utils.SettingsFile;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -13,25 +11,17 @@ import java.util.Scanner;
 public class ServerMain {
 
     public static ServerSocket Server;
-    public static final SettingsFile Settings = new SettingsFile(new File("server_settings.cfg")){{
-        setDefault("port", "15565");
-        setDefault("encryption_key", ProfileUtils.generateKey());
-        setDefault("email", "null");
-        setDefault("email_password", "null");
-        setDefault("email_title", "Archie's Paradise");
-    }};
+    public static final ServerSettingsFile Settings = new ServerSettingsFile();
 
-    public static MailManager MailManager = new MailManager(Settings.get("email"), Settings.get("email_password"));
+    public static MailManager MailManager = new MailManager(Settings.getEmail(), Settings.getEmailPassword());
 
     public static void main(String[] args){
         ConsoleUtils.printDebug(ServerMain.class, "Starting...");
 
-        int port = Integer.parseInt(Settings.get("port", "15565"));
-
         new Thread(() -> {
             try {
-                Server = new ServerSocket(port);
-                ConsoleUtils.printDebug(ServerMain.class, "Server started at port: " + port);
+                Server = new ServerSocket(Settings.getPort());
+                ConsoleUtils.printDebug(ServerMain.class, "Server started at port: " + Settings.getPort());
 
                 while(true){
                     Socket client = Server.accept();
@@ -39,6 +29,8 @@ public class ServerMain {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                ConsoleUtils.printDebug(ServerMain.class, "Server is closing... ");
+                System.exit(0);
             }
         }).start();
 
@@ -48,15 +40,16 @@ public class ServerMain {
             if(line.equals("stop") || line.equals("exit") || line.equals("quit"))
                 System.exit(0);
             if(line.startsWith("port") && line.split(" ").length == 2){
-                Settings.set("port", line.split(" ")[1]);
+                Settings.setPort(line.split(" ")[1]);
                 ConsoleUtils.printDebug(ServerMain.class, "Changes were saved! Please restart server.");
             }
             if(line.startsWith("key") && line.split(" ").length == 2){
-                Settings.set("key", line.split(" ")[1]);
+                Settings.setEncryptionKey(line.split(" ")[1]);
                 ConsoleUtils.printDebug(ServerMain.class, "Changes were saved! Please restart server.");
             }
         }
-    }
 
+
+    }
 
 }

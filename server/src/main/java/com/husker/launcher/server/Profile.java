@@ -20,9 +20,12 @@ public class Profile {
     public static final String mailCodesFile = "mailCodes.txt";
     public static final String skinFile = "skin.png";
 
+    public static final String RESULT = "result";
     public static final String KEY = "key";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
+    public static final String EMAIL_CODE = "email_code";
+    public static final String ENCRYPTED = "encrypted";
     public static final String STATUS = "status";
     public static final String SKIN_NAME = "skinName";
     public static final String PASSWORD = "password";
@@ -144,7 +147,7 @@ public class Profile {
             return -1;
         }
 
-        return ServerMain.MailManager.send(email, ServerMain.Settings.get("email_title"), "Код подтверждения: " + code) ? 0 : -1;
+        return ServerMain.MailManager.send(email, ServerMain.Settings.getEmailTitle(), "Код подтверждения: " + code) ? 0 : -1;
     }
 
     public int confirmMail(String email, String code){
@@ -196,13 +199,14 @@ public class Profile {
                     return 3;
                 if(data.containsKey(EMAIL) && !FormatUtils.isCorrectEmail(data.get(EMAIL)))
                     return 4;
-                if(data.containsKey(EMAIL) && data.containsKey("email_code"))
-                    return 4;
+                if(data.containsKey(EMAIL) && data.containsKey(EMAIL_CODE))
+                    return 5;
 
+                if (data.containsKey(EMAIL))
+                    if(confirmMail(data.get(EMAIL), data.get(EMAIL_CODE)) != 0)
+                        return 5;
                 if (data.containsKey(LOGIN))
                     oldData.put(LOGIN, data.get(LOGIN));
-                if (data.containsKey(EMAIL))
-                    confirmMail(data.get(EMAIL), data.get("email_code"));
 
                 ArrayList<String> lines = new ArrayList<>();
                 for (Map.Entry<String, String> entry : oldData.entrySet())

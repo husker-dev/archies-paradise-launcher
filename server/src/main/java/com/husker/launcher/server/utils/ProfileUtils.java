@@ -90,6 +90,11 @@ public class ProfileUtils {
     }
 
     public static int getUserCount(){
+        try {
+            Files.createDirectories(Paths.get(Profile.profilesFolder));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
         return Objects.requireNonNull(new File(Profile.profilesFolder).list()).length;
     }
 
@@ -97,7 +102,7 @@ public class ProfileUtils {
         if(parameters.containsKey(Profile.KEY))
             return Profile.get(parameters.get(Profile.KEY));
         else {
-            if(parameters.containsKey("encrypted") && parameters.get("encrypted").equals("1"))
+            if(parameters.containsKey(Profile.ENCRYPTED) && parameters.get(Profile.ENCRYPTED).equals("1"))
                 return Profile.get(parameters.get(Profile.LOGIN), decrypt(parameters.get(Profile.PASSWORD)));
             else
                 return Profile.get(parameters.get(Profile.LOGIN), parameters.get(Profile.PASSWORD));
@@ -127,14 +132,13 @@ public class ProfileUtils {
 
     private static byte[] xor(final byte[] input) {
         final byte[] output = new byte[input.length];
-        final byte[] secret = ServerMain.Settings.get("encryption_key").getBytes();
+        final byte[] secret = ServerMain.Settings.getEncryptionKey().getBytes();
         int spos = 0;
         for (int pos = 0; pos < input.length; ++pos) {
             output[pos] = (byte) (input[pos] ^ secret[spos]);
             spos += 1;
-            if (spos >= secret.length) {
+            if (spos >= secret.length)
                 spos = 0;
-            }
         }
         return output;
     }

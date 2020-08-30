@@ -1,6 +1,7 @@
 package com.husker.launcher.ui.impl.glass.screens.main.profile;
 
 import com.husker.launcher.NetManager;
+import com.husker.launcher.ui.impl.glass.Message;
 import com.husker.launcher.ui.impl.glass.SimpleLoadingScreen;
 
 public class InfoApplying extends SimpleLoadingScreen {
@@ -12,23 +13,26 @@ public class InfoApplying extends SimpleLoadingScreen {
 
     public void onShow() {
         new Thread(() -> {
-            int result = getLauncher().NetManager.PlayerInfo.setData(getParameters()[0], NetManager.LOGIN, getParameters()[1], NetManager.EMAIL, getParameters()[2]);
+            String currentPassword = getParameterValue("currentPassword");
+            String login = getParameterValue("login");
+            String email = getParameterValue("email");
+
+            int result = getLauncher().NetManager.PlayerInfo.setData(currentPassword, NetManager.LOGIN, login, NetManager.EMAIL, email);
 
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_OK)
                 getLauncherUI().setScreen("main");
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_WRONG_PASSWORD)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Неправильный пароль!");
+                Message.showMessage(getLauncherUI(), "Проблемка", "Неправильный пароль!", "info_edit", getParameters());
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_BAD_NAME)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Имя имеет неправильный формат!");
+                Message.showMessage(getLauncherUI(), "Проблемка", "Имя имеет неправильный формат!", "info_edit", getParameters());
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_NAME_TAKEN)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Данное имя уже занято");
+                Message.showMessage(getLauncherUI(), "Проблемка", "Данное имя уже занято", "info_edit", getParameters());
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_BAD_EMAIL)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Почта имеет неправильный формат!");
-
+                Message.showMessage(getLauncherUI(), "Проблемка", "Почта имеет неправильный формат!", "info_edit", getParameters());
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_ERROR)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Произошла ошибка");
+                Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка", "info_edit", getParameters());
             if(result == getLauncher().NetManager.PlayerInfo.DATASET_SERVER_ERROR)
-                getLauncherUI().setScreen("message", "info_edit," + getParameters()[1] + "," + getParameters()[2], "Проблемка", "Произошла ошибка на сервере");
+                Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка на сервере", "info_edit", getParameters());
 
         }).start();
     }

@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static com.husker.launcher.utils.UIUtils.ShadowSide.BOTTOM;
 
@@ -23,7 +24,7 @@ public class Message extends CenteredMenuScreen {
     private WebLabel title;
     private WebLabel message;
     private String prevScreen = "";
-    private String[] prevParameters;
+    private Parameters prevParameters;
 
     public void onMenuInit() {
 
@@ -56,32 +57,26 @@ public class Message extends CenteredMenuScreen {
         }});
     }
 
-    public static void showMessage(LauncherUI ui, String title, String text, String prevScreen, String... parameters ){
-        ui.setScreen("message", prevScreen + "," + String.join(",", parameters), title, text);
+    public static void showMessage(LauncherUI ui, String title, String text, String prevScreen){
+        showMessage(ui, title, text, prevScreen, new Parameters());
+    }
+
+    public static void showMessage(LauncherUI ui, String title, String text, String prevScreen, Parameters parameters){
+        ui.setScreen("message", new Parameters(){{
+            put("backScreen", prevScreen);
+            put("title", title);
+            put("text", text);
+            put("backParameters", parameters);
+        }});
     }
 
     public void onShow() {
         super.onShow();
 
-        if(getParameters().length != 3){
-            title.setText("Ошибка!");
-            message.setText("Сделай всё правильно!!!");
-            return;
-        }
-        if(getParameters()[0].contains(",")){
-            ArrayList<String> parameters = new ArrayList<>(Arrays.asList(getParameters()[0].split(",")));
-
-            prevScreen = parameters.remove(0);
-            prevParameters = parameters.toArray(new String[0]);
-        }else{
-            prevScreen = getParameters()[0];
-            prevParameters = new String[]{};
-        }
-
-
-
-        title.setText(getParameters()[1]);
-        message.setText(getParameters()[2]);
+        prevScreen = getParameterValue("backScreen");
+        prevParameters = (Parameters)getParameter("backParameters");
+        title.setText(getParameterValue("title"));
+        message.setText(getParameterValue("text"));
     }
 
 }

@@ -15,7 +15,7 @@ public abstract class LauncherUI extends JPanel {
     private String currentScreen;
 
     private String nextScreen;
-    private String[] nextScreenParameters;
+    private Screen.Parameters nextScreenParameters;
     private boolean animated = false;
 
     public LauncherUI(LauncherWindow launcher){
@@ -50,10 +50,18 @@ public abstract class LauncherUI extends JPanel {
         }
     }
 
-    public void setScreen(String name, String... parameters){
+    public void setScreen(String name){
+        setScreen(name, new Screen.Parameters());
+    }
+
+    public void setScreen(String name, String parameters){
+        setScreen(name, new Screen.Parameters(parameters));
+    }
+
+    public void setScreen(String name, Screen.Parameters parameters){
         nextScreen = name;
         nextScreenParameters = parameters;
-        ConsoleUtils.printDebug(getClass(), "Changing screen to: " + name);
+        ConsoleUtils.printDebug(getClass(), "Changing screen to: " + name + "  " + parameters.toString());
 
         if(animated)
             getLauncher().beginAnimation();

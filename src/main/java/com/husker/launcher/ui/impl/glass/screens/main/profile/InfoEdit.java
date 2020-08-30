@@ -104,7 +104,11 @@ public class InfoEdit extends SimpleCenteredScreen {
                                     setEnabled(false);
                                     setPreferredWidth(120);
                                     addActionListener(e -> {
-                                        getLauncherUI().setScreen("info_edit_apply", password.getText(), nickname.getText(), email.getText());
+                                        getLauncherUI().setScreen("info_edit_apply", new Parameters(){{
+                                            put("currentPassword", password.getText());
+                                            put("login", nickname.getText());
+                                            put("email", email.getText());
+                                        }});
                                     });
                                 }});
                             }}, BorderLayout.SOUTH);
@@ -138,13 +142,9 @@ public class InfoEdit extends SimpleCenteredScreen {
 
     public void onShow() {
         viewer.setPlayerTexture(getLauncher().NetManager.PlayerInfo.getSkin());
-        if(getParameters().length == 2){
-            nickname.setText(getParameters()[0]);
-            email.setText(getParameters()[1]);
-        }else {
-            nickname.setText(getLauncher().NetManager.PlayerInfo.getNickname());
-            email.setText(getLauncher().NetManager.PlayerInfo.getEmail());
-        }
+
+        nickname.setText(getParameterValue("login", getLauncher().NetManager.PlayerInfo.getNickname()));
+        email.setText(getParameterValue("email", getLauncher().NetManager.PlayerInfo.getEmail()));
 
         password.clear();
     }

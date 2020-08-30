@@ -95,12 +95,7 @@ public class ProfilePanel extends WebPanel {
                 add(new BlurButton(screen, "Выйти"){
                     {
                         setMargin(3, 20, 0, 20);
-                        addActionListener(e -> {
-                            screen.getLauncher().NetManager.PlayerInfo.logout();
-                            screen.getLauncher().getUserConfig().set("login", "null");
-                            screen.getLauncher().getUserConfig().set("password", "null");
-                            screen.getLauncherUI().setScreen("login");
-                        });
+                        addActionListener(e -> ((GlassUI)screen.getLauncherUI()).logout());
                     }
                     public void onBlurApply(BlurParameter parameter, Component component) {
                         super.onBlurApply(parameter, component);

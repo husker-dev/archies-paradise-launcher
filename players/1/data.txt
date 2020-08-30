@@ -1,5 +1,0 @@
-password:password
-skinName:Хаски
-login:Husker
-email:redfancoestar@gmail.com
-status:Гость

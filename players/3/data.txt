@@ -1,5 +1,0 @@
-password:12345
-skinName:null
-login:Husker3
-email:redfancoestar@gmail.com
-status:Гость

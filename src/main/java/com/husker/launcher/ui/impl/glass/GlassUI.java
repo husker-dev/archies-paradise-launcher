@@ -4,6 +4,7 @@ import com.alee.laf.label.WebLabel;
 import com.husker.launcher.LauncherWindow;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
+import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.impl.glass.screens.BackgroundSelection;
 import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
@@ -67,11 +68,16 @@ public class GlassUI extends LauncherUI {
 
         boolean hasAccount = false;
         if(getLauncher().getSettings().get("auto_auth", "false").equals("true")){
-            if (getLauncher().getUserConfig().get("login") != null && getLauncher().getUserConfig().get("password") != null) {
-                if (!getLauncher().getUserConfig().get("login").equals("null") && !getLauncher().getUserConfig().get("password").equals("null")) {
-                    hasAccount = true;
-                    setScreen("authProcess", getLauncher().getUserConfig().get("login"), getLauncher().getUserConfig().get("password"), "true");
-                }
+            String login = getLauncher().getUserConfig().get("login");
+            String password = getLauncher().getUserConfig().get("password");
+
+            if (login != null && !login.equals("null") && password != null && !password.equals("null")) {
+                hasAccount = true;
+                setScreen("authProcess", new Screen.Parameters(){{
+                    put("login", login);
+                    put("password", password);
+                    put("encrypted", "true");
+                }});
             }
         }
         if(!hasAccount)
@@ -117,5 +123,13 @@ public class GlassUI extends LauncherUI {
         parameter.setBlurFactor(25);
         parameter.setShadowSize(10);
         parameter.setShadowColor(new Color(0, 0, 0, 50));
+    }
+
+    public void logout(){
+        String login = getLauncher().NetManager.PlayerInfo.getNickname();
+        getLauncher().NetManager.PlayerInfo.logout();
+        getLauncher().getUserConfig().set("login", "null");
+        getLauncher().getUserConfig().set("password", "null");
+        setScreen("login", new Screen.Parameters("login", login));
     }
 }

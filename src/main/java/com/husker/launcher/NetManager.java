@@ -19,9 +19,12 @@ public class NetManager {
 
     public static final int DEFAULT_AUTH_SERVER_PORT = 15565;
 
+    public static final String RESULT = "result";
     public static final String KEY = "key";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
+    public static final String EMAIL_CODE = "email_code";
+    public static final String ENCRYPTED = "encrypted";
     public static final String STATUS = "status";
     public static final String SKIN_NAME = "skinName";
     public static final String PASSWORD = "password";
@@ -234,7 +237,7 @@ public class NetManager {
 
         public int checkNickname(String name){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("is_nickname_taken", "name", name)).get("result"));
+                return Integer.parseInt(manager.getString(new GetParameters("is_login_taken", LOGIN, name)).get(RESULT));
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -243,7 +246,7 @@ public class NetManager {
 
         public int register(String login, String password){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("register", LOGIN, login, PASSWORD, password)).get("result"));
+                return Integer.parseInt(manager.getString(new GetParameters("register", LOGIN, login, PASSWORD, password)).get(RESULT));
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -263,7 +266,7 @@ public class NetManager {
 
         public int sendConfirmCode(String login, String password, String email, boolean encrypted){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, "encrypted", encrypted ? "1" : "0")).get("result"));
+                return Integer.parseInt(manager.getString(new GetParameters("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, ENCRYPTED, encrypted ? "1" : "0")).get(RESULT));
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -272,7 +275,7 @@ public class NetManager {
 
         public int confirmMail(String login, String password, String email, String code, boolean encrypted){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, "email_code", code, "encrypted", encrypted ? "1" : "0")).get("result"));
+                return Integer.parseInt(manager.getString(new GetParameters("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, EMAIL_CODE, code, ENCRYPTED, encrypted ? "1" : "0")).get(RESULT));
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -293,7 +296,7 @@ public class NetManager {
 
         public int auth(String login, String password, boolean encrypted){
             try {
-                String result = manager.getString(new GetParameters("get_key", LOGIN, login, PASSWORD, password, "encrypted", encrypted ? "1" : "0")).get("key");
+                String result = manager.getString(new GetParameters("get_key", LOGIN, login, PASSWORD, password, ENCRYPTED, encrypted ? "1" : "0")).get(KEY);
                 if(result.equals("-1"))
                     return WRONG_DATA;
                 else {
@@ -353,10 +356,10 @@ public class NetManager {
 
             encryptedPassword = manager.getString(new GetParameters("get_encrypted_password", KEY, key)).get(PASSWORD);
 
-            emailConfirmed = manager.getString(new GetParameters("is_email_confirmed", KEY, key)).get("result").equals("1");
+            emailConfirmed = manager.getString(new GetParameters("is_email_confirmed", KEY, key)).get(RESULT).equals("1");
 
             if(has_skin)
-                skin = manager.getImage(new GetParameters("skin", "key", key));
+                skin = manager.getImage(new GetParameters("skin", KEY, key));
             else
                 skin = manager.launcher.Resources.Skin_Steve;
         }
@@ -404,7 +407,7 @@ public class NetManager {
                 dataList.add(currentPassword);
                 dataList.add(KEY);
                 dataList.add(key);
-                int result = Integer.parseInt(manager.getString(new GetParameters("set_profile_data", dataList.toArray(new String[0]))).get("result"));
+                int result = Integer.parseInt(manager.getString(new GetParameters("set_profile_data", dataList.toArray(new String[0]))).get(RESULT));
                 if(result == DATASET_OK)
                     updateData();
                 return result;

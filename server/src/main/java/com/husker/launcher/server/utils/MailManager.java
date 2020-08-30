@@ -7,28 +7,30 @@ import java.util.Properties;
 
 public class MailManager {
 
-    private final Session session;
     private final String email;
+    private final String password;
+    private final Properties properties;
 
     public MailManager(String email, String password){
         this.email = email;
+        this.password = password;
 
-        Properties properties = System.getProperties();
+        properties = System.getProperties();
 
         properties.put("mail.smtp.host", "smtp.gmail.com");
         properties.put("mail.smtp.port", "465");
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.auth", "true");
-
-        session = Session.getInstance(properties, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(email, password);
-            }
-        });
     }
 
     public boolean send(String to_email, String title, String text){
         try {
+
+            Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(email, password);
+                }
+            });
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(email));
 
