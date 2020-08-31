@@ -221,7 +221,7 @@ public class SkinViewer extends WebPanel {
             currentRotateY += delta * (rotateY - currentRotateY);
 
             final GL2 gl = drawable.getGL().getGL2();
-            gl.glClearColor(0f, 0f, 0f, 0.01f);
+            gl.glClearColor(0f, 0f, 0f, 0.003f);
             gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
             gl.glLoadIdentity();
 

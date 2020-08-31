@@ -56,7 +56,11 @@ public class InfoEdit extends InfoEditPanel {
             addActionListener(e -> {
 
                 if(!email.getText().equals(getLauncher().NetManager.PlayerInfo.getEmail())){
-
+                    getLauncherUI().setScreen("info_email_confirm", new Parameters(){{
+                        put("currentPassword", password.getText());
+                        put(NetManager.LOGIN, nickname.getText());
+                        put(NetManager.EMAIL, email.getText());
+                    }});
                 }else{
                     getLauncherUI().setScreen("info_edit_apply", new Parameters(){{
                         put("currentPassword", password.getText());

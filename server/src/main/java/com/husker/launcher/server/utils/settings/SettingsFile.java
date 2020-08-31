@@ -1,13 +1,17 @@
-package com.husker.launcher.utils.settings;
+package com.husker.launcher.server.utils.settings;
 
-import com.husker.launcher.Resources;
-import com.husker.launcher.utils.ConsoleUtils;
+
+
+import com.husker.launcher.server.utils.ConsoleUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SettingsFile implements SettingsContainer{
@@ -18,23 +22,18 @@ public class SettingsFile implements SettingsContainer{
 
     public SettingsFile(String resourcePath){
         resourcePath = "/" + resourcePath;
-        ConsoleUtils.printDebug(SettingsFile.class, "Reading in-jar config file: " + resourcePath);
 
-        InputStream inputStream = Resources.class.getResourceAsStream(resourcePath);
+        InputStream inputStream = SettingsFile.class.getResourceAsStream(resourcePath);
 
         if(inputStream != null) {
             init(new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.toList()));
             isSaveEnabled = false;
         }else{
-            ConsoleUtils.printResult("ERROR");
             throw new RuntimeException("Can't read in-jar config file: " + resourcePath);
         }
-        ConsoleUtils.printResult("OK");
     }
 
     public SettingsFile(File file){
-        ConsoleUtils.printDebug(SettingsFile.class, "Reading config file: " + file.getAbsolutePath());
-
         try {
             if(!file.exists())
                 file.createNewFile();
@@ -42,9 +41,8 @@ public class SettingsFile implements SettingsContainer{
             init(Files.readAllLines(Paths.get(file.getAbsolutePath())));
             path = file.getAbsolutePath();
         }catch (Exception ex){
-            ConsoleUtils.printResult("ERROR");
+            ex.printStackTrace();
         }
-        ConsoleUtils.printResult("OK");
     }
 
     private void init(List<String> lines){

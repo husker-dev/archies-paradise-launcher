@@ -12,8 +12,10 @@ import com.husker.launcher.ui.impl.glass.screens.Message;
 import com.husker.launcher.ui.impl.glass.screens.main.MainScreen;
 import com.husker.launcher.ui.impl.glass.screens.login.AuthProcess;
 import com.husker.launcher.ui.impl.glass.screens.login.Login;
+import com.husker.launcher.ui.impl.glass.screens.main.profile.EmailConfirm;
 import com.husker.launcher.ui.impl.glass.screens.main.profile.InfoApplying;
 import com.husker.launcher.ui.impl.glass.screens.main.profile.InfoEdit;
+import com.husker.launcher.ui.impl.glass.screens.main.profile.SkinChooserScreen;
 import com.husker.launcher.ui.impl.glass.screens.registration.*;
 
 import java.awt.*;
@@ -65,25 +67,19 @@ public class GlassUI extends LauncherUI {
         // Main
         addScreen("main", new MainScreen());
         addScreen("backgroundSelection", new BackgroundSelection());
+        addScreen("skin_chooser", new SkinChooserScreen());
         addScreen("info_edit", new InfoEdit());
         addScreen("info_edit_apply", new InfoApplying());
+        addScreen("info_email_confirm", new EmailConfirm());
 
-        boolean hasAccount = false;
-        if(getLauncher().getSettings().isAutoAuth()){
-            String login = getLauncher().getUserConfig().getLogin();
-            String password = getLauncher().getUserConfig().getPassword();
-
-            if (login != null && !login.equals("null") && password != null && !password.equals("null")) {
-                hasAccount = true;
-                setScreen("authProcess", new Screen.Parameters(){{
-                    put(NetManager.LOGIN, login);
-                    put(NetManager.PASSWORD, password);
-                    put(NetManager.ENCRYPTED, "true");
-                }});
-            }
-        }
-        if(!hasAccount)
-            setScreen("login");
+        if(getLauncher().getSettings().isAutoAuth() && getLauncher().getUserConfig().hasAccount()){
+            setScreen("authProcess", new Screen.Parameters(){{
+                put(NetManager.LOGIN, getLauncher().getUserConfig().getLogin());
+                put(NetManager.PASSWORD, getLauncher().getUserConfig().getPassword());
+                put(NetManager.ENCRYPTED, "true");
+            }});
+        }else
+            setScreen("skin_chooser");
     }
 
     public Dimension getDefaultSize() {

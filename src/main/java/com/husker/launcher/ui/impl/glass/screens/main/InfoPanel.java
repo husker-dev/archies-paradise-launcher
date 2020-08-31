@@ -71,7 +71,7 @@ public class InfoPanel extends WebPanel {
         });
         add(new WebPanel(StyleId.panelTransparent){{
             setLayout(new FlowLayout(CENTER, 10, 0));
-            setMargin(0, 10, 0, 10);
+            setMargin(15, 10, 0, 10);
 
             add(createLightText("Java: " + System.getProperty("java.version")));
             add(createLightText("UI: " + screen.getLauncher().getCurrentUITitle()));

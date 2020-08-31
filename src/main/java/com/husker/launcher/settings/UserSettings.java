@@ -1,5 +1,7 @@
 package com.husker.launcher.settings;
 
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.Screen;
 import com.husker.launcher.utils.settings.SettingsFile;
 
 import java.io.File;
@@ -29,5 +31,12 @@ public class UserSettings extends SettingsFile {
     public void reset(){
         setLogin("null");
         setPassword("null");
+    }
+
+    public boolean hasAccount(){
+        String login = getLogin();
+        String password = getPassword();
+
+        return login != null && password != null && !login.equals("null") && !password.equals("null");
     }
 }

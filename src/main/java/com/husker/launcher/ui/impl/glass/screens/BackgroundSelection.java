@@ -21,7 +21,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
         panel.setLayout(new FlowLayout(CENTER, 15, 15));
 
         panel.setPreferredWidth(550);
-        panel.setPreferredHeight(350);
+        panel.setPreferredHeight(230);
 
         for(int i = 1; i < getLauncher().Resources.Background.length; i++){
             final int I = i;

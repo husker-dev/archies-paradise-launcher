@@ -2,6 +2,7 @@ package com.husker.launcher.server;
 
 import com.husker.launcher.server.utils.FormatUtils;
 import com.husker.launcher.server.utils.ProfileUtils;
+import com.husker.launcher.server.utils.settings.SettingsFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,8 +31,11 @@ public class Profile {
     public static final String SKIN_NAME = "skinName";
     public static final String PASSWORD = "password";
     public static final String CURRENT_PASSWORD = "current_password";
+    public static final String NEW_PASSWORD = "new_password";
     public static final String HAS_SKIN = "hasSkin";
     public static final String ID = "id";
+
+    public SettingsFile data;
 
     public static int create(String login, String password){
         try {
@@ -71,20 +75,9 @@ public class Profile {
     public static Profile get(String login, String password){
         for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
             try {
-                boolean correctLogin = false;
-                boolean correctPassword = false;
-                for (String line : Files.readAllLines(Paths.get(profilesFolder + "/" + id + "/" + dataFile))) {
-                    ArrayList<String> parts = new ArrayList<>(Arrays.asList(line.split(":")));
-                    String parameter = parts.remove(0);
-                    String value = String.join(":", parts.toArray(new String[0])).trim();
-
-                    if(parameter.equals(LOGIN) && value.equals(login))
-                        correctLogin = true;
-                    if(parameter.equals(PASSWORD) && value.equals(password))
-                        correctPassword = true;
-                }
-                if(correctLogin && correctPassword)
-                    return new Profile(id);
+                Profile profile = new Profile(id);
+                if(profile.data.get(PASSWORD).equals(password) && profile.getDataValue(LOGIN).equals(login))
+                    return profile;
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -94,30 +87,35 @@ public class Profile {
 
     public Profile(int id){
         this.id = id;
+        data = new SettingsFile(new File(getFolder() + "/" + dataFile));
+    }
+
+    public String getDataValue(String parameter){
+        return getData(parameter).get(parameter);
     }
 
     public HashMap<String, String> getData(String... parameters){
-        HashMap<String, String> out_values = new HashMap<>();
-        ArrayList<String> parameterList = new ArrayList<>(Arrays.asList(parameters));
-        parameterList.remove(PASSWORD);
+        HashMap<String, String> out_data = new HashMap<>();
 
-        for(String parameter : parameters)
-            out_values.put(parameter, "null");
+        List<String> availableData = Arrays.asList(ID, HAS_SKIN, SKIN_NAME, LOGIN, EMAIL, STATUS, PASSWORD);
 
-        try {
-            for (String line : Files.readAllLines(Paths.get(getFolder() + "/" + dataFile))) {
-                ArrayList<String> parts = new ArrayList<>(Arrays.asList(line.split(":")));
-                if(parameterList.size() == 0 || parameterList.contains(parts.get(0)))
-                    out_values.put(parts.remove(0), String.join(":", parts.toArray(new String[0])).trim());
+        if(parameters.length == 0)
+            parameters = availableData.toArray(new String[0]);
+
+        for(String parameter : parameters) {
+            if (availableData.contains(parameter)) {
+                if (parameter.equals(ID))
+                    out_data.put(parameter, id + "");
+                else if (parameter.equals(HAS_SKIN))
+                    out_data.put(parameter, Files.exists(Paths.get(getFolder() + "/" + skinFile)) ? "1" : "0");
+                else if (parameter.equals(PASSWORD))
+                    out_data.put(parameter, ProfileUtils.encrypt(data.get(PASSWORD)));
+                else
+                    out_data.put(parameter, data.get(parameter));
             }
-        }catch (Exception ignored){}
+        }
 
-        if(parameterList.contains(ID))
-            out_values.put(ID, id + "");
-        if(parameterList.contains(HAS_SKIN))
-            out_values.put(HAS_SKIN, Files.exists(Paths.get(getFolder() + "/" + skinFile)) ? "1" : "0");
-
-        return out_values;
+        return out_data;
     }
 
     public String createKey(){
@@ -150,28 +148,17 @@ public class Profile {
         return ServerMain.MailManager.send(email, ServerMain.Settings.getEmailTitle(), "Код подтверждения: " + code) ? 0 : -1;
     }
 
-    public int confirmMail(String email, String code){
+    public boolean isValidEmailCode(String email, String code){
         try {
             ProfileUtils.removeInvalidEmails(id);
 
-            for (String line : Files.readAllLines(Paths.get(profilesFolder + "/" + id + "/" + mailCodesFile))) {
-                if (line.split(",")[1].equals(email) && line.split(",")[2].equals(code)) {
-
-                    ArrayList<String> lines = new ArrayList<>();
-                    for (Map.Entry<String, String> entry : getData().entrySet()) {
-                        if(entry.getKey().equals(EMAIL))
-                            entry.setValue(email);
-                        lines.add(entry.getKey() + ":" + entry.getValue());
-                    }
-                    Files.write(Paths.get(getFolder() + "/" + dataFile), lines);
-
-                    return 0;
-                }
-            }
+            for (String line : Files.readAllLines(Paths.get(getFolder() + "/" + mailCodesFile)))
+                if (line.split(",")[1].equals(email) && line.split(",")[2].equals(code))
+                    return true;
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return -1;
+        return false;
     }
 
     public void removeKey(String key){
@@ -189,36 +176,53 @@ public class Profile {
         }
     }
 
-    public int modifyData(String currentPassword, HashMap<String, String> data){
-        if(currentPassword.equals(getData(PASSWORD).get(PASSWORD))){
-            try {
-                HashMap<String, String> oldData = getData();
-                if(data.containsKey(LOGIN) && !FormatUtils.isCorrectName(data.get(LOGIN)))
-                    return 2;
-                if(data.containsKey(LOGIN) && !getData(LOGIN).get(LOGIN).equals(data.get(LOGIN)) && ProfileUtils.isNicknameExist(data.get(LOGIN)))
-                    return 3;
-                if(data.containsKey(EMAIL) && !FormatUtils.isCorrectEmail(data.get(EMAIL)))
-                    return 4;
-                if(data.containsKey(EMAIL) && data.containsKey(EMAIL_CODE))
-                    return 5;
+    public int modifyData(HashMap<String, String> modify){
+        try {
+            int INCORRECT_CURRENT_PASSWORD = 1;
+            int INCORRECT_LOGIN_FORMAT = 2;
+            int LOGIN_EXIST = 3;
+            int INCORRECT_EMAIL_FORMAT = 4;
+            int INCORRECT_EMAIL_CODE = 5;
+            int INCORRECT_PASSWORD_FORMAT = 6;
 
-                if (data.containsKey(EMAIL))
-                    if(confirmMail(data.get(EMAIL), data.get(EMAIL_CODE)) != 0)
-                        return 5;
-                if (data.containsKey(LOGIN))
-                    oldData.put(LOGIN, data.get(LOGIN));
+            if(modify.containsKey(LOGIN)){
+                if(!FormatUtils.isCorrectName(modify.get(LOGIN)))
+                    return INCORRECT_LOGIN_FORMAT;
+                if(!getDataValue(LOGIN).equals(modify.get(LOGIN)) && ProfileUtils.isNicknameExist(modify.get(LOGIN)))
+                    return LOGIN_EXIST;
+                if(!modify.containsKey(CURRENT_PASSWORD) || !modify.get(CURRENT_PASSWORD).equals(data.get(PASSWORD)))
+                    return INCORRECT_CURRENT_PASSWORD;
 
-                ArrayList<String> lines = new ArrayList<>();
-                for (Map.Entry<String, String> entry : oldData.entrySet())
-                    lines.add(entry.getKey() + ":" + entry.getValue());
-                Files.write(Paths.get(getFolder() + "/" + dataFile), lines);
-                return 0;
-            }catch (Exception ex){
-                ex.printStackTrace();
-                return -1;
+                data.set(LOGIN, modify.get(LOGIN));
             }
+
+            if(modify.containsKey(EMAIL)){
+                if(!FormatUtils.isCorrectName(modify.get(LOGIN)))
+                    return INCORRECT_EMAIL_FORMAT;
+                if(!modify.containsKey(EMAIL_CODE) || !isValidEmailCode(modify.get(EMAIL), modify.get(EMAIL_CODE)))
+                    return INCORRECT_EMAIL_CODE;
+
+                data.set(EMAIL, modify.get(EMAIL));
+            }
+
+            if(modify.containsKey(NEW_PASSWORD)){
+                String email = modify.containsKey(EMAIL) ? modify.get(EMAIL) : getDataValue(EMAIL);
+                if(!FormatUtils.isCorrectPassword(modify.get(NEW_PASSWORD)))
+                    return INCORRECT_PASSWORD_FORMAT;
+                if(!modify.containsKey(EMAIL_CODE) || !isValidEmailCode(email, modify.get(EMAIL_CODE)))
+                    return INCORRECT_EMAIL_CODE;
+
+                data.set(PASSWORD, modify.get(NEW_PASSWORD));
+            }
+
+            if(modify.containsKey(SKIN_NAME))
+                data.set(SKIN_NAME, modify.get(SKIN_NAME));
+
+            return 0;
+        }catch (Exception ex){
+            ex.printStackTrace();
+            return -1;
         }
-        return 1;
     }
 
     public boolean isEmailConfirmed(){

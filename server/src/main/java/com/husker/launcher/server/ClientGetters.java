@@ -27,7 +27,7 @@ public class ClientGetters {
             }
         });
 
-        put("get_encrypted_password", (in, out) -> out.put(Profile.PASSWORD, ProfileUtils.encrypt(ProfileUtils.getProfile(in).getData(Profile.PASSWORD).get(Profile.PASSWORD))));
+        put("get_encrypted_password", (in, out) -> out.put(Profile.PASSWORD, ProfileUtils.getProfile(in).getDataValue(Profile.PASSWORD)));
         put("get_profile_data", (in, out) -> out.putAll(ProfileUtils.getProfile(in).getData(in.get("get").split(","))));
 
         put("set_profile_data", (in, out) -> {
@@ -39,10 +39,10 @@ public class ClientGetters {
                 in.remove(Profile.LOGIN);
                 in.remove(Profile.PASSWORD);
             }
-            out.put("result", profile.modifyData(in.remove(Profile.CURRENT_PASSWORD), in) + "");
+            out.put("result", profile.modifyData(in) + "");
         });
 
-        put("is_nickname_taken", (in, out) -> out.put("result", ProfileUtils.isNicknameExist(in.get("name")) ? "1" : "0"));
+        put("is_login_taken", (in, out) -> out.put("result", ProfileUtils.isNicknameExist(in.get(Profile.LOGIN)) ? "1" : "0"));
 
         put("register", (in, out) -> out.put("result", Profile.create(in.get(Profile.LOGIN), in.get(Profile.PASSWORD)) + ""));
 
@@ -50,7 +50,7 @@ public class ClientGetters {
 
         put("send_email_code", (in, out) -> out.put("result", ProfileUtils.getProfile(in).sendEmailCode(in.get(Profile.EMAIL)) + ""));
 
-        put("confirm_mail", (in, out) -> out.put("result", ProfileUtils.getProfile(in).confirmMail(in.get(Profile.EMAIL), in.get("email_code")) + ""));
+        put("confirm_mail", (in, out) -> out.put("result", ProfileUtils.getProfile(in).modifyData(in) + ""));
     }};
 
     public static HashMap<String, Client.ImageGetter> imageGetters = new HashMap<String, Client.ImageGetter>(){{

@@ -19,8 +19,10 @@ public class Client {
             BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
             String line = in.readLine();
-            if(line == null)
+            if(line == null) {
+                ConsoleUtils.printDebug(Client.class, ip + ": Disconnected");
                 return;
+            }
             ConsoleUtils.printDebug(Client.class, ip + " -> " + line);
 
             try {

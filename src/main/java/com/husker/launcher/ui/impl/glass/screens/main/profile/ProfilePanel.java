@@ -78,9 +78,7 @@ public class ProfilePanel extends WebPanel {
                 add(createParameterLine("Статус", status = createParameterValueLabel(false)));
                 add(createParameterLine("Id", id = createParameterValueLabel(false)));
                 add(Box.createRigidArea(new Dimension(0, 5)));
-                add(createTitleLabel("Скин", () -> {
-
-                }));
+                add(createTitleLabel("Скин", () -> screen.getLauncherUI().setScreen("skin_chooser")));
                 add(createParameterLine("Название", skinName = createParameterValueLabel(false)));
             }});
             add(new WebPanel(StyleId.panelTransparent){{

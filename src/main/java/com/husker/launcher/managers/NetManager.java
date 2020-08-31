@@ -316,12 +316,12 @@ public class NetManager {
 
         private String key = "";
 
-        private String name = "";
-        private String email = "";
-        private String status = "";
+        private String name = "Имя";
+        private String email = "Почта";
+        private String status = "Статус";
         private long id = -1;
         private boolean has_skin = false;
-        private String skin_name = "";
+        private String skin_name = null;
         private BufferedImage skin;
         private boolean emailConfirmed = false;
 

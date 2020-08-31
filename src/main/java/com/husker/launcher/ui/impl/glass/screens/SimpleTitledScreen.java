@@ -25,10 +25,13 @@ public abstract class SimpleTitledScreen extends Screen {
     public void onInit() {
         setLayout(new GridBagLayout());
 
-        add(new BlurPanel(this, true){
+        add(new BlurPanel(this, false){
             {
                 setLayout(new BorderLayout(0, 0));
-                add(GlassUI.createTitleLabel(title), BorderLayout.NORTH);
+
+                add(new BlurPanel(SimpleTitledScreen.this, true){{
+                    add(GlassUI.createTitleLabel(title));
+                }}, BorderLayout.NORTH);
 
                 add(new WebPanel(StyleId.panelTransparent){{
                     onMenuInit(this);

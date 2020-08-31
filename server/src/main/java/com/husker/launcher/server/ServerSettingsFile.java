@@ -1,7 +1,7 @@
 package com.husker.launcher.server;
 
 import com.husker.launcher.server.utils.ProfileUtils;
-import com.husker.launcher.server.utils.SettingsFile;
+import com.husker.launcher.server.utils.settings.SettingsFile;
 
 import java.io.File;
 import java.nio.file.Files;
