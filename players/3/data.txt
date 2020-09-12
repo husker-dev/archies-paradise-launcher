@@ -1,5 +1,0 @@
-login:test
-password:password
-skinName:null
-status:Гость
-email:null

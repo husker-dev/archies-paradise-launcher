@@ -1,5 +1,0 @@
-login: aaaaa
-password: password
-skinName: 2a6b2bb5807b005c
-status: Гость
-email: redfancoestar@gmail.com

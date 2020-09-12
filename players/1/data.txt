@@ -1,5 +1,0 @@
-login: Husker
-password: password
-skinName: skin_test
-status: Гость
-email: redfancoestar@gmail.com
