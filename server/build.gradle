@@ -33,4 +33,8 @@ dependencies {
 
     implementation 'commons-codec:commons-codec:1.14'
     implementation 'com.sun.mail:javax.mail:1.6.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.141.5'
+
+    implementation 'org.json:json:20200518'
+
 }

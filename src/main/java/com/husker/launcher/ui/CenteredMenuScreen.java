@@ -1,15 +1,15 @@
 package com.husker.launcher.ui;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.panel.WebPanel;
 import com.alee.managers.style.StyleId;
+import com.husker.launcher.components.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
 public abstract class CenteredMenuScreen extends Screen{
 
-    private WebPanel centeredPanel;
+    private TransparentPanel centeredPanel;
 
     public CenteredMenuScreen(){
 
@@ -24,7 +24,7 @@ public abstract class CenteredMenuScreen extends Screen{
     public void onInit() {
         setLayout(new GridBagLayout());
 
-        add(centeredPanel = new WebPanel(StyleId.panelTransparent){{
+        add(centeredPanel = new TransparentPanel(){{
             setPreferredWidth(350);
 
             setLayout(new VerticalFlowLayout(0, 0));
@@ -40,7 +40,7 @@ public abstract class CenteredMenuScreen extends Screen{
         addToMenu(Box.createRigidArea(new Dimension(0, height)));
     }
 
-    public WebPanel getCenteredPanel(){
+    public TransparentPanel getCenteredPanel(){
         return centeredPanel;
     }
 

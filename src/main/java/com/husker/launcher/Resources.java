@@ -91,6 +91,14 @@ public class Resources {
     public final BufferedImage Icon_Frame;
     public final BufferedImage Icon_Edit;
     public final BufferedImage Icon_Edit_Selected;
+    public final BufferedImage Icon_Arrow_Left;
+    public final BufferedImage Icon_Arrow_Right;
+    public final BufferedImage Icon_Arrow_Left_Selected;
+    public final BufferedImage Icon_Arrow_Right_Selected;
+    public final BufferedImage Icon_Dot;
+    public final BufferedImage Icon_Dot_Selected;
+    public final BufferedImage Icon_Reply;
+    public final BufferedImage Icon_Reply_Selected;
 
     public final BufferedImage Social_Loading_Logo;
     public final BufferedImage Logo_Youtube;
@@ -99,7 +107,6 @@ public class Resources {
     public final BufferedImage Loading_Background;
 
     public final BufferedImage Skin_Steve;
-    public final BufferedImage Skin_Alex;
 
     public final BufferedImage[] Background = new BufferedImage[7];
 
@@ -130,6 +137,14 @@ public class Resources {
         Icon_Frame = getBufferedImage("frame_icon.png");
         Icon_Edit = getBufferedImage("edit_icon.png");
         Icon_Edit_Selected = getBufferedImage("edit_icon_selected.png");
+        Icon_Arrow_Left = getBufferedImage("arrow_left.png");
+        Icon_Arrow_Right = getBufferedImage("arrow_right.png");
+        Icon_Arrow_Left_Selected = getBufferedImage("arrow_left_selected.png");
+        Icon_Arrow_Right_Selected = getBufferedImage("arrow_right_selected.png");
+        Icon_Dot = getBufferedImage("dot.png");
+        Icon_Dot_Selected = getBufferedImage("dot_selected.png");
+        Icon_Reply = getBufferedImage("reply.png");
+        Icon_Reply_Selected = getBufferedImage("reply_selected.png");
 
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");
@@ -138,7 +153,6 @@ public class Resources {
         Loading_Background = getBufferedImage("loading_background.png");
 
         Skin_Steve = getBufferedImage("steve.png");
-        Skin_Alex = getBufferedImage("alex.png");
 
         Icon_Checkbox_On = getBufferedImage("checkbox_on.png");
         Icon_Checkbox_Off = getBufferedImage("checkbox_off.png");

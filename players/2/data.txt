@@ -1,0 +1,5 @@
+login:test_user
+password:password
+skinName:null
+status:Гость
+email:null

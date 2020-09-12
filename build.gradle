@@ -31,8 +31,12 @@ repositories {
 
 dependencies {
     implementation 'com.weblookandfeel:weblaf-ui:1.2.13'
-    implementation 'org.seleniumhq.selenium:selenium-java:3.141.5'
     implementation 'net.lingala.zip4j:zip4j:2.6.1'
     implementation 'org.jogamp.jogl:jogl-all-main:2.3.2'
     implementation 'org.jogamp.gluegen:gluegen-rt-main:2.3.2'
+
+    implementation 'org.json:json:20200518'
+
+
+
 }

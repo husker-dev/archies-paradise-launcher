@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 
 public class ComponentUtils {
 
@@ -57,5 +59,23 @@ public class ComponentUtils {
                     parent.dispatchEvent(e);
             }
         });
+    }
+
+    public static int getStringWidth(String text, Font font){
+        FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
+
+        return (int)(font.getStringBounds(text, frc).getWidth()) + 5;
+    }
+
+    public static void setPreferredWidth(Component component, int width){
+        component.setPreferredSize(new Dimension(width, component.getPreferredSize().height));
+    }
+
+    public static void setPreferredHeight(Component component, int height){
+        component.setPreferredSize(new Dimension(component.getPreferredSize().width, height));
+    }
+
+    public static void setMargin(JComponent component, int top, int left, int bottom, int right){
+        component.setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
     }
 }

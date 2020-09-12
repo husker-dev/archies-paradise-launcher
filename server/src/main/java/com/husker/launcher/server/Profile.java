@@ -176,7 +176,14 @@ public class Profile {
         }
     }
 
-    public int modifyData(HashMap<String, String> modify){
+    public int setData(String... parameters){
+        HashMap<String, String> parameterMap = new HashMap<>();
+        for(int i = 0; i < parameters.length; i += 2)
+            parameterMap.put(parameters[0], parameters[1]);
+        return setData(parameterMap);
+    }
+
+    public int setData(HashMap<String, String> modify){
         try {
             int INCORRECT_CURRENT_PASSWORD = 1;
             int INCORRECT_LOGIN_FORMAT = 2;
@@ -197,8 +204,9 @@ public class Profile {
             }
 
             if(modify.containsKey(EMAIL)){
-                if(!FormatUtils.isCorrectName(modify.get(LOGIN)))
+                if(!FormatUtils.isCorrectEmail(modify.get(EMAIL)))
                     return INCORRECT_EMAIL_FORMAT;
+
                 if(!modify.containsKey(EMAIL_CODE) || !isValidEmailCode(modify.get(EMAIL), modify.get(EMAIL_CODE)))
                     return INCORRECT_EMAIL_CODE;
 

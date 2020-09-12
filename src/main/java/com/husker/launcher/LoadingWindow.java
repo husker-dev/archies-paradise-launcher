@@ -3,7 +3,7 @@ package com.husker.launcher;
 
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.managers.UpdateManager;
-import com.husker.launcher.ui.impl.glass.GlassUI;
+import com.husker.glassui.GlassUI;
 import com.husker.launcher.utils.ComponentUtils;
 import com.husker.launcher.utils.RenderUtils;
 import com.husker.launcher.utils.ShapeUtils;

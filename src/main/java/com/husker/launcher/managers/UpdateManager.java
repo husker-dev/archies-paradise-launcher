@@ -1,6 +1,5 @@
 package com.husker.launcher.managers;
 
-import com.alee.utils.FileUtils;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.utils.settings.SettingsFile;
 import com.husker.launcher.utils.ConsoleUtils;
@@ -26,7 +25,7 @@ public class UpdateManager {
     public String zipName = "archive";
     private static final String[] filesToSave = new String[]{"launcher.cfg"};
 
-    public SettingsFile config = new SettingsFile("update_config.cfg");
+    public SettingsFile config = new SettingsFile("update.cfg");
 
     private String html = null;
     private ZipFile file;
@@ -92,7 +91,7 @@ public class UpdateManager {
 
             Files.createDirectories(Paths.get(updateFolder));
             for (File fileToDelete : Objects.requireNonNull(new File(updateFolder).listFiles()))
-                FileUtils.deleteFile(fileToDelete);
+                deleteDirectory(fileToDelete);
 
             FileOutputStream fileOutputStream = new FileOutputStream(updateFolder + "/" + zipName + ".zip");
             byte[] dataBuffer = new byte[1024];
@@ -164,7 +163,7 @@ public class UpdateManager {
 
                 progress.accept((int) ((float) currentFile / (float) files * 100f));
             }
-            FileUtils.deleteFile(new File(updateFolder + "/" + folder));
+            deleteDirectory(new File(updateFolder + "/" + folder));
         } catch (IOException e) {
             e.printStackTrace();
             throw new UpdateException(UpdateException.Stage.UNPACK, 6, e);
@@ -214,5 +213,13 @@ public class UpdateManager {
         public int getCode() {
             return code;
         }
+    }
+
+    boolean deleteDirectory(File directoryToBeDeleted) {
+        File[] allContents = directoryToBeDeleted.listFiles();
+        if (allContents != null)
+            for (File file : allContents)
+                deleteDirectory(file);
+        return directoryToBeDeleted.delete();
     }
 }

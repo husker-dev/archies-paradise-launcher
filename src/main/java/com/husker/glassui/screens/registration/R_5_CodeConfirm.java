@@ -1,0 +1,110 @@
+package com.husker.glassui.screens.registration;
+
+import com.alee.extended.label.WebStyledLabel;
+import com.alee.extended.layout.VerticalFlowLayout;
+import com.alee.managers.style.StyleId;
+import com.husker.glassui.components.BlurButton;
+import com.husker.glassui.components.BlurTextField;
+import com.husker.launcher.Resources;
+import com.husker.glassui.GlassUI;
+import com.husker.glassui.screens.Message;
+import com.husker.glassui.screens.TitledLogoScreen;
+import com.husker.launcher.components.TransparentPanel;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class R_5_CodeConfirm extends TitledLogoScreen {
+
+    private BlurTextField code;
+    private BlurButton nextButton;
+    private WebStyledLabel emailLabel;
+
+    private BlurButton resendButton;
+
+    private int seconds;
+
+    public void createMenu(TransparentPanel panel) {
+        setTitle("Подтверждение");
+
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                if(resendButton == null)
+                    return;
+
+                if(seconds > 0)
+                    seconds--;
+                if(seconds > 0) {
+                    resendButton.setText("Повторить (" + seconds + ")");
+                }else
+                    resendButton.setText("Повторить");
+                resendButton.setEnabled(seconds <= 0);
+            }
+        }, 0, 1000);
+
+        panel.setMargin(0, 20, 0, 20);
+        emailLabel = new WebStyledLabel(WebStyledLabel.CENTER){{
+            setMaximumRows(3);
+            setForeground(GlassUI.Colors.labelLightText);
+            setPreferredHeight(80);
+            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+        }};
+        panel.add(emailLabel);
+        panel.add(new TransparentPanel(){{
+            setLayout(new VerticalFlowLayout(0, 6));
+            setMargin(0, 40, 0, 40);
+
+            add(createLabel("Код (6 цифр)"));
+            add(code = new BlurTextField(R_5_CodeConfirm.this){{
+                addTextListener(text -> nextButton.setEnabled(code.getText().length() == 6));
+            }});
+            add(resendButton = createButton(1, "Повторить", () -> {
+                seconds = 60;
+
+                new Thread(() -> {
+                    String login = getParameterValue("login");
+                    String password = getParameterValue("password");
+                    String email = getParameterValue("email");
+                    boolean encrypted = getParameterValue("encrypted", "false").equals("true");
+
+                    int result = getLauncher().NetManager.Email.sendConfirmCode(login, password, email, encrypted);
+
+                    if(result == getLauncher().NetManager.Email.ERROR)
+                        Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "emailConfirm", getParameters());
+
+                }).start();
+            }));
+        }});
+    }
+
+    public void createComponents(TransparentPanel panel) {
+        nextButton = createButton(2, "Далее", () -> {
+            getLauncherUI().setScreen("checkingEmailCode", new Parameters(){{
+                put("login", getParameter("login"));
+                put("password", getParameter("password"));
+                put("email", getParameter("email"));
+                put("encrypted", getParameter("encrypted"));
+                put("fromLogin", getParameter("fromLogin"));
+                put("code", code.getText());
+            }});
+        });
+        nextButton.setEnabled(false);
+        panel.add(createButton(2, "Назад", () -> {
+            getLauncherUI().setScreen("registration_1", getParameters());
+        }));
+        panel.add(nextButton);
+
+    }
+
+    public void createSubComponents(TransparentPanel panel) {
+    }
+
+
+    public void onShow() {
+        super.onShow();
+        code.setText("");
+        seconds = 60;
+        resendButton.setEnabled(false);
+        emailLabel.setText("Код подтверждения был отправлен на {" + getParameterValue("email") + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
+    }
+}

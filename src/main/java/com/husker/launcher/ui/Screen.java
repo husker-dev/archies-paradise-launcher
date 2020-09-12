@@ -4,7 +4,6 @@ import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.blur.BlurSegment;
-import com.husker.launcher.ui.shadow.ShadowSegment;
 import com.husker.launcher.utils.ConsoleUtils;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ public abstract class Screen extends JPanel {
 
     private LauncherUI launcherUI;
     private final ArrayList<BlurPainter> blurPainters = new ArrayList<>();
-    private final ArrayList<ShadowSegment> shadowSegments = new ArrayList<>();
     private Parameters parameters = new Parameters();
 
     public Screen(){
@@ -50,16 +48,8 @@ public abstract class Screen extends JPanel {
         removeBlurSegment(parameter.getBlurSegment());
     }
 
-    public void addShadowSegment(ShadowSegment segment){
-        shadowSegments.add(segment);
-    }
-
     public BlurPainter[] getBlurPainters(){
         return blurPainters.toArray(new BlurPainter[0]);
-    }
-
-    public ShadowSegment[] getShadowSegments(){
-        return shadowSegments.toArray(new ShadowSegment[0]);
     }
 
     public LauncherUI getLauncherUI() {

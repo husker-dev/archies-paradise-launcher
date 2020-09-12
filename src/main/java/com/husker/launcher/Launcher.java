@@ -1,17 +1,15 @@
 package com.husker.launcher;
 
 import com.alee.laf.WebLookAndFeel;
-import com.alee.laf.panel.WebPanel;
-import com.alee.managers.style.StyleId;
 import com.husker.launcher.components.ScalableImage;
 
+import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.managers.*;
 import com.husker.launcher.settings.*;
 import com.husker.launcher.ui.blur.BlurPainter;
-import com.husker.launcher.ui.impl.glass.GlassUI;
+import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.utils.ConsoleUtils;
-import com.husker.launcher.utils.settings.SettingsFile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,7 +26,7 @@ public class Launcher extends JFrame {
 
     private float currentAlpha = 0;
     private boolean isAnimating = false;
-    private WebPanel animationPanel;
+    private TransparentPanel animationPanel;
 
     private final LauncherConfig config = new LauncherConfig();
     private final LauncherSettings settings = new LauncherSettings();
@@ -37,7 +35,6 @@ public class Launcher extends JFrame {
     public final UpdateManager UpdateManager = new UpdateManager(this);
     public final Resources Resources = new Resources(this);
     public final NetManager NetManager = new NetManager(this);
-    public final BrowserManager BrowserManager = new BrowserManager(this);
 
     public LoadingWindow loadingWindow;
 
@@ -59,8 +56,6 @@ public class Launcher extends JFrame {
             addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
                     new Thread(() -> {
-                        ConsoleUtils.printDebug(Launcher.class, "Closing");
-                        BrowserManager.close();
                         ConsoleUtils.printDebug(Launcher.class, "Closed");
                         System.exit(0);
                     }).start();
@@ -76,16 +71,14 @@ public class Launcher extends JFrame {
                 currentUI = new GlassUI(this);
             }
 
-            setContentPane(new WebPanel(StyleId.panelTransparent){{
+            setContentPane(new TransparentPanel(){{
                 setLayout(new OverlayLayout(this));
 
                 // For animation
-                add(animationPanel = new WebPanel(){
+                add(animationPanel = new TransparentPanel(){
                     {
                         setLayout(new BorderLayout());
                         add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
-                        setOpaque(false);
-                        setBackground(new Color(0, 0, 0, 0));
                         setVisible(false);
                     }
 
@@ -98,7 +91,7 @@ public class Launcher extends JFrame {
                 });
 
                 // UI
-                add(new WebPanel(StyleId.panelTransparent){{
+                add(new TransparentPanel(){{
                     setLayout(new BorderLayout());
                     add(currentUI);
                 }});
@@ -252,8 +245,8 @@ public class Launcher extends JFrame {
     }
 
     public void updateUI(){
-        ((WebPanel)getContentPane()).updateUI();
-        ((WebPanel)getContentPane()).repaint();
+        getContentPane().revalidate();
+        getContentPane().repaint();
     }
 
 }

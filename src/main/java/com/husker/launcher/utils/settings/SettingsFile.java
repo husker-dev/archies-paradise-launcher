@@ -138,7 +138,7 @@ public class SettingsFile implements SettingsContainer{
                         i++;
                         while(true) {
                             line = lines.get(i).replaceAll("\\s", "");
-                            if(line.contains(":{"))
+                            if(line.contains(SEPARATOR + "{"))
                                 grapes++;
                             if(line.equals("}")) {
                                 grapes--;

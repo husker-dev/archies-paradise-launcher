@@ -22,6 +22,10 @@ public class Main {
                 Files.deleteIfExists(Paths.get("./logs/updater_log.txt"));
                 Files.createFile(Paths.get("./logs/updater_log.txt"));
                 System.setOut(new PrintStream("./logs/updater_log.txt"));
+
+                Files.deleteIfExists(Paths.get("./logs/updater_err_log.txt"));
+                Files.createFile(Paths.get("./logs/updater_err_log.txt"));
+                System.setErr(new PrintStream("./logs/updater_err_log.txt"));
             }catch (Exception ex){
                 ex.getStackTrace();
             }

@@ -1,6 +1,6 @@
 package com.husker.launcher.settings;
 
-import com.husker.launcher.ui.impl.glass.GlassUI;
+import com.husker.glassui.GlassUI;
 import com.husker.launcher.utils.settings.SettingsContainer;
 import com.husker.launcher.utils.settings.SettingsFile;
 import com.husker.launcher.utils.settings.SettingsSubElement;

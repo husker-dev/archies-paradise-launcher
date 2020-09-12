@@ -1,18 +1,18 @@
 package com.husker.launcher.managers;
 
-import com.alee.laf.label.WebLabel;
+import com.husker.glassui.components.social.vk.VkPostParameter;
+import com.husker.glassui.components.social.youtube.YoutubeVideoParameters;
 import com.husker.launcher.Launcher;
-import com.husker.launcher.settings.LauncherConfig;
-import com.husker.launcher.utils.ConsoleUtils;
+import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NetManager {
 
@@ -54,7 +54,7 @@ public class NetManager {
         }).start();
     }
 
-    public void updateStatusLabel(WebLabel label){
+    public void updateStatusLabel(JLabel label){
         if(label == null)
             return;
 
@@ -167,8 +167,13 @@ public class NetManager {
     public Email Email = new Email(this);
     public Auth Auth = new Auth(this);
     public ProfileInfo PlayerInfo = new ProfileInfo(this);
+    public Skins Skins = new Skins(this);
+    public Social Social = new Social(this);
+
+    public ArrayList<Long> threadQueue = new ArrayList<>();
 
     public void connect() throws IOException {
+        joinThreadQueue();
         socket = new Socket();
         socket.connect(new InetSocketAddress(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort()), launcher.getConfig().Net.Auth.getTimeout());
 
@@ -176,50 +181,71 @@ public class NetManager {
         out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
     }
 
-    public GetParameters getString(GetParameters parameters) throws IOException {
-        connect();
-
-        String text = parameters.toString();
-
-        ConsoleUtils.printDebug(getClass(), "Send: " + text.replace("\n", ""));
-        out.write(text + "\n");
-        out.flush();
-        String inLine = in.readLine();
-
-        socket.close();
-        in.close();
-        out.close();
-
-        ConsoleUtils.printDebug(getClass(), "Received: " + inLine);
-        return GetParameters.create(inLine);
+    public void disconnect(){
+        try {
+            socket.close();
+        }catch (Exception ignored){}
+        try {
+            in.close();
+        }catch (Exception ignored){}
+        try {
+            out.close();
+        }catch (Exception ignored){}
+        leaveThreadQueue();
     }
 
-    public BufferedImage getImage(GetParameters parameters) throws IOException {
-        connect();
+    public GetRequest get(GetRequest parameters) throws IOException {
+        try {
+            connect();
+            parameters.send(socket);
 
-        String text = parameters.toString();
+            GetRequest received = GetRequest.create(socket);
+            disconnect();
 
-        ConsoleUtils.printDebug(getClass(), "Send: " + text.replace("\n", ""));
-        out.write(text + "\n");
-        out.flush();
+            return received;
+        }catch (Exception exception){
+            disconnect();
+            throw exception;
+        }
+    }
 
-        ConsoleUtils.printDebug(getClass(), "Receiving image...");
-        byte[] sizeAr = new byte[4];
-        socket.getInputStream().read(sizeAr);
-        int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+    private void joinThreadQueue(){
+        threadQueue.add(Thread.currentThread().getId());
+        while(threadQueue.size() > 0 && !threadQueue.get(0).equals(Thread.currentThread().getId())){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-        byte[] imageAr = new byte[size];
-        socket.getInputStream().read(imageAr);
+    private void leaveThreadQueue(){
+        threadQueue.remove(Thread.currentThread().getId());
+    }
 
-        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+    public static class Skins {
 
-        ConsoleUtils.printResult("OK");
+        private final NetManager manager;
+        public Skins(NetManager manager){
+            this.manager = manager;
+        }
 
-        socket.close();
-        in.close();
-        out.close();
+        public String[] getFolders() throws IOException {
+            return manager.get(GetRequest.createWithTitle("get_skin_folders")).getString("folders").split(",");
+        }
 
-        return image;
+        public String[] getFolderSkinCount(String folder) throws IOException {
+            return manager.get(GetRequest.createWithTitle("get_skin_folder_skins", "folder", folder)).getString("skins").split(",");
+        }
+
+        public BufferedImage getFolderSkin(String folder, String name) throws IOException {
+            return manager.get(GetRequest.createWithTitle("get_folder_skin", "folder", folder, "name", name)).getImage("skin");
+        }
+
+        public BufferedImage getFolderPreview(String folder) throws IOException {
+            return manager.get(GetRequest.createWithTitle("get_skin_folder_preview", "folder", folder)).getImage("skin");
+        }
     }
 
     public static class Players {
@@ -238,7 +264,7 @@ public class NetManager {
 
         public int checkNickname(String name){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("is_login_taken", LOGIN, name)).get(RESULT));
+                return manager.get(GetRequest.createWithTitle("is_login_taken", LOGIN, name)).getInt(RESULT);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -247,7 +273,7 @@ public class NetManager {
 
         public int register(String login, String password){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("register", LOGIN, login, PASSWORD, password)).get(RESULT));
+                return manager.get(GetRequest.createWithTitle("register", LOGIN, login, PASSWORD, password)).getInt(RESULT);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -267,7 +293,7 @@ public class NetManager {
 
         public int sendConfirmCode(String login, String password, String email, boolean encrypted){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, ENCRYPTED, encrypted ? "1" : "0")).get(RESULT));
+                return manager.get(GetRequest.createWithTitle("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, ENCRYPTED, encrypted ? "1" : "0")).getInt(RESULT);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -276,7 +302,7 @@ public class NetManager {
 
         public int confirmMail(String login, String password, String email, String code, boolean encrypted){
             try {
-                return Integer.parseInt(manager.getString(new GetParameters("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, EMAIL_CODE, code, ENCRYPTED, encrypted ? "1" : "0")).get(RESULT));
+                return manager.get(GetRequest.createWithTitle("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, EMAIL_CODE, code, ENCRYPTED, encrypted ? "1" : "0")).getInt(RESULT);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -297,7 +323,7 @@ public class NetManager {
 
         public int auth(String login, String password, boolean encrypted){
             try {
-                String result = manager.getString(new GetParameters("get_key", LOGIN, login, PASSWORD, password, ENCRYPTED, encrypted ? "1" : "0")).get(KEY);
+                String result = manager.get(GetRequest.createWithTitle("get_key", LOGIN, login, PASSWORD, password, ENCRYPTED, encrypted ? "1" : "0")).getString(KEY);
                 if(result.equals("-1"))
                     return WRONG_DATA;
                 else {
@@ -348,20 +374,20 @@ public class NetManager {
         }
 
         public void updateData() throws IOException{
-            GetParameters parameters = manager.getString(new GetParameters("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS}), KEY, key));
-            name = parameters.get(LOGIN);
-            email = parameters.get(EMAIL);
-            id = Long.parseLong(parameters.get(ID));
-            has_skin = parameters.get(HAS_SKIN).equals("1");
-            skin_name = parameters.get(SKIN_NAME).equals("null") ? null : parameters.get(SKIN_NAME);
-            status = parameters.get(STATUS);
+            GetRequest parameters = manager.get(GetRequest.createWithTitle("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS}), KEY, key));
+            name = parameters.getString(LOGIN);
+            email = parameters.getString(EMAIL);
+            id = parameters.getLong(ID);
+            has_skin = parameters.getString(HAS_SKIN).equals("1");
+            skin_name = parameters.getString(SKIN_NAME).equals("null") ? null : parameters.getString(SKIN_NAME);
+            status = parameters.getString(STATUS);
 
-            encryptedPassword = manager.getString(new GetParameters("get_encrypted_password", KEY, key)).get(PASSWORD);
+            encryptedPassword = manager.get(GetRequest.createWithTitle("get_encrypted_password", KEY, key)).getString(PASSWORD);
 
-            emailConfirmed = manager.getString(new GetParameters("is_email_confirmed", KEY, key)).get(RESULT).equals("1");
+            emailConfirmed = manager.get(GetRequest.createWithTitle("is_email_confirmed", KEY, key)).getInt(RESULT) == 1;
 
             if(has_skin)
-                skin = manager.getImage(new GetParameters("skin", KEY, key));
+                skin = manager.get(GetRequest.createWithTitle("skin", KEY, key)).getImage("skin");
             else
                 skin = manager.launcher.Resources.Skin_Steve;
         }
@@ -409,7 +435,7 @@ public class NetManager {
                 dataList.add(currentPassword);
                 dataList.add(KEY);
                 dataList.add(key);
-                int result = Integer.parseInt(manager.getString(new GetParameters("set_profile_data", dataList.toArray(new String[0]))).get(RESULT));
+                int result = manager.get(GetRequest.createWithTitle("set_profile_data", dataList.toArray(new String[0]))).getInt(RESULT);
                 if(result == DATASET_OK)
                     updateData();
                 return result;
@@ -428,51 +454,151 @@ public class NetManager {
             skin_name = "";
         }
 
+        public int setSkin(BufferedImage image){
+            try {
+                GetRequest request = GetRequest.createWithTitle("set_skin", KEY, key);
+                request.put("skin", image);
 
+                return manager.get(request).getInt(RESULT);
+            }catch (Exception ex){
+                return -1;
+            }
+        }
+
+        public int setSkin(String folder, String name){
+            try {
+                return manager.get(GetRequest.createWithTitle("set_skin", "folder", folder, "name", name, KEY, key)).getInt(RESULT);
+            }catch (Exception ex){
+                return -1;
+            }
+        }
     }
 
-    private static class GetParameters extends HashMap<String, String>{
-        private final String title;
+    public static class Social {
 
-        public GetParameters(String title, String... parameters){
-            this.title = title;
-
-            if(parameters.length % 2 == 1)
-                throw new RuntimeException("Bad parameters");
-
-            for(int i = 0; i < parameters.length; i += 2)
-                put(parameters[i], parameters[i + 1]);
+        private final NetManager manager;
+        public Social(NetManager manager){
+            this.manager = manager;
         }
 
-        public String toString(){
-            StringBuilder values = new StringBuilder();
+        public GetRequest vkInfo;
+        public GetRequest youtubeInfo;
 
-            int index = 0;
-            for(Map.Entry<String, String> entry : entrySet()) {
-                values.append(entry.getKey()).append("=").append("\"").append(entry.getValue()).append("\"");
+        public String getVkTitle(){
+            checkForVKInfo();
+            return vkInfo.getString("title");
+        }
 
-                if(index != size() - 1)
-                    values.append(";");
-                index ++;
+        public String getVkDescription(){
+            checkForVKInfo();
+            return vkInfo.getString("description");
+        }
+
+        public BufferedImage getVkLogo(){
+            checkForVKInfo();
+            return vkInfo.getImage("image");
+        }
+
+        public String getVkUrl(){
+            checkForVKInfo();
+            return vkInfo.getString("url");
+        }
+
+        public String getYoutubeTitle(){
+            checkForYoutubeInfo();
+            return youtubeInfo.getString("title");
+        }
+
+        public String getYoutubeSubscribers(){
+            checkForYoutubeInfo();
+            return youtubeInfo.getString("subscribers");
+        }
+
+        public BufferedImage getYoutubeLogo(){
+            checkForYoutubeInfo();
+            return youtubeInfo.getImage("preview");
+        }
+
+        public String getYoutubeUrl(){
+            checkForYoutubeInfo();
+            return youtubeInfo.getString("url");
+        }
+
+        private void checkForVKInfo(){
+            try {
+                if (vkInfo == null)
+                    vkInfo = manager.get(GetRequest.createWithTitle("social_get_vk_info"));
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
-
-            return title + "{" + values + "}";
         }
 
-        public String getTitle(){
-            return title;
-        }
-
-        public static GetParameters create(String text){
-            String title = text.split("\\{")[0];
-            ArrayList<String> parameters = new ArrayList<>();
-
-            for(String par : text.split("\\{")[1].split("}")[0].split(";")) {
-                parameters.add(par.split("=")[0]);
-                parameters.add(par.split("\"")[1].split("\"")[0]);
+        private void checkForYoutubeInfo(){
+            try {
+                if (youtubeInfo == null)
+                    youtubeInfo = manager.get(GetRequest.createWithTitle("social_get_youtube_info"));
+            }catch (Exception ex){
+                ex.printStackTrace();
             }
+        }
 
-            return new GetParameters(title, parameters.toArray(new String[0]));
+        public VkPostParameter[] getVKPostParameters(int count){
+            try {
+                ArrayList<VkPostParameter> out = new ArrayList<>();
+
+                GetRequest request = manager.get(GetRequest.createWithTitle("social_get_vk_list", "count", count + ""));
+                for(int i = 0; i < request.getInt("count"); i++){
+                    JSONObject object = request.getJSONArray("elements").getJSONObject(i);
+                    String type = object.getString("type");
+                    String text = object.getString("text");
+                    String url = object.getString("url");
+
+                    if(type.equals("default"))
+                        out.add(new VkPostParameter(text, url));
+                    if(type.equals("picture"))
+                        out.add(new VkPostParameter.Picture(text, url, GetRequest.fromBase64(object.getString("image"))));
+                    if(type.equals("video"))
+                        out.add(new VkPostParameter.Video(text, url, GetRequest.fromBase64(object.getString("image"))));
+                    if(type.equals("Snippet"))
+                        out.add(new VkPostParameter.Snippet(text, url, GetRequest.fromBase64(object.getString("image")), object.getString("title"), object.getString("author")));
+                }
+
+                return out.toArray(new VkPostParameter[0]);
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return new VkPostParameter[0];
+            }
+        }
+
+        public void getVKPostParametersAsync(int count, Consumer<VkPostParameter[]> consumer){
+            new Thread(() -> consumer.accept(getVKPostParameters(count))).start();
+        }
+
+        public YoutubeVideoParameters[] getYoutubeVideoParameters(int count){
+            try {
+                ArrayList<YoutubeVideoParameters> out = new ArrayList<>();
+
+                GetRequest request = manager.get(GetRequest.createWithTitle("social_get_youtube_list", "count", count + ""));
+                for(int i = 0; i < request.getInt("count"); i++){
+                    JSONObject object = request.getJSONArray("elements").getJSONObject(i);
+                    String text = object.getString("title");
+                    String url = object.getString("url");
+                    String image = object.getString("image");
+                    long date = object.getLong("date");
+
+                    out.add(new YoutubeVideoParameters(GetRequest.fromBase64(image), text, url, date));
+
+                }
+
+                return out.toArray(new YoutubeVideoParameters[0]);
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return new YoutubeVideoParameters[0];
+            }
+        }
+
+        public void getYoutubeVideoParametersAsync(int count, Consumer<YoutubeVideoParameters[]> consumer){
+            new Thread(() -> consumer.accept(getYoutubeVideoParameters(count))).start();
         }
     }
 }

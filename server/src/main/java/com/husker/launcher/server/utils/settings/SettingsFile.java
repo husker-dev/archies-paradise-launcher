@@ -58,6 +58,16 @@ public class SettingsFile implements SettingsContainer{
         return currentElement;
     }
 
+    private void createTreeElements(String path){
+        String[] split = path.split("\\.");
+        TreeElement currentElement = rootElement;
+        for (int i = 0; i < split.length - 1; i++) {
+            if(!currentElement.containsKey(split[i]))
+                currentElement.setValue(split[i], new TreeElement(split[i]));
+            currentElement = (TreeElement) currentElement.getValue(split[i]);
+        }
+    }
+
     public SettingsContainer getParentSettingsContainer() {
         return null;
     }
@@ -75,7 +85,7 @@ public class SettingsFile implements SettingsContainer{
                 return null;
             }
         }else {
-            if(rootElement.containsValue(path))
+            if(rootElement.containsKey(path))
                 return rootElement.getValue(path).toString();
             else
                 return null;
@@ -91,6 +101,7 @@ public class SettingsFile implements SettingsContainer{
         if(!isSaveEnabled)
             throw new RuntimeException("Saving is unable!");
 
+        createTreeElements(path);
         TreeElement element = getTreeElement(path);
         element.setValue(path.split("\\.")[path.split("\\.").length - 1], value);
         save();
@@ -122,8 +133,15 @@ public class SettingsFile implements SettingsContainer{
         private final String title;
         private final LinkedHashMap<String, Object> parameters = new LinkedHashMap<>();
 
+        public TreeElement(String title){
+            this(title, null);
+        }
+
         public TreeElement(String title, List<String> lines){
             this.title = title;
+
+            if(lines == null)
+                return;
 
             for(int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
@@ -186,11 +204,15 @@ public class SettingsFile implements SettingsContainer{
             return parameters.get(parameter);
         }
 
+        public Object setValue(String parameter, Object value){
+            return parameters.put(parameter, value);
+        }
+
         public Object setValue(String parameter, String value){
             return parameters.put(parameter, value);
         }
 
-        public boolean containsValue(String parameter){
+        public boolean containsKey(String parameter){
             return parameters.containsKey(parameter);
         }
 

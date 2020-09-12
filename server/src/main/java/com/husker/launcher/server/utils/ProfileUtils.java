@@ -1,5 +1,6 @@
 package com.husker.launcher.server.utils;
 
+import com.husker.launcher.server.GetRequest;
 import com.husker.launcher.server.Profile;
 import com.husker.launcher.server.ServerMain;
 import org.apache.commons.codec.binary.Base64;
@@ -98,14 +99,14 @@ public class ProfileUtils {
         return Objects.requireNonNull(new File(Profile.profilesFolder).list()).length;
     }
 
-    public static Profile getProfile(GetParameters parameters){
+    public static Profile getProfile(GetRequest parameters){
         if(parameters.containsKey(Profile.KEY))
-            return Profile.get(parameters.get(Profile.KEY));
+            return Profile.get(parameters.getString(Profile.KEY));
         else {
             if(parameters.containsKey(Profile.ENCRYPTED) && parameters.get(Profile.ENCRYPTED).equals("1"))
-                return Profile.get(parameters.get(Profile.LOGIN), decrypt(parameters.get(Profile.PASSWORD)));
+                return Profile.get(parameters.getString(Profile.LOGIN), decrypt(parameters.getString(Profile.PASSWORD)));
             else
-                return Profile.get(parameters.get(Profile.LOGIN), parameters.get(Profile.PASSWORD));
+                return Profile.get(parameters.getString(Profile.LOGIN), parameters.getString(Profile.PASSWORD));
         }
     }
 

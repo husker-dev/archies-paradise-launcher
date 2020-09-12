@@ -103,9 +103,12 @@ public abstract class LauncherUI extends JPanel {
 
         add(screens.get(nextScreen));
         screens.get(nextScreen).doLayout();
-        //screens.get(nextScreen).doCaching();
         screens.get(nextScreen).setParameters(nextScreenParameters);
-        screens.get(nextScreen).onShow();
+        try {
+            screens.get(nextScreen).onShow();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
         this.nextScreen = null;
     }
 
