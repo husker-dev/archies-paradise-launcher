@@ -99,6 +99,9 @@ public class Resources {
     public final BufferedImage Icon_Dot_Selected;
     public final BufferedImage Icon_Reply;
     public final BufferedImage Icon_Reply_Selected;
+    public final BufferedImage Icon_Download;
+
+    public final BufferedImage Texture_EmptyIcon;
 
     public final BufferedImage Social_Loading_Logo;
     public final BufferedImage Logo_Youtube;
@@ -145,6 +148,9 @@ public class Resources {
         Icon_Dot_Selected = getBufferedImage("dot_selected.png");
         Icon_Reply = getBufferedImage("reply.png");
         Icon_Reply_Selected = getBufferedImage("reply_selected.png");
+        Icon_Download = getBufferedImage("download_icon.png");
+
+        Texture_EmptyIcon = getBufferedImage("empty_icon.png");
 
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");

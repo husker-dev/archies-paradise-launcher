@@ -21,7 +21,7 @@ public class UpdateManager {
 
     public static boolean enable = true;
 
-    public String updateFolder = "./update";
+    public String updateFolder = "./launcher_update";
     public String zipName = "archive";
     private static final String[] filesToSave = new String[]{"launcher.cfg"};
 
@@ -31,7 +31,7 @@ public class UpdateManager {
     private ZipFile file;
     private Exception lastUnzipException;
 
-    private Launcher launcher;
+    private final Launcher launcher;
 
     public UpdateManager(Launcher launcher){
         this.launcher = launcher;

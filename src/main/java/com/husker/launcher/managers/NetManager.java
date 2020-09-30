@@ -3,6 +3,9 @@ package com.husker.launcher.managers;
 import com.husker.glassui.components.social.vk.VkPostParameter;
 import com.husker.glassui.components.social.youtube.YoutubeVideoParameters;
 import com.husker.launcher.Launcher;
+import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.utils.IOUtils;
+import com.husker.launcher.utils.MinecraftStarter;
 import org.json.JSONObject;
 
 import javax.swing.*;
@@ -10,6 +13,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
@@ -32,6 +39,7 @@ public class NetManager {
     public static final String CURRENT_PASSWORD = "current_password";
     public static final String HAS_SKIN = "hasSkin";
     public static final String ID = "id";
+    public static final String UUID = "uuid";
 
     public ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
     private final Launcher launcher;
@@ -169,6 +177,7 @@ public class NetManager {
     public ProfileInfo PlayerInfo = new ProfileInfo(this);
     public Skins Skins = new Skins(this);
     public Social Social = new Social(this);
+    public Client Client = new Client(this);
 
     public ArrayList<Long> threadQueue = new ArrayList<>();
 
@@ -192,6 +201,15 @@ public class NetManager {
             out.close();
         }catch (Exception ignored){}
         leaveThreadQueue();
+    }
+
+    public void sendText(String text) throws IOException {
+        out.write(text + "\n");
+        out.flush();
+    }
+
+    public String receiveText() throws IOException {
+        return in.readLine();
     }
 
     public GetRequest get(GetRequest parameters) throws IOException {
@@ -348,6 +366,7 @@ public class NetManager {
         private long id = -1;
         private boolean has_skin = false;
         private String skin_name = null;
+        private String uuid = null;
         private BufferedImage skin;
         private boolean emailConfirmed = false;
 
@@ -374,13 +393,14 @@ public class NetManager {
         }
 
         public void updateData() throws IOException{
-            GetRequest parameters = manager.get(GetRequest.createWithTitle("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS}), KEY, key));
+            GetRequest parameters = manager.get(GetRequest.createWithTitle("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS, UUID}), KEY, key));
             name = parameters.getString(LOGIN);
             email = parameters.getString(EMAIL);
             id = parameters.getLong(ID);
             has_skin = parameters.getString(HAS_SKIN).equals("1");
             skin_name = parameters.getString(SKIN_NAME).equals("null") ? null : parameters.getString(SKIN_NAME);
             status = parameters.getString(STATUS);
+            uuid = parameters.getString(UUID);
 
             encryptedPassword = manager.get(GetRequest.createWithTitle("get_encrypted_password", KEY, key)).getString(PASSWORD);
 
@@ -428,6 +448,10 @@ public class NetManager {
             return emailConfirmed;
         }
 
+        public String getUUID(){
+            return uuid;
+        }
+
         public int setData(String currentPassword, String... data){
             try {
                 ArrayList<String> dataList = new ArrayList<>(Arrays.asList(data));
@@ -443,6 +467,15 @@ public class NetManager {
                 ex.printStackTrace();
             }
             return DATASET_ERROR;
+        }
+
+        public int applyIP(){
+            try {
+                GetRequest request = GetRequest.createWithTitle("set_ip", KEY, key);
+                return manager.get(request).getInt(RESULT);
+            }catch (Exception ex){
+                return -1;
+            }
         }
 
         public void logout(){
@@ -587,7 +620,6 @@ public class NetManager {
                     long date = object.getLong("date");
 
                     out.add(new YoutubeVideoParameters(GetRequest.fromBase64(image), text, url, date));
-
                 }
 
                 return out.toArray(new YoutubeVideoParameters[0]);
@@ -599,6 +631,401 @@ public class NetManager {
 
         public void getYoutubeVideoParametersAsync(int count, Consumer<YoutubeVideoParameters[]> consumer){
             new Thread(() -> consumer.accept(getYoutubeVideoParameters(count))).start();
+        }
+    }
+
+    public static class Client{
+
+        public final int ERROR = -1;
+        public final int PLAY = 0;
+        public final int UPDATE = 1;
+        public final int DOWNLOAD = 2;
+
+        private final NetManager manager;
+        public Client(NetManager manager){
+            this.manager = manager;
+        }
+
+        public String getClientVersion(){
+            try {
+                return manager.get(GetRequest.createWithTitle("client_get_version")).getString("version");
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return "-1";
+        }
+
+        public String getCurrentClientVersion(){
+            try {
+                if(Files.exists(Paths.get("client/client_info.json"))){
+                    JSONObject object = new JSONObject(IOUtils.readFileText("client/client_info.json"));
+                    return object.getString("build");
+                }
+            }catch (Exception ex){
+            }
+            return "-1";
+        }
+
+        public String getShortClientVersion(){
+            try {
+                return manager.get(GetRequest.createWithTitle("client_get_short_version")).getString("version");
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return "-1";
+        }
+
+        public String getJarVersion(){
+            try {
+                return manager.get(GetRequest.createWithTitle("client_get_minecraft_version")).getString("version");
+            }catch (Exception ex){
+                return "Unknown";
+            }
+        }
+
+        public int hasUpdate(){
+            String currentVersion = getCurrentClientVersion();
+            String version = getClientVersion();
+
+            if(version.equals("-1"))
+                return ERROR;
+            if(currentVersion.equals(version)){
+                return PLAY;
+            }else{
+                if(currentVersion.equals("-1"))
+                    return DOWNLOAD;
+                else
+                    return UPDATE;
+            }
+        }
+
+        public ModInfo getModInfo(int index, boolean hasIcons){
+            try {
+                GetRequest request = manager.get(GetRequest.createWithTitle("client_get_mod_info", "index", index + "", "icon", hasIcons + ""));
+                return new ModInfo(request.getJSONArray("mods").getJSONObject(0));
+            }catch (Exception ex){
+            }
+            return null;
+        }
+
+        public void playOrDownload(Consumer<DownloadingProcessArguments> process){
+            new Thread(() -> {
+                int state = hasUpdate();
+                if(state == ERROR)
+                    return;
+                if(state == UPDATE || state == DOWNLOAD){
+                    try {
+                        process.accept(new DownloadingProcessArguments(0));
+                        if(Files.exists(Paths.get("client")))
+                            IOUtils.delete("client", percent -> process.accept(new DownloadingProcessArguments(0, percent)));
+                        Files.createDirectories(Paths.get("client"));
+
+                        // Downloading
+                        JSONObject downloadInfo = manager.get(GetRequest.createWithTitle("get_download_info"));
+                        JSONObject zipInfo = downloadInfo.getJSONObject("info").getJSONObject("zip");
+                        long zipVersions = zipInfo.getLong("versions");
+                        long zipMods = zipInfo.getLong("mods");
+                        long zipOther = zipInfo.getLong("other");
+                        long zipFullSize = zipVersions + zipMods + zipOther;
+
+                        process.accept(new DownloadingProcessArguments(1));
+                        receiveClientPart("versions", args -> process.accept(new DownloadingProcessArguments(1){{
+                            setCurrentSize(args.getCurrentSize());
+                            setFullSize(zipFullSize);
+                            setSpeed(args.getSpeed());
+                        }}));
+                        receiveClientPart("other", args -> process.accept(new DownloadingProcessArguments(1){{
+                            setCurrentSize(zipVersions + args.getCurrentSize());
+                            setFullSize(zipFullSize);
+                            setSpeed(args.getSpeed());
+                        }}));
+                        receiveClientPart("mods", args -> process.accept(new DownloadingProcessArguments(1){{
+                            setCurrentSize(zipOther + zipVersions + args.getCurrentSize());
+                            setFullSize(zipFullSize);
+                            setSpeed(args.getSpeed());
+                        }}));
+
+                        // Unzipping
+                        JSONObject folderInfo = downloadInfo.getJSONObject("info").getJSONObject("folders");
+                        long folderVersions = folderInfo.getLong("versions");
+                        long folderMods = folderInfo.getLong("mods");
+                        long folderOther = folderInfo.getLong("other");
+                        long folderFullSize = folderVersions + folderMods + folderOther;
+
+                        process.accept(new DownloadingProcessArguments(2));
+                        simpleUnzip("client/mods.zip", args -> process.accept(new DownloadingProcessArguments(2){{
+                            setCurrentSize(args.getCurrentSize());
+                            setFullSize(folderFullSize);
+                        }}));
+                        simpleUnzip("client/versions.zip", args -> process.accept(new DownloadingProcessArguments(2){{
+                            setCurrentSize(folderMods + args.getCurrentSize());
+                            setFullSize(folderFullSize);
+                        }}));
+                        IOUtils.unzip("client/other.zip", "client/tmp_", args ->process.accept(new DownloadingProcessArguments(2){{
+                            setCurrentSize(folderVersions + folderMods + args.getCurrentSize());
+                            setFullSize(folderFullSize);
+                        }}));
+
+                        // Moving
+                        IOUtils.moveDirectoryContent("client/tmp_/update", "client", percent -> process.accept(new DownloadingProcessArguments(3, percent)));
+
+                        // Removing tmp files
+                        IOUtils.delete("client/tmp_", percent -> process.accept(new DownloadingProcessArguments(4, percent / 2)));
+                        IOUtils.delete("client/other.zip", percent -> process.accept(new DownloadingProcessArguments(4, 50 + percent / 2)));
+
+                        // Saving client info
+                        IOUtils.writeFileText("client/client_info.json", new JSONObject(){{
+                            put("version", getJarVersion());
+                            put("build", getClientVersion());
+                            put("build_id", getShortClientVersion());
+                        }}.toString());
+
+                        process.accept(new DownloadingProcessArguments(-1));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                        process.accept(new DownloadingProcessArguments(-2));
+                    }
+                }
+                if(state == PLAY){
+                    try{
+                        process.accept(new DownloadingProcessArguments(5));
+
+                        if(manager.PlayerInfo.applyIP() == -1){
+                            process.accept(new DownloadingProcessArguments(-2));
+                            return;
+                        }
+                        MinecraftStarter starter = new MinecraftStarter("client"){{
+                            addServer(manager.launcher.getConfig().Net.Minecraft.getIp());
+                            setNickname(manager.PlayerInfo.getNickname());
+                            setUUID(manager.PlayerInfo.getUUID());
+                        }};
+                        starter.launch();
+
+                        process.accept(new DownloadingProcessArguments(6));
+                        System.gc();
+                        starter.joinThread();
+                        process.accept(new DownloadingProcessArguments(-1));
+
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                        process.accept(new DownloadingProcessArguments(-2));
+                    }
+                }
+            }).start();
+        }
+
+        private void simpleUnzip(String path, Consumer<IOUtils.UnzippingArguments> process) throws IOException {
+            IOUtils.unzip(path, "client/", process);
+            IOUtils.delete(path);
+        }
+
+        private void receiveClientPart(String name, Consumer<IOUtils.FileReceivingArguments> listener) throws IOException {
+            ConsoleUtils.printDebug(getClass(), "Receiving \"" + name + "\"...");
+            manager.connect();
+            manager.sendText("get_client:" + name);
+            IOUtils.receiveFile(manager.socket, "client/" + name + ".zip", listener);
+            manager.disconnect();
+        }
+
+        private String echoText(String text) throws IOException {
+            manager.connect();
+            manager.sendText(text);
+            String received = manager.receiveText();
+            manager.disconnect();
+            return received;
+        }
+
+        private static double thirdPart(int index, double percent){
+            return 100d / 3d * (double)index + percent / 3d;
+        }
+
+        public static class DownloadingProcessArguments {
+
+            private int processId;
+
+            private double current;
+            private double full;
+            private double speed;
+
+            public DownloadingProcessArguments(int id){
+                this(id, 0);
+            }
+
+            public DownloadingProcessArguments(int id, double percent){
+                this.processId = id;
+                full = 100;
+                current = percent;
+            }
+
+            public int getProcessId() {
+                return processId;
+            }
+
+            public double getPercent() {
+                return current / full * 100d;
+            }
+
+            public void setProcessId(int processId) {
+                this.processId = processId;
+            }
+
+            public void setCurrentSize(double current){
+                this.current = current;
+            }
+
+            public void setFullSize(double full){
+                this.full = full;
+            }
+
+            public double getFullSize(){
+                return full;
+            }
+
+            public double getCurrentSize(){
+                return current;
+            }
+
+            public void setSpeed(double speed){
+                this.speed = speed;
+            }
+
+            public double getSpeed(){
+                return speed;
+            }
+        }
+
+        public static class ModInfo{
+
+            private final String name;
+            private final String description;
+            private final BufferedImage icon;
+
+            public ModInfo(JSONObject jsonObject){
+                name = jsonObject.getString("name");
+                description = jsonObject.getString("description");
+                if(jsonObject.has("icon"))
+                    icon = GetRequest.fromBase64(jsonObject.getString("icon"));
+                else
+                    icon = null;
+            }
+
+            public String getName(){
+                return name;
+            }
+
+            public String getDescription(){
+                return description;
+            }
+
+            public BufferedImage getIcon(){
+                return icon;
+            }
+        }
+    }
+
+    public static class MinecraftServer{
+        public static JSONObject info(String ip, int port) throws IOException {
+            InetSocketAddress host = new InetSocketAddress(ip, port);
+            Socket socket = new Socket();
+            socket.connect(host, 3000);
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            byte [] handshakeMessage = createHandshakeMessage(ip, port);
+
+            // C->S : Handshake State=1
+            // send packet length and packet
+            writeVarInt(output, handshakeMessage.length);
+            output.write(handshakeMessage);
+
+            // C->S : Request
+            output.writeByte(0x01); //size is only 1
+            output.writeByte(0x00); //packet id for ping
+
+            // S->C : Response
+            int size = readVarInt(input);
+            int packetId = readVarInt(input);
+
+            if (packetId == -1)
+                throw new IOException("Premature end of stream.");
+
+            if (packetId != 0x00)
+                throw new IOException("Invalid packetID");
+            int length = readVarInt(input); //length of json string
+
+            if (length == -1)
+                throw new IOException("Premature end of stream.");
+
+            if (length == 0)
+                throw new IOException("Invalid string length.");
+
+            byte[] in = new byte[length];
+            input.readFully(in);  //read json string
+            String json = new String(in);
+
+            // C->S : Ping
+            long now = System.currentTimeMillis();
+            output.writeByte(0x09); //size of packet
+            output.writeByte(0x01); //0x01 for ping
+            output.writeLong(now); //time!?
+
+            // S->C : Pong
+            long pingTime = readVarInt(input);
+            packetId = readVarInt(input);
+            if (packetId == -1)
+                throw new IOException("Premature end of stream.");
+
+            if (packetId != 0x01)
+                throw new IOException("Invalid packetID");
+
+            input.readLong(); //read response
+
+            JSONObject object = new JSONObject(json);
+            object.put("ping", pingTime);
+
+            return object;
+        }
+
+        public static byte [] createHandshakeMessage(String host, int port) throws IOException {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+            DataOutputStream handshake = new DataOutputStream(buffer);
+            handshake.writeByte(0x00); //packet id for handshake
+            writeVarInt(handshake, 4); //protocol version
+            writeString(handshake, host, StandardCharsets.UTF_8);
+            handshake.writeShort(port); //port
+            writeVarInt(handshake, 1); //state (1 for handshake)
+
+            return buffer.toByteArray();
+        }
+
+        public static void writeString(DataOutputStream out, String string, Charset charset) throws IOException {
+            byte [] bytes = string.getBytes(charset);
+            writeVarInt(out, bytes.length);
+            out.write(bytes);
+        }
+
+        public static void writeVarInt(DataOutputStream out, int paramInt) throws IOException {
+            while (true) {
+                if ((paramInt & 0xFFFFFF80) == 0) {
+                    out.writeByte(paramInt);
+                    return;
+                }
+
+                out.writeByte(paramInt & 0x7F | 0x80);
+                paramInt >>>= 7;
+            }
+        }
+
+        public static int readVarInt(DataInputStream in) throws IOException {
+            int i = 0;
+            int j = 0;
+            while (true) {
+                int k = in.readByte();
+                i |= (k & 0x7F) << j++ * 7;
+                if (j > 5) throw new RuntimeException("VarInt too big");
+                if ((k & 0x80) != 128) break;
+            }
+            return i;
         }
     }
 }

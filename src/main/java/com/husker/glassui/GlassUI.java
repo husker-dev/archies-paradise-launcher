@@ -1,6 +1,8 @@
 package com.husker.glassui;
 
 import com.alee.laf.label.WebLabel;
+import com.alee.laf.panel.WebPanel;
+import com.husker.glassui.components.BlurComponent;
 import com.husker.glassui.screens.main.profile.skin.*;
 import com.husker.glassui.screens.main.settings.*;
 import com.husker.glassui.screens.*;
@@ -9,6 +11,7 @@ import com.husker.glassui.screens.main.*;
 import com.husker.glassui.screens.main.profile.edit.*;
 import com.husker.glassui.screens.registration.*;
 import com.husker.launcher.Launcher;
+import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
@@ -90,7 +93,7 @@ public class GlassUI extends LauncherUI {
                 put(NetManager.ENCRYPTED, "true");
             }});
         }else
-            setScreen("login");
+            setScreen("main");
     }
 
     public Dimension getDefaultSize() {
@@ -139,9 +142,76 @@ public class GlassUI extends LauncherUI {
         parameter.setShadowColor(new Color(0, 0, 0, 50));
         parameter.setAdditionColor(GlassUI.Colors.third);
 
-        Rectangle2D bounds = parameter.getShape().getBounds();
-        parameter.setShape(ShapeUtils.createRoundRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 10, 10, ALL_CORNERS));
+        if(parameter.getShape() != null) {
+            Rectangle2D bounds = parameter.getShape().getBounds();
+            parameter.setShape(ShapeUtils.createRoundRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 10, 10, ALL_CORNERS));
+        }
         parameter.setShadowSize(4);
+    }
+
+    public static WebLabel createTagLabel(Screen screen, String text){
+        return new WebLabel(text){{
+            setForeground(Colors.labelText);
+            setHorizontalAlignment(LEFT);
+            setVerticalAlignment(CENTER);
+            setPreferredHeight(30);
+            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(23f));
+            setMargin(1, 10, 0, 10);
+
+            screen.addBlurSegment("ProfilePanel.Label", parameter -> {
+                if(BlurComponent.isReturnOnInvisible(parameter, this))
+                    return;
+
+                parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 10, 10, ALL_CORNERS));
+                GlassUI.applyTag(parameter);
+            });
+        }};
+    }
+
+    public static WebPanel createParameterLine(String name, Component component){
+        return new TransparentPanel(){
+            {
+                setMargin(10, 20, 0, 10);
+                setLayout(new BorderLayout());
+                add(new WebLabel(name + ":"){{
+                    setForeground(GlassUI.Colors.labelText);
+                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(18f));
+                    setMargin(0, 0, 0, 10);
+                }}, BorderLayout.WEST);
+                add(component, BorderLayout.EAST);
+            }
+
+            public void paint(Graphics gr) {
+                super.paint(gr);
+
+                gr.setColor(GlassUI.Colors.separator);
+                gr.drawLine(10, getHeight() - 1, getWidth(), getHeight() - 1);
+            }
+        };
+    }
+
+    public static WebLabel createParameterLineValueLabel(boolean main){
+        float minFontSize = 14;
+        float maxFontSize = main ? 18 : 16;
+
+        return new WebLabel(){
+            {
+                setForeground(GlassUI.Colors.labelLightText);
+                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(maxFontSize));
+                setHorizontalAlignment(RIGHT);
+            }
+            public void setText(String text) {
+                super.setText(text);
+                if(text == null)
+                    return;
+
+                for(int i = (int)maxFontSize; i >= minFontSize; i--){
+                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont((float)i));
+                    if(getFontMetrics(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont((float)i)).stringWidth(text) < 160)
+                        break;
+                }
+            }
+        };
     }
 
     public void logout(){

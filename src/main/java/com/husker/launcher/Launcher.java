@@ -78,7 +78,7 @@ public class Launcher extends JFrame {
                 add(animationPanel = new TransparentPanel(){
                     {
                         setLayout(new BorderLayout());
-                        add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
+                        add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
                         setVisible(false);
                     }
 
@@ -119,7 +119,7 @@ public class Launcher extends JFrame {
                 // Background
                 add(new JPanel(){{
                     setLayout(new BorderLayout());
-                    add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FIT_XY));
+                    add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
                 }});
             }});
 

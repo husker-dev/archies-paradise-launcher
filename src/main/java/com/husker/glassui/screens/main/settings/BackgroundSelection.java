@@ -41,7 +41,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
                 final int I = i;
                 BlurScalableImage scalableImage = new BlurScalableImage(BackgroundSelection.this, getLauncher().Resources.Background[i]){
                     {
-                        setFitType(FitType.FIT_XY);
+                        setFitType(FitType.FILL_XY);
                     }
                     public void onBlurApply(BlurParameter parameter, Component component) {
                         super.onBlurApply(parameter, component);

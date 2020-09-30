@@ -29,7 +29,7 @@ public abstract class ImageSocialPanel extends SocialPanel{
                 ImageSocialPanel.this.onBlurApply(parameter, image);
             }
         };
-        image.setFitType(ScalableImage.FitType.FIT_XY);
+        image.setFitType(ScalableImage.FitType.FILL_XY);
         //image.setAnimated(true);
         ComponentUtils.makeMouseEventTransparent(image);
         panel.setMargin(0, 0, 25, 0);

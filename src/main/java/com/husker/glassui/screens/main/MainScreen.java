@@ -1,7 +1,8 @@
 package com.husker.glassui.screens.main;
 
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurTabPanel;
+import com.husker.glassui.screens.main.info.InfoPanel;
+import com.husker.glassui.screens.main.play.PlayPanel;
 import com.husker.glassui.screens.main.profile.ProfilePanel;
 import com.husker.glassui.screens.main.settings.SettingsPanel;
 import com.husker.glassui.screens.main.social.VkGroupPanel;
@@ -20,15 +21,14 @@ public class MainScreen extends AbstractMainScreen {
     private VkGroupPanel vkPanel;
     private YoutubePanel youtubePanel;
     private ProfilePanel profilePanel;
+    private PlayPanel playPanel;
 
     void onMenuInit(TransparentPanel menu) {
         menu.setLayout(new BorderLayout());
 
         menu.add(tabPanel = new BlurTabPanel(this){{
             setPreferredHeight(450);
-            addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), new TransparentPanel(){{
-
-            }});
+            addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
             addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
             addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
             addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
@@ -57,6 +57,8 @@ public class MainScreen extends AbstractMainScreen {
             youtubePanel.onShow();
         if(id.equals("profile"))
             profilePanel.onShow();
+        if(id.equals("play"))
+            playPanel.onShow();
     }
 
     // YouTube videos panel

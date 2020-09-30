@@ -4,8 +4,10 @@ import com.husker.launcher.server.services.browser.BrowserService;
 import com.husker.launcher.server.services.ClientService;
 import com.husker.launcher.server.services.ConsoleService;
 import com.husker.launcher.server.settings.ServerSettingsFile;
+import com.husker.launcher.server.utils.ClientManager;
 import com.husker.launcher.server.utils.ConsoleUtils;
 import com.husker.launcher.server.utils.MailManager;
+import com.husker.launcher.server.utils.UpdateManager;
 
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -31,6 +33,8 @@ public class ServerMain {
         BrowserService.start();
 
         ConsoleUtils.printDebug(ServerMain.class, "Server has been started!");
+
+
     }
 
 }

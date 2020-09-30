@@ -60,9 +60,9 @@ public class SkinViewerRenderer implements GLEventListener {
 
     private float alpha = 0;
     private boolean textureLoaded = false;
-    
+
     private final SkinViewer viewer;
-    
+
     public SkinViewerRenderer(SkinViewer viewer){
         this.viewer = viewer;
     }
@@ -94,7 +94,7 @@ public class SkinViewerRenderer implements GLEventListener {
             gl.glRotatef(currentRotateX, 0, 1, 0);
             gl.glTranslatef(0, -currentCamY, -0);
 
-            if (textureLoaded && alpha < 1)
+            if (alpha < 1)
                 alpha += 0.25 * delta;
             if (alpha > 1)
                 alpha = 1;
@@ -282,26 +282,37 @@ public class SkinViewerRenderer implements GLEventListener {
 
         viewer.askForLoadingQueue();
 
-        tasks.put("1", gl -> rightLeg = getHandOrLeg(gl, 16, 48));
-        tasks.put("2", gl -> leftLeg = getHandOrLeg(gl, 0, 16));
+        tasks.put("1", gl -> {
+            rightLeg = getHandOrLeg(gl, 16, 48);
+            leftLeg = getHandOrLeg(gl, 0, 16);
+        });
 
-        tasks.put("3", gl -> leftHand = getHandOrLeg(gl, 40, 16));
-        tasks.put("4", gl -> rightHand = getHandOrLeg(gl, 32, 48));
+        tasks.put("2", gl -> {
+            leftHand = getHandOrLeg(gl, 40, 16);
+            rightHand = getHandOrLeg(gl, 32, 48);
+        });
 
-        tasks.put("5", gl -> leftHand = getHandOrLeg(gl, 40, 16));
-        tasks.put("6", gl -> rightHand = getHandOrLeg(gl, 32, 48));
+        tasks.put("3", gl -> {
+            leftHand = getHandOrLeg(gl, 40, 16);
+            rightHand = getHandOrLeg(gl, 32, 48);
+        });
 
-        tasks.put("7", gl -> body = getBody(gl, 16, 16));
-        tasks.put("8", gl -> head = getHead(gl, 0, 0));
+        tasks.put("4", gl -> {
+            body = getBody(gl, 16, 16);
+            head = getHead(gl, 0, 0);
+        });
 
-        tasks.put("9", gl -> rightLeg_layer = getHandOrLeg(gl, 0, 48));
-        tasks.put("10", gl -> leftLeg_layer = getHandOrLeg(gl, 0, 32));
+        tasks.put("5", gl -> {
+            rightLeg_layer = getHandOrLeg(gl, 0, 48);
+            leftLeg_layer = getHandOrLeg(gl, 0, 32);
+        });
 
-        tasks.put("11", gl -> leftHand_layer = getHandOrLeg(gl, 48, 48));
-        tasks.put("12", gl -> rightHand_layer = getHandOrLeg(gl, 40, 32));
-
-        tasks.put("13", gl -> body_layer = getBody(gl, 16, 32));
-        tasks.put("14", gl -> {
+        tasks.put("6", gl -> {
+            leftHand_layer = getHandOrLeg(gl, 48, 48);
+            rightHand_layer = getHandOrLeg(gl, 40, 32);
+        });
+        tasks.put("7", gl -> {
+            body_layer = getBody(gl, 16, 32);
             head_layer = getHead(gl, 32, 0);
 
             textureLoaded = true;

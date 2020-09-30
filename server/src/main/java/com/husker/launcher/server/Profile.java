@@ -20,6 +20,7 @@ public class Profile {
     public static final String keysFile = "keys.txt";
     public static final String mailCodesFile = "mailCodes.txt";
     public static final String skinFile = "skin.png";
+    public static final String ipFile = "ip.txt";
 
     public static final String RESULT = "result";
     public static final String KEY = "key";
@@ -33,6 +34,7 @@ public class Profile {
     public static final String CURRENT_PASSWORD = "current_password";
     public static final String NEW_PASSWORD = "new_password";
     public static final String HAS_SKIN = "hasSkin";
+    public static final String UUID = "uuid";
     public static final String ID = "id";
 
     public SettingsFile data;
@@ -46,7 +48,14 @@ public class Profile {
 
             int id = ProfileUtils.getUserCount() + 1;
             Files.createDirectories(Paths.get(profilesFolder + "/" + id));
-            Files.write(Paths.get(profilesFolder + "/" + id + "/" + dataFile), new ArrayList<>(Arrays.asList(LOGIN + ":" + login, PASSWORD + ":" + password, SKIN_NAME + ":null", STATUS + ":Гость", EMAIL + ":null")));
+            Files.write(Paths.get(profilesFolder + "/" + id + "/" + dataFile), new ArrayList<>(Arrays.asList(
+                    LOGIN + ":" + login,
+                    PASSWORD + ":" + password,
+                    SKIN_NAME + ":null",
+                    STATUS + ":Гость",
+                    EMAIL + ":null",
+                    UUID + ":" + ProfileUtils.createUuid())));
+            Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + ipFile));
             Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + keysFile));
             Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + mailCodesFile));
             return 0;
@@ -54,6 +63,15 @@ public class Profile {
             ex.printStackTrace();
         }
         return -1;
+    }
+
+    public static Profile getByUUID(String uuid){
+        for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
+            Profile profile = new Profile(id);
+            if(profile.getDataValue(UUID).equals(uuid))
+                return profile;
+        }
+        return null;
     }
 
     public static Profile get(String key){
@@ -90,6 +108,23 @@ public class Profile {
         data = new SettingsFile(new File(getFolder() + "/" + dataFile));
     }
 
+    public void setIP(String ip){
+        try {
+            Files.write(Paths.get(getFolder() + "/" + ipFile), Collections.singletonList(ip));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String getIP(){
+        try {
+            return Files.readAllLines(Paths.get(getFolder() + "/" + ipFile)).get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public String getDataValue(String parameter){
         return getData(parameter).get(parameter);
     }
@@ -97,7 +132,7 @@ public class Profile {
     public HashMap<String, String> getData(String... parameters){
         HashMap<String, String> out_data = new HashMap<>();
 
-        List<String> availableData = Arrays.asList(ID, HAS_SKIN, SKIN_NAME, LOGIN, EMAIL, STATUS, PASSWORD);
+        List<String> availableData = Arrays.asList(ID, HAS_SKIN, SKIN_NAME, LOGIN, EMAIL, STATUS, PASSWORD, UUID);
 
         if(parameters.length == 0)
             parameters = availableData.toArray(new String[0]);
@@ -145,7 +180,7 @@ public class Profile {
             return -1;
         }
 
-        return ServerMain.MailManager.send(email, ServerMain.Settings.getEmailTitle(), "Код подтверждения: " + code) ? 0 : -1;
+        return ServerMain.MailManager.send(email, ServerMain.Settings.getEmailTitle(), ServerMain.Settings.getEmailText().replace("[code]", code)) ? 0 : -1;
     }
 
     public boolean isValidEmailCode(String email, String code){

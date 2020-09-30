@@ -7,9 +7,17 @@ import java.awt.geom.Area;
 
 public class RenderUtils {
 
+    public static void enableAntialiasing(Graphics gr){
+        enableAntialiasing((Graphics2D)gr);
+    }
+
     public static void enableAntialiasing(Graphics2D g2d){
         RenderingHints qualityHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHints(qualityHints);
+    }
+
+    public static void disableAntialiasing(Graphics gr){
+        disableAntialiasing((Graphics2D)gr);
     }
 
     public static void disableAntialiasing(Graphics2D g2d){

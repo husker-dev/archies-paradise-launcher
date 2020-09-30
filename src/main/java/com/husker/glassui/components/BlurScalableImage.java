@@ -27,7 +27,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     public BlurScalableImage(Screen screen, BufferedImage image){
         super(image);
         this.screen = screen;
-        setFitType(FitType.FIT_Y);
+        setFitType(FitType.FILL_Y);
         screen.addBlurSegment("ScalableImage", parameter -> onBlurApply(parameter, this));
 
         new Timer().schedule(new TimerTask() {
@@ -75,7 +75,6 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
             repaint();
 
         if (img != null) {
-
             parameter.setUseTexture(true);
             parameter.setTexture(img);
         }

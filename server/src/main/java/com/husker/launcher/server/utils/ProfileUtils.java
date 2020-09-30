@@ -53,6 +53,18 @@ public class ProfileUtils {
         }
     }
 
+    public static boolean isValidIp(String uuid, String ip){
+        Profile profile = Profile.getByUUID(uuid);
+        try {
+            if (profile.getIP().equals(ip))
+                return true;
+            else
+                return false;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
     public static boolean isValidKey(long time){
         return System.currentTimeMillis() - time < KEY_VALID_HOURS * 60 * 60 * 1000;
     }
@@ -112,9 +124,24 @@ public class ProfileUtils {
 
     public static boolean isNicknameExist(String nickname){
         for(int i = 1; i <= getUserCount(); i++)
-            if(new Profile(i).getData(Profile.LOGIN).get(Profile.LOGIN).equals(nickname))
+            if(new Profile(i).getDataValue(Profile.LOGIN).equals(nickname))
                 return true;
         return false;
+    }
+
+    public static boolean isUUIDExist(String uuid){
+        for(int i = 1; i <= getUserCount(); i++)
+            if(new Profile(i).getDataValue(Profile.UUID).equals(uuid))
+                return true;
+        return false;
+    }
+
+    public static String createUuid(){
+        String uuid;
+        do{
+            uuid = UUID.randomUUID().toString();
+        }while (isUUIDExist(uuid));
+        return uuid;
     }
 
     public static void sendText(Socket socket, Object text) throws IOException {
@@ -144,13 +171,4 @@ public class ProfileUtils {
         return output;
     }
 
-    public static void sendImage(Socket socket, BufferedImage image) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, "png", byteArrayOutputStream);
-
-        byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-        socket.getOutputStream().write(size);
-        socket.getOutputStream().write(byteArrayOutputStream.toByteArray());
-        socket.getOutputStream().flush();
-    }
 }

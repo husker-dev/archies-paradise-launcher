@@ -3,11 +3,10 @@ package com.husker.launcher;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.managers.UpdateManager;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
 public class Main {
 
@@ -40,5 +39,4 @@ public class Main {
 
         new Launcher();
     }
-
 }

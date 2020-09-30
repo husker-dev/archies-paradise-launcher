@@ -2,7 +2,6 @@ package com.husker.glassui.screens.main;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.launcher.Resources;
@@ -34,7 +33,7 @@ public abstract class AbstractMainScreen extends Screen {
                 add(new BlurScalableImage(AbstractMainScreen.this, getLauncher().Resources.Logo){
                     {
                         setAnimated(true);
-                        setFitType(FitType.FIT_Y);
+                        setFitType(FitType.FILL_Y);
                     }
 
                     public void onBlurApply(BlurParameter parameter, Component component) {

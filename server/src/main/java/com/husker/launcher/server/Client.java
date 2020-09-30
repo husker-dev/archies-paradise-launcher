@@ -1,14 +1,18 @@
 package com.husker.launcher.server;
 
-import com.husker.launcher.server.services.browser.VkPostParameter;
 import com.husker.launcher.server.utils.ConsoleUtils;
+import com.husker.launcher.server.utils.IOUtils;
 import com.husker.launcher.server.utils.ProfileUtils;
+import com.husker.launcher.server.utils.UpdateManager;
+import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -22,10 +26,24 @@ public class Client {
         String ip = client.getInetAddress().getHostAddress();
 
         try {
-            GetRequest received = GetRequest.create(socket);
+            String receivedText = GetRequest.receiveText(socket);
+            if(receivedText.startsWith("get_client:")){
+                String name = receivedText.split("get_client:")[1];
+                if(name.equals("other"))
+                    sendFile(UpdateManager.clientFolder + "/other.zip");
+                if(name.equals("mods"))
+                    sendFile(UpdateManager.clientFolder + "/mods.zip");
+                if(name.equals("versions"))
+                    sendFile(UpdateManager.clientFolder + "/versions.zip");
+                disconnect();
+                return;
+            }
+
+            GetRequest received = GetRequest.create(receivedText);
             GetRequest outParameters = GetRequest.createWithTitle(received.getTitle());
 
             try {
+                received.put("ip", ip);
                 textGetters.get(received.getTitle()).apply(received, outParameters);
             }catch (Exception ex){
                 outParameters.put(Profile.RESULT, "-1");
@@ -40,6 +58,25 @@ public class Client {
                 ConsoleUtils.printDebug(Client.class, ip + " [ERROR] " + ex.getMessage());
         }
         disconnect();
+    }
+
+    public void sendFile(String path){
+        try {
+            GetRequest.sendText(socket, new File(path).length() + "");
+
+            OutputStream out = socket.getOutputStream();
+            FileInputStream fis = new FileInputStream(new File(path));
+            byte[] buffer = new byte[1024];
+
+            int len;
+            while ((len = fis.read(buffer)) > 0)
+                out.write(buffer, 0, len);
+
+            fis.close();
+            out.close();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     public void disconnect(){
@@ -250,5 +287,86 @@ public class Client {
             out.put("subscribers", ServerMain.BrowserService.getYoutubeSubscribers());
             out.put("preview", ServerMain.BrowserService.getYoutubePreviewLogo());
         });
+
+        put("client_get_version", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
+                out.put("version", object.getString("build"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
+
+        put("client_get_short_version", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
+                out.put("version", "" + object.getLong("build_id"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
+
+        put("client_get_minecraft_version", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
+                out.put("version", object.getString("version"));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
+
+        put("client_get_mod_info", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
+                JSONArray mods = object.getJSONArray("mods");
+
+                ArrayList<JSONObject> objects = new ArrayList<>();
+                if (in.has("count")) {
+                    if (in.has("icon") && in.getBoolean("icon")) {
+                        for (int i = 0; objects.size() < in.getInt("count") && i < mods.length(); i++)
+                            if (!mods.getJSONObject(i).getString("icon").equals("null"))
+                                objects.add(mods.getJSONObject(i));
+                    } else {
+                        for (int i = 0; i < in.getInt("count"); i++)
+                            objects.add(mods.getJSONObject(i));
+                    }
+                }
+                if (in.has("index")) {
+                    if (in.has("icon") && in.getBoolean("icon")) {
+                        int remain = in.getInt("index");
+                        for (int i = 0; i < mods.length(); i++) {
+                            if (!mods.getJSONObject(i).getString("icon").equals("null")) {
+                                if (remain == 0) {
+                                    objects.add(mods.getJSONObject(i));
+                                    break;
+                                } else
+                                    remain--;
+                            }
+                        }
+                    } else {
+                        objects.add(mods.getJSONObject(in.getInt("index")));
+                    }
+                }
+                out.put("mods", objects);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
+
+        put("get_download_info", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(IOUtils.readFileText(UpdateManager.clientFolder + "/files_info.json"));
+                out.put("info", object);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        put("set_ip", (in, out) -> {
+            Profile profile = ProfileUtils.getProfile(in);
+            profile.setIP(in.getString("ip"));
+        });
+
+        put("check_ip", (in, out) -> ProfileUtils.isValidIp(in.getString("uuid"), in.getString("ip")));
     }};
 }

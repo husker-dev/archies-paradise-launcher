@@ -93,6 +93,10 @@ public class ServerSettingsFile extends SettingsFile {
         return get(YOUTUBE);
     }
 
+    public String getEmailText(){
+        return get(EMAIL_TEXT);
+    }
+
     public int getSocialDelay(){
         try {
             return Integer.parseInt(get(DELAY, "10"));

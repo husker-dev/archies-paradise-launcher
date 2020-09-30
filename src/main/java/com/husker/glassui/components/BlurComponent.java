@@ -20,6 +20,8 @@ public interface BlurComponent {
     }
 
     default boolean returnOnInvisible(BlurParameter parameter, Component component){
+        if(component == null)
+            return true;
         if(!component.isDisplayable() || !component.isVisible()) {
             parameter.setVisible(false);
             return true;
@@ -28,6 +30,8 @@ public interface BlurComponent {
     }
 
     static boolean isReturnOnInvisible(BlurParameter parameter, Component component){
+        if(component == null)
+            return true;
         if(!component.isDisplayable()) {
             parameter.setVisible(false);
             return true;

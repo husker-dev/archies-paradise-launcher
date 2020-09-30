@@ -180,7 +180,7 @@ public class LoadingWindow extends JFrame {
                 add(new JPanel(){{
                     setLayout(new BorderLayout());
                     add(new ScalableImage(launcher.Resources.Loading_Background){{
-                        setFitType(FitType.FIT_XY);
+                        setFitType(FitType.FILL_XY);
                     }});
                 }});
             }

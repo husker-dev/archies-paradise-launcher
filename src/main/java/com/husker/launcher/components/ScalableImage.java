@@ -11,13 +11,14 @@ public class ScalableImage extends JComponent {
 
     public enum FitType{
         FILL,
-        FIT_X,
-        FIT_Y,
+        FILL_X,
+        FILL_Y,
+        FILL_XY,
         FIT_XY
     }
 
     private BufferedImage image;
-    private FitType fitType = FitType.FIT_X;
+    private FitType fitType = FitType.FILL_X;
     private int round = 0;
 
     public ScalableImage(){}
@@ -54,32 +55,39 @@ public class ScalableImage extends JComponent {
         if(image == null)
             return;
 
-        if(fitType == FitType.FIT_X){
-            float scalePercent = (float)getWidth() / (float)image.getWidth(null);
+        if(fitType == FitType.FILL_X){
+            float scalePercent = (float)getWidth() / (float)image.getWidth();
 
             newWidth = getWidth();
             newHeight = (int)(image.getHeight(null) * scalePercent);
         }
 
-        if(fitType == FitType.FIT_Y){
-            float scalePercent = (float)getHeight() / (float)image.getHeight(null);
+        if(fitType == FitType.FILL_Y){
+            float scalePercent = (float)getHeight() / (float)image.getHeight();
 
             newWidth = (int)(image.getWidth(null) * scalePercent);
             newHeight = getHeight();
         }
 
-        if(fitType == FitType.FIT_XY){
-            float scalePercent = (float)getWidth() / (float)image.getWidth(null);
+        if(fitType == FitType.FILL_XY){
+            float scalePercent = (float)getWidth() / (float)image.getWidth();
 
             newWidth = getWidth();
             newHeight = (int)(image.getHeight(null) * scalePercent);
 
             if(newHeight < getHeight()){
-                scalePercent = (float)getHeight() / (float)image.getHeight(null);
+                scalePercent = (float)getHeight() / (float)image.getHeight();
 
                 newWidth = (int)(image.getWidth(null) * scalePercent);
                 newHeight = getHeight();
             }
+        }
+
+        if(fitType == FitType.FIT_XY){
+            float scale = (float)Math.max(getWidth(), getHeight()) / Math.max(image.getWidth(), image.getHeight());
+
+            newWidth = (int)(image.getWidth() * scale) - 20;
+            newHeight = (int)(image.getHeight() * scale) - 20;
         }
 
         if(fitType == FitType.FILL){

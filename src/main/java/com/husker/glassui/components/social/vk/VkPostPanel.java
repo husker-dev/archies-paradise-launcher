@@ -2,7 +2,6 @@ package com.husker.glassui.components.social.vk;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.managers.style.StyleId;
 import com.alee.utils.swing.extensions.SizeMethods;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.Resources;
@@ -130,7 +129,7 @@ public class VkPostPanel extends ImageSocialPanel {
 
         public Picture(Screen screen, VkPostParameter.Picture parameter) {
             super(screen, parameter);
-            getBlurScalableImage().setFitType(ScalableImage.FitType.FIT_XY);
+            getBlurScalableImage().setFitType(ScalableImage.FitType.FILL_XY);
             setImage(parameter.getImage());
         }
     }

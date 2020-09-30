@@ -8,6 +8,7 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurButtonLineChooser;
 import com.husker.glassui.components.BlurComponent;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.glassui.screens.Message;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.components.skin.SkinViewer;
@@ -75,13 +76,13 @@ public class ProfilePanel extends TransparentPanel {
                 setLayout(new VerticalFlowLayout(0, 0));
 
                 add(createTitleLabel("Информация", () -> screen.getLauncherUI().setScreen("info_edit")));
-                add(createParameterLine("Имя", name = createParameterValueLabel(true)));
-                add(createParameterLine("Email", email = createParameterValueLabel(false)));
-                add(createParameterLine("Статус", status = createParameterValueLabel(false)));
-                add(createParameterLine("Id", id = createParameterValueLabel(false)));
+                add(GlassUI.createParameterLine("Имя", name = GlassUI.createParameterLineValueLabel(true)));
+                add(GlassUI.createParameterLine("Email", email = GlassUI.createParameterLineValueLabel(false)));
+                add(GlassUI.createParameterLine("Статус", status = GlassUI.createParameterLineValueLabel(false)));
+                add(GlassUI.createParameterLine("Id", id = GlassUI.createParameterLineValueLabel(false)));
                 add(Box.createRigidArea(new Dimension(0, 5)));
                 add(createTitleLabel("Скин", () -> screen.getLauncherUI().setScreen("skin_folders_loading")));
-                add(createParameterLine("Название", skinName = createParameterValueLabel(false)));
+                add(GlassUI.createParameterLine("Название", skinName = GlassUI.createParameterLineValueLabel(false)));
             }});
             add(new TransparentPanel(){{
                 setMargin(0, 10, 0, 0);
@@ -89,7 +90,7 @@ public class ProfilePanel extends TransparentPanel {
                 add(new BlurButton(screen, "Сменить пароль"){{
                     setMargin(3, 20, 0, 20);
                     addActionListener(e -> {
-
+                        Message.showMessage(screen.getLauncherUI(), "Проблемка", "Пока что изменить пароль нельзя(", "main");
                     });
                 }});
                 add(new BlurButton(screen, "Выйти"){
@@ -126,64 +127,6 @@ public class ProfilePanel extends TransparentPanel {
         else
             skinName.setText("Без названия");
         skinViewer.setPlayerTexture(screen.getLauncher().NetManager.PlayerInfo.getSkin());
-    }
-
-    public Component createParameterLine(String name, Component component){
-        return new WebLabel(){
-            {
-                setMargin(10, 20, 0, 10);
-                setLayout(new BorderLayout());
-                add(new WebLabel(name + ":"){{
-                    setForeground(GlassUI.Colors.labelText);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(18f));
-                    setMargin(0, 0, 0, 10);
-                }}, BorderLayout.WEST);
-                add(component);
-            }
-
-            public void paint(Graphics gr) {
-                super.paint(gr);
-
-                gr.setColor(GlassUI.Colors.separator);
-                gr.drawLine(10, getHeight() - 1, getWidth(), getHeight() - 1);
-            }
-        };
-    }
-
-    public Component createParameterLine(String name, String value){
-        return createParameterLine(name, value, false);
-    }
-
-    public Component createParameterLine(String name, String value, boolean main){
-        WebLabel valueLabel;
-
-        Component out = createParameterLine(name, valueLabel = createParameterValueLabel(main));
-        valueLabel.setText(value);
-        return out;
-    }
-
-    public WebLabel createParameterValueLabel(boolean main){
-        float minFontSize = 14;
-        float maxFontSize = main ? 18 : 16;
-
-        return new WebLabel(){
-            {
-                setForeground(GlassUI.Colors.labelLightText);
-                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(maxFontSize));
-                setHorizontalAlignment(RIGHT);
-            }
-            public void setText(String text) {
-                super.setText(text);
-                if(text == null)
-                    return;
-
-                for(int i = (int)maxFontSize; i >= minFontSize; i--){
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont((float)i));
-                    if(getFontMetrics(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont((float)i)).stringWidth(text) < 160)
-                        break;
-                }
-            }
-        };
     }
 
     public Component createTitleLabel(String text, Runnable action){

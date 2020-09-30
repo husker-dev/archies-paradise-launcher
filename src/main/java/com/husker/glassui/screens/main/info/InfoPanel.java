@@ -1,4 +1,4 @@
-package com.husker.glassui.screens.main;
+package com.husker.glassui.screens.main.info;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;

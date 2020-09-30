@@ -2,7 +2,6 @@ package com.husker.glassui.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurButton;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
@@ -104,7 +103,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
 
         addToMenu(new ScalableImage(getLauncher().Resources.Logo){{
             setPreferredSize(new Dimension(getCenteredPanel().getWidth(), logoSize));
-            setFitType(FitType.FIT_Y);
+            setFitType(FitType.FILL_Y);
         }});
 
         addIndent(10);

@@ -89,7 +89,7 @@ public class GetRequest extends JSONObject{
         return create(receiveText(socket));
     }
 
-    private static void sendText(Socket socket, String text) throws IOException {
+    public static void sendText(Socket socket, String text) throws IOException {
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
         out.write(text + "\n");
@@ -98,7 +98,7 @@ public class GetRequest extends JSONObject{
         ConsoleUtils.printDebug(Client.class, socket.getInetAddress().getHostAddress() + " <- " + text);
     }
 
-    private static String receiveText(Socket socket) throws IOException {
+    public static String receiveText(Socket socket) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         String text = in.readLine();
