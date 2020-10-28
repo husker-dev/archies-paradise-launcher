@@ -914,3 +914,64 @@ socket.close();
   ```
   ---
 </details>
+
+<details>
+  <summary><code>get</code></summary>
+   
+  ---
+  # client.get
+  
+  Отправляет zip файл клиента
+  
+  <details>
+  <summary><code>Пример скачивания файла на Java</code></summary>
+  
+  ```java
+// Подключаемся к серверу
+Socket socket = new Socket("127.0.0.1", 15565);
+
+// Отправляем запрос
+new PrintWriter(socket.getOutputStream()).println("{'method':'client.get','name':'mods'}".replaceAll("'", "\""));
+
+// Создаём поток записи в файл
+FileOutputStream fileOutputStream = new FileOutputStream("new_file.zip");
+
+// Считываем размер файла (В данном примере не используется, но считать обязательно надо)
+long size = Long.parseLong(new BufferedReader(new InputStreamReader(socket.getInputStream())).readLine());
+
+// Считываем
+byte[] dataBuffer = new byte[1024];
+int len;
+while ((len = socket.getInputStream().read(dataBuffer, 0, 1024)) != -1)
+      fileOutputStream.write(dataBuffer, 0, len);
+
+// Заканчиваем запись файла
+fileOutputStream.close();
+
+// Отключаемся
+socket.close();
+  ```
+  </details>
+  
+  - **Запрос**
+    * ```name``` - Название файла (```mods```, ```versions```, ```other```)
+  
+  - **Ответ**
+    - Размер файла в байтах
+    - Указанный Zip файл
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"client.get",
+    "name":"mods"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  18297788
+  [file bytes]
+  ```
+  ---
+</details>
