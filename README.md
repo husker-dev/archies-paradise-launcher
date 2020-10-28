@@ -552,7 +552,8 @@ socket.close();
 
   ```yaml
   {
-    "method":"skins.getCategorySkins"
+    "method":"skins.getCategorySkins",
+    "category":"cat1"
   }
   ```
   #### Вывод:
