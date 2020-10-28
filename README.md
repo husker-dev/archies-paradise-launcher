@@ -453,7 +453,7 @@
   <summary><code>getCategorySkins</code></summary>
    
   ---
-  # skins.getCategorySkinsList
+  # skins.getCategorySkins
   
   - **Запрос**
     * ```category``` - Категория скинов
