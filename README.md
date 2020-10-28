@@ -1,3 +1,4 @@
+
 # Документация по сетовому API
 > Эта документация сделана специально для разработчика, который звбывает свои же методы. Он немного глупый... (Возможно ему просто лень всё помнить... непонятно...) 
 
@@ -202,6 +203,31 @@ socket.close();
   ---
   
 </details>
+
+<details>
+  <summary><code>bindIp</code></summary>
+  
+  ---
+  # user.bindIp
+
+  Привязывает IP, с которого был сделан запрос, к аккаунту для дальнейшего входа на сервер
+  
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"auth.bindIp",
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0"
+  }
+  ```
+  ---
+</details>
         
 <details>
   <summary><code>isEmailConfirmed</code></summary>
@@ -323,7 +349,7 @@ socket.close();
   ```yaml
   {
     "method":"profile.getSkin",
-    "key":"aaaaaaaaaaaaaaaaaaaa",
+    "key":"aaaaaaaaaaaaaaaaaaaa"
   }
   ```
   #### Вывод:
@@ -400,7 +426,42 @@ socket.close();
   ```yaml
   {
     "method":"profiles.isLoginTaken",
-    "login":"myLogin",
+    "login":"myLogin"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0"
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>isIpBound</code></summary>
+   
+  ---
+  # profiles.isIpBound
+  
+  Проверяет игрока на доступ к серверу
+  
+  - **Запрос**
+    * ```name``` - Имя аккаунта
+    * ```ip``` - IP, с которого был выполнен вход на сервер
+
+  - **Ответ**
+    * ```result```
+        - ```0``` - Вход разрешён
+        - ```1``` - Вход запрещён
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"profiles.isIpBound",
+    "name":"myNickname",
+    "ip":"127.0.0.1"
   }
   ```
   #### Вывод:
@@ -429,7 +490,7 @@ socket.close();
 
   ```yaml
   {
-    "method":"skins.getCategories",
+    "method":"skins.getCategories"
   }
   ```
   #### Вывод:
@@ -460,7 +521,7 @@ socket.close();
 
   ```yaml
   {
-    "method":"skins.getCategoryPreview",
+    "method":"skins.getCategoryPreview"
   }
   ```
   #### Вывод:
@@ -479,6 +540,8 @@ socket.close();
   ---
   # skins.getCategorySkins
   
+  Возвращает список названий скинов в категории
+  
   - **Запрос**
     * ```category``` - Категория скинов
 
@@ -489,7 +552,7 @@ socket.close();
 
   ```yaml
   {
-    "method":"skins.getCategorySkins",
+    "method":"skins.getCategorySkins"
   }
   ```
   #### Вывод:
@@ -521,7 +584,7 @@ socket.close();
 
   ```yaml
   {
-    "method":"skins.getSkin",
+    "method":"skins.getSkin"
   }
   ```
   #### Вывод:
@@ -534,4 +597,320 @@ socket.close();
   ---
 </details>
     
+## VK
+<details>
+  <summary><code>getPost</code></summary>
+   
+  ---
+  # vk.getPost
+  
+  Возвращает запись в группе VK
+  
+  - **Запрос**
+    * ```index``` - Номер записи
+    * ```fields``` - Запрашиваемые параметры
+      - ```type``` - Тип записи (```text```, ```picture```, ```video```, ```youtube```, ```snippet```)
+      - ```text``` - Текст в записи
+      - ```url``` - Ссылка на запись
+      - ```image``` - Первое изображение в записи (Отсутствует у типа ```text```) 
 
+  - **Ответ**
+    * ```post``` - Информация о записи
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"vk.getPost",
+    "index":"0",
+    "fields":"type,text"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "post":{
+      "type":"text",
+      "text":"Текст в записи VK... Да..."
+    }
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>getInfo</code></summary>
+   
+  ---
+  # vk.getInfo
+  
+  Возвращает информацию о группе VK
+  
+  - **Ответ**
+    * ```title``` - Название группы
+    * ```url``` - Ссылка на группу
+    * ```description``` - Описание группы
+    * ```image``` - Логотип группы в Base64
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"vk.getInfo"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "title":"В гостях у Арчи :3",
+    "url":"https://vk.com/archie.enotik",
+    "description":"Подписавшись - станешь моим пушистиком :3",
+    "image":"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"
+  }
+  ```
+  ---
+</details>
+
+## YouTube
+<details>
+  <summary><code>getVideo</code></summary>
+   
+  ---
+  # youtube.getVideo
+  
+  Возвращает видео с YouTube канала
+  
+  - **Запрос**
+    * ```index``` - Номер видео
+    * ```fields``` - Запрашиваемые параметры
+      - ```title``` - Название видео
+      - ```url``` - Ссылка на видео
+      - ```date``` - Дата публикации видео
+      - ```image``` - Превью видео
+
+  - **Ответ**
+    * ```video``` - Информация о видео
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"youtube.getVideo",
+    "index":"0",
+    "fields":"title,url"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "post":{
+      "title":"Название видео",
+      "url":"https://www.youtube.com/watch?v=izGwDsrQ1eQ"
+    }
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>getInfo</code></summary>
+   
+  ---
+  # youtube.getInfo
+  
+  Возвращает информацию о канале YouTube
+  
+  - **Ответ**
+    * ```title``` - Название канала
+    * ```url``` - Ссылка на канал
+    * ```subscribers``` - Количество подписчиков
+    * ```logo``` - Логотип канала в Base64
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"youtube.getInfo"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "title":"В гостях у Арчи :3",
+    "url":"https://www.youtube.com/channel/UCAOEGtCBZUmctchRTkQ201A",
+    "subscribers":"999999",
+    "image":"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"
+  }
+  ```
+  ---
+</details>
+
+## Клиент
+<details>
+  <summary><code>getInfo</code></summary>
+   
+  ---
+  # client.getInfo
+  
+  Возвращает информацию об клиенте Minecraft
+  
+  - **Ответ**
+    * ```build``` - Номер клиента (Основан на дате создания)
+    * ```build_id``` - Идентификатор клиента (Основан на количестве предыдущих сборок)
+    * ```version``` - Версия Minecraft
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"client.getInfo"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "build":"20201001185731",
+    "build_id":"3",
+    "version":"1.16.1"
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>getModsInfo</code></summary>
+   
+  ---
+  # client.getModsInfo
+  
+  Возвращает информацию об модификациях клиента. 
+  
+  Есть два способа получить список модов: 
+  - Получить несколько первых элементов, указав параметр ```count```
+  - Получить элемент по его индексу, указав ```index```
+  
+  - **Запрос**
+    * ```count``` - Количество модификация
+    * ```index``` - Индекс модификации
+    * ```icon``` - Если равен ```true```, то возвращаются только модификации с иконкой 
+  
+  - **Ответ**
+    * ```mods``` - Информация о модификациях
+      - ```name``` - Название модификации
+      - ```icon``` - Иконка модификации
+      - ```description``` - Описание модификации
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"client.getModsInfo"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "mods": [
+        {
+            "name": "Fabric API",
+            "icon":"(Base64 icon)",
+            "description": "Core API module providing key hooks and intercompatibility features."
+        },
+        {
+            "name": "Sodium",
+            "icon":"(Base64 icon)",
+            "description": "Sodium is an free and open-source optimization mod for Minecraft which improves frame rates and reduces lag spikes."
+        }
+    ]
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>getFilesInfo</code></summary>
+   
+  ---
+  # client.getFilesInfo
+  
+  Возвращает размер файлов и их архивированных копиях в байтах.  
+  
+  - **Ответ**
+    * ```zip``` - Информация о zip файлах
+      - ```versions``` - Размер архива versions.zip
+      - ```mods``` - Размер архива mods.zip
+      - ```other``` - Размер архива others.zip
+    * ```folders``` - Информация о zip файлах
+      - ```versions``` - Размер папки versions
+      - ```mods``` - Размер папки mods
+      - ```other``` - Размер всех файлов, не включая versions и mods 
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"client.getFilesInfo"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "info": {
+        "zip": {
+            "versions": 18297788,
+            "mods": 1007751,
+            "other": 565079955
+        },
+        "folders": {
+            "versions": 23817426,
+            "mods": 1075929,
+            "other": 765709286
+        }
+    }
+  }
+  ```
+  ---
+</details>
+
+<details>
+  <summary><code>checksum</code></summary>
+   
+  ---
+  # client.checksum
+  
+  Сверяет MD5 хэш файлов клиента  
+  
+  - **Запрос**
+    * ```mods``` - MD5 модификаций
+    * ```client``` - MD5 .jar файла клиента
+  
+  - **Ответ**
+    * ```equal_mods``` - Если ```true```, значит файлы модификаций совпадают
+    * ```equal_client``` - Если ```true```, значит файл клиента совпадает
+  ---
+  #### Запрос:
+
+  ```yaml
+  {
+    "method":"client.checksum",
+    "mods":"8d45eaa12389b48eefd82f78e6290d3e",
+    "client":"9b94beec05c9580343f663165fa53d3f"
+  }
+  ```
+  #### Вывод:
+  ```yaml
+  {
+    "result":"0",
+    "equal_mods":"true",
+    "equal_client":"false"
+  }
+  ```
+  ---
+</details>
