@@ -40,7 +40,7 @@ socket.close();
   <summary><code>getAccessToken</code></summary>
   
   ---
-  # auth.getAccessCode
+  # auth.getAccessToken
 
   Получение кода для доступа к аккаунту.
   Код имеет срок годности, коотрый указывается в конфиге сервера.
