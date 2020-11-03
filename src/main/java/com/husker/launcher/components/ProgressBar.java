@@ -1,65 +1,87 @@
 package com.husker.launcher.components;
 
-import com.alee.laf.label.WebLabel;
+
+import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.ui.Screen;
-import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.Resources;
+import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.RenderUtils;
 import com.husker.launcher.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.Area;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.husker.launcher.utils.ShapeUtils.*;
 import static javax.swing.SwingConstants.*;
 
-public class ProgressBar extends TransparentPanel {
-
-    private boolean disposed = false;
-    private final Screen screen;
+public class ProgressBar extends JComponent {
 
     private double currentValue = 0;
     private double value = 0;
 
-    private WebLabel textLabel;
-    private WebLabel valueLabel;
-    private WebLabel speedLabel;
+    private final JLabel textLabel;
+    private final JLabel valueLabel;
+    private final JLabel speedLabel;
 
-    public ProgressBar(Screen screen){
-        this.screen = screen;
+    public ProgressBar(){
+        setOpaque(false);
 
         setLayout(new BorderLayout(0, 0));
-        add(textLabel = GlassUI.createSimpleLabel(""), BorderLayout.WEST);
-        add(speedLabel = GlassUI.createSimpleLabel(""), BorderLayout.CENTER);
-        add(valueLabel = GlassUI.createSimpleLabel(""), BorderLayout.EAST);
+        add(textLabel = createLabel(), BorderLayout.WEST);
+        add(speedLabel = createLabel(), BorderLayout.CENTER);
+        add(valueLabel = createLabel(), BorderLayout.EAST);
 
         textLabel.setForeground(GlassUI.Colors.labelText);
         textLabel.setHorizontalAlignment(LEFT);
 
         valueLabel.setForeground(GlassUI.Colors.labelText);
         valueLabel.setHorizontalAlignment(RIGHT);
-        valueLabel.setPreferredWidth(115);
+        valueLabel.setPreferredSize(new Dimension(115, (int)valueLabel.getPreferredSize().getHeight()));
 
         speedLabel.setForeground(GlassUI.Colors.labelLightText);
         speedLabel.setHorizontalAlignment(RIGHT);
 
-        setPreferredHeight(30);
+        //setPreferredHeight(30);
         new Timer().schedule(new TimerTask() {
             public void run() {
                 currentValue += (value - currentValue) / 10;
+                if((int)currentValue != (int)value)
+                    repaint();
             }
         }, 0, 10);
     }
 
-    public void setText(String text){
-        textLabel.setText(text);
+    private JLabel createLabel(){
+        return new JLabel(){
+            {
+                setForeground(GlassUI.Colors.labelText);
+                SizeMethodsImpl.setPreferredWidth(this, 16);
+                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                setBackground(new Color(0, 0, 0, 0));
+            }
+        };
     }
 
-    public void paint(Graphics graphics) {
-        Graphics2D g2d = (Graphics2D)graphics;
+    public void setText(String text){
+        textLabel.setText(text);
+        repaint();
+    }
+
+    public void setPreferredWidth(int size){
+        SizeMethodsImpl.setPreferredWidth(this, size);
+    }
+
+    public void setPreferredHeight(int size){
+        SizeMethodsImpl.setPreferredHeight(this, size);
+    }
+
+    public void paint(Graphics gr) {
+        super.paint(gr);
+
+        Graphics2D g2d = (Graphics2D)gr;
         RenderUtils.enableAntialiasing(g2d);
 
         int height = 5;
@@ -73,35 +95,22 @@ public class ProgressBar extends TransparentPanel {
         g2d.fill(progressShape);
 
         RenderUtils.disableAntialiasing(g2d);
-
-        super.paint(graphics);
     }
 
     public void setValue(double value){
         if(value > 100)
             value = 0;
         this.value = value;
-        //valueLabel.setText((int)value + "%");
         repaint();
     }
 
     public void setValueText(String text){
         valueLabel.setText(text);
+        repaint();
     }
 
     public void setSpeedText(String text){
         speedLabel.setText(text);
-    }
-
-    public Screen getScreen() {
-        return screen;
-    }
-
-    public void dispose() {
-        disposed = true;
-    }
-
-    public boolean isDisposed() {
-        return disposed;
+        repaint();
     }
 }

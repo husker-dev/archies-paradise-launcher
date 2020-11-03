@@ -3,10 +3,12 @@ package com.husker.glassui.screens;
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
+import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.glassui.GlassUI;
+import com.husker.launcher.ui.Screen;
 import com.husker.launcher.utils.UIUtils;
 
 import java.awt.*;
@@ -55,15 +57,23 @@ public class Message extends CenteredMenuScreen {
         }});
     }
 
+    public static void showMessage(LauncherUI ui, String title, String text, Class<? extends Screen> prevScreen){
+        showMessage(ui, title, text, ui.getScreen(prevScreen));
+    }
+
+    public static void showMessage(LauncherUI ui, String title, String text, Class<? extends Screen> prevScreen, Parameters parameters){
+        showMessage(ui, title, text, ui.getScreen(prevScreen), parameters);
+    }
+
     public static void showMessage(LauncherUI ui, String title, String text, String prevScreen){
         showMessage(ui, title, text, prevScreen, new Parameters());
     }
 
     public static void showMessage(LauncherUI ui, String title, String text, String prevScreen, Parameters parameters){
-        ui.setScreen("message", new Parameters(){{
-            put("backScreen", prevScreen);
+        ui.setScreen(Message.class, new Parameters(){{
             put("title", title);
             put("text", text);
+            put("prevScreen", prevScreen);
             put("backParameters", parameters);
         }});
     }
@@ -71,7 +81,7 @@ public class Message extends CenteredMenuScreen {
     public void onShow() {
         super.onShow();
 
-        prevScreen = getParameterValue("backScreen");
+        prevScreen = getParameterValue("prevScreen");
         prevParameters = (Parameters)getParameter("backParameters");
         title.setText(getParameterValue("title"));
         message.setText(getParameterValue("text"));

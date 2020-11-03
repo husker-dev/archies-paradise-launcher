@@ -40,11 +40,7 @@ public class SettingsPanel extends TransparentPanel {
             add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().isAutoAuth()){{
                 setOnAction(() -> {
                     screen.getLauncher().getSettings().setAutoAuth(isChecked());
-                    if(isChecked()) {
-                        screen.getLauncher().getUserConfig().setLogin(screen.getLauncher().NetManager.PlayerInfo.getNickname());
-                        screen.getLauncher().getUserConfig().setPassword(screen.getLauncher().NetManager.PlayerInfo.getEncryptedPassword());
-                    }else
-                        screen.getLauncher().getUserConfig().reset();
+
                 });
             }});
 
@@ -54,7 +50,7 @@ public class SettingsPanel extends TransparentPanel {
                 add(new BlurButton(screen, "Изменить фон"){{
                     setForeground(GlassUI.Colors.labelText);
                     setMargin(0, 15, 0, 15);
-                    addActionListener(e -> screen.getLauncherUI().setScreen("backgroundSelection"));
+                    addActionListener(e -> screen.getLauncherUI().setScreen(BackgroundSelection.class));
                 }});
             }});
         }});

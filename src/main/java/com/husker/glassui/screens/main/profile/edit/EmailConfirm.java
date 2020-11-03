@@ -71,15 +71,16 @@ public class EmailConfirm extends InfoEditPanel{
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(this, "Назад"){{
             setPreferredWidth(120);
-            addActionListener(e -> getLauncherUI().setScreen("info_edit", new Parameters(NetManager.LOGIN, getParameterValue(NetManager.LOGIN), NetManager.EMAIL, getParameterValue(NetManager.EMAIL))));
+            addActionListener(e -> getLauncherUI().setScreen(InfoEdit.class, new Parameters(NetManager.LOGIN, getParameterValue(NetManager.LOGIN), NetManager.EMAIL, getParameterValue(NetManager.EMAIL))));
         }});
         panel.add(next = new BlurButton(this, "Далее"){{
             setEnabled(false);
             setPreferredWidth(120);
             addActionListener(e -> {
-                getLauncherUI().setScreen("info_edit_apply", new Parameters(){{
-                    put("currentPassword", getParameter("currentPassword"));
-                    put(NetManager.LOGIN, getParameter(NetManager.LOGIN));
+                getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
+                    put(NetManager.PASSWORD, getParameter(NetManager.PASSWORD));
+                    if(getParameters().containsKey(NetManager.LOGIN))
+                        put(NetManager.LOGIN, getParameter(NetManager.LOGIN));
                     put(NetManager.EMAIL, getParameter(NetManager.EMAIL));
                     put(NetManager.EMAIL_CODE, code.getText());
                 }});
@@ -94,13 +95,11 @@ public class EmailConfirm extends InfoEditPanel{
         resend.setEnabled(false);
 
         new Thread(() -> {
-            String login = getLauncher().NetManager.PlayerInfo.getNickname();
-            String password = getLauncher().NetManager.PlayerInfo.getEncryptedPassword();
             String email = getParameterValue(NetManager.EMAIL);
 
-            int result = getLauncher().NetManager.Email.sendConfirmCode(login, password, email, true);
+            int result = getLauncher().NetManager.PlayerInfo.sendConfirmCode(email);
 
-            if(result == getLauncher().NetManager.Email.ERROR)
+            if(result == -1)
                 Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "info_email_confirm", getParameters());
 
             seconds = 60;
@@ -114,7 +113,5 @@ public class EmailConfirm extends InfoEditPanel{
         seconds = 60;
         resend.setEnabled(false);
         emailLabel.setText("Код подтверждения был отправлен на {" + getParameterValue(NetManager.EMAIL) + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
-
-        send();
     }
 }

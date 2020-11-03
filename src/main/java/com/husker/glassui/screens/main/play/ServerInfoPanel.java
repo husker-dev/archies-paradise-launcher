@@ -63,7 +63,7 @@ public class ServerInfoPanel extends BlurPanel {
 
     public void updateInfo(){
         Color red = new Color(160, 0, 0);
-        Color yellow = new Color(140, 140, 0);
+        Color yellow = new Color(160, 160, 0);
         Color green = new Color(0, 160, 0);
 
         try {
@@ -71,15 +71,14 @@ public class ServerInfoPanel extends BlurPanel {
             status.setForeground(yellow);
             ping.setText("...");
 
-            JSONObject object = NetManager.MinecraftServer.info("archiesparadise.hopto.org", 25565);
+            JSONObject object = NetManager.MinecraftServer.info(getScreen().getLauncher().getConfig().Net.Minecraft.getIp(), getScreen().getLauncher().getConfig().Net.Minecraft.getPort());
 
             status.setText("Онлайн");
             status.setForeground(green);
             players.setText(object.getJSONObject("players").getInt("online") + "");
             maxPlayers.setText(object.getJSONObject("players").getInt("max") + "");
-            ping.setText("~" + object.getLong("ping")  + " ms");
+            ping.setText(object.getLong("ping")  + " мс");
         } catch (IOException e) {
-            e.printStackTrace();
             status.setForeground(red);
             status.setText("Оффлайн");
             players.setText("");

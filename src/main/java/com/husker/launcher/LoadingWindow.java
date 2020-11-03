@@ -1,6 +1,8 @@
 package com.husker.launcher;
 
 
+import com.alee.utils.swing.extensions.SizeMethodsImpl;
+import com.husker.launcher.components.ProgressBar;
 import com.husker.launcher.components.ScalableImage;
 import com.husker.launcher.managers.UpdateManager;
 import com.husker.glassui.GlassUI;
@@ -29,16 +31,16 @@ public class LoadingWindow extends JFrame {
 
     private final Launcher launcher;
 
-    private JLabel statusLabel;
+    //private JLabel statusLabel;
     private JLabel closeLabel;
     private JLabel hideLabel;
+    private JPanel statusPanel;
 
-    private String html;
-    private int fileSize;
-    private int currentSize = 0;
+    private ProgressBar progressBar;
 
     private boolean error = false;
     private boolean starting = false;
+    private boolean ready = false;
 
     public LoadingWindow(Launcher launcher){
         super("Launcher loading");
@@ -46,7 +48,7 @@ public class LoadingWindow extends JFrame {
         this.launcher = launcher;
 
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        setSize(310,230);
+        setSize(450,300);
         setUndecorated(true);
         setLocationRelativeTo(null);
         setBackground(Color.GRAY);
@@ -70,15 +72,12 @@ public class LoadingWindow extends JFrame {
                     setLayout(new BorderLayout());
                     add(new ScalableImage(launcher.Resources.Logo));
 
-                    add(statusLabel = new JLabel(){{
-                        setBorder(BorderFactory.createEmptyBorder(-10, 0, 0, 0));
-                        setOpaque(true);
-                        setPreferredSize(new Dimension(0, 60));
-                        setBackground(defaultColor);
-                        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
-                        setForeground(GlassUI.Colors.labelText);
-                        setVerticalAlignment(CENTER);
-                        setHorizontalAlignment(CENTER);
+                    add(statusPanel = new JPanel(){{
+                        setBorder(BorderFactory.createEmptyBorder(5, 20, 10, 20));
+                        setLayout(new BorderLayout());
+                        add(progressBar = new ProgressBar(){{
+                            setPreferredHeight(150);
+                        }});
                     }}, BorderLayout.SOUTH);
 
                     add(new JPanel(){
@@ -199,7 +198,7 @@ public class LoadingWindow extends JFrame {
 
                 g2d.setClip(getWindowShape());
                 RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(hideLocation.x, hideLocation.y, hideLabel.getWidth() + closeLabel.getWidth(), hideLabel.getHeight() - 1, 10, 10, ShapeUtils.Corner.BOTTOM_LEFT), new Color(0, 0, 0, 60), 10);
-                RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(LoadingWindow.this, statusLabel, 0, 0), new Color(0, 0, 0, 60), 10);
+                RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(LoadingWindow.this, statusPanel, 0, 0), new Color(0, 0, 0, 60), 10);
 
                 g2d.setClip(null);
                 RenderUtils.drawOuterShade(g2d, getWindowShape(), new Color(0, 0, 0, 50), shadow);
@@ -208,44 +207,42 @@ public class LoadingWindow extends JFrame {
         });
 
         new Thread(() -> {
-            setStatusText("Проверка обновлений...");
+            setStatusText("Проверка обновлений...", 15);
             try {
                 if(launcher.UpdateManager.hasUpdate()){
-                    setStatusText("Обновление...");
-                    launcher.UpdateManager.downloadUpdate(percent -> setStatusText("Скачивание обновления...   " + percent + "%"));
+                    launcher.UpdateManager.downloadUpdate(args -> setStatusText("Скачивание...", (int)args.getSpeed() + " Мб/с", "(" + (int)(args.getSize() / 1000000d) + "/" + (int)(args.getCurrentSize() / 1000000d) + " Мб)", args.getPercent()));
+                    launcher.UpdateManager.unzipUpdate(args -> setStatusText("Распаковка... ", args.getPercent()));
+                    launcher.UpdateManager.unpackUpdateFolder(percent -> setStatusText("Завершение...", percent));
 
-                    setStatusText("Распаковка...");
-                    launcher.UpdateManager.unzipUpdate(percent -> setStatusText("Распаковка...   " + percent + "%"));
-
-                    setStatusText("Завершение...");
-                    launcher.UpdateManager.unpackUpdateFolder(percent -> setStatusText("Завершение...   " + percent + "%"));
-
-                    setStatusText("Перезапуск...");
+                    setStatusText("Перезапуск...", 50);
                     launcher.UpdateManager.rebootToApplyUpdate();
+                    System.exit(0);
                 }else {
                     starting = true;
                     if (error)
                         setErrorText();
                     else
-                        setStartingText();
+                        setStatusText("Запуск...", 90);
                 }
+
+                ready = true;
 
             }catch (UpdateManager.UpdateException ex){
                 switch (ex.getStage()) {
                     case VERSION_GET:
-                        setStatusText("Возникла ошибка при", "проверке обновления!   (" + ex.getCode() + ")");
+                        setStatusText("Ошибка проверки обновления!", "(" + ex.getCode() + ")", 0);
                         break;
                     case DOWNLOAD:
-                        setStatusText("Возникла ошибка при", "скачивании обновления!   (" + ex.getCode() + ")");
+                        setStatusText("Ошибка скачивания!   (" + ex.getCode() + ")", 0);
                         break;
                     case UNZIP:
-                        setStatusText("Возникла ошибка при", "распаковке обновления!   (" + ex.getCode() + ")");
+                        setStatusText("Ошибка распаковки!", "(" + ex.getCode() + ")", 0);
                         break;
                     case UNPACK:
-                        setStatusText("Возникла ошибка при", "распаковке папки обновления!   (" + ex.getCode() + ")");
+                        setStatusText("Ошибка перемещения!", "(" + ex.getCode() + ")", 0);
                         break;
                     case REBOOT:
-                        setStatusText("Возникла ошибка при", "перезапуске приложения!   (" + ex.getCode() + ")");
+                        setStatusText("Ошибка перезапуска приложения!", "(" + ex.getCode() + ")", 0);
                         break;
                 }
                 logException(ex.getException());
@@ -270,18 +267,22 @@ public class LoadingWindow extends JFrame {
     }
 
     public boolean isOK(){
-        try {
-            return !launcher.UpdateManager.hasUpdate();
-        }catch (Exception ex){
-            return false;
-        }
+        return ready;
     }
 
-    public void setStatusText(String... text){
-        SwingUtilities.invokeLater(() -> {
-            statusLabel.setText("<html><center>" + String.join("<br><center>", text) + "</html>");
-            LoadingWindow.this.repaint();
-        });
+    public void setStatusText(String text, double progress){
+        setStatusText(text, "", progress);
+    }
+
+    public void setStatusText(String text, String addition, double progress){
+        setStatusText(text, addition, "", progress);
+    }
+
+    public void setStatusText(String text, String addition, String addition2, double progress){
+        progressBar.setValueText(addition);
+        progressBar.setValue(progress);
+        progressBar.setText(text);
+        progressBar.setSpeedText(addition2);
     }
 
     public void onError(){
@@ -290,15 +291,13 @@ public class LoadingWindow extends JFrame {
             setErrorText();
     }
 
-    private void setStartingText(){
-        setStatusText("Запуск...");
-    }
+
 
     private void setErrorText(){
         if(!System.getProperty("java.version").startsWith("1.8"))
-            setStatusText("Ошибка при запуске!", "Попробуйте установить Java 1.8");
+            setStatusText("Для работы пекомендуется Java 1.8", 0);
         else
-            setStatusText("Ошибка при запуске!");
+            setStatusText("Ошибка при запуске!", 0);
     }
 
     public static class FrameDragListener extends MouseAdapter {

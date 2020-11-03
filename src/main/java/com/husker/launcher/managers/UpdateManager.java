@@ -1,41 +1,35 @@
 package com.husker.launcher.managers;
 
 import com.husker.launcher.Launcher;
+import com.husker.launcher.utils.IOUtils;
 import com.husker.launcher.utils.settings.SettingsFile;
 import com.husker.launcher.utils.ConsoleUtils;
-import net.lingala.zip4j.ZipFile;
-import net.lingala.zip4j.exception.ZipException;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class UpdateManager {
 
     public static final String VERSION = "0.0.1";
+    private static final String[] filesToSave = new String[]{"client"};
 
     public static boolean enable = true;
 
     public String updateFolder = "./launcher_update";
     public String zipName = "archive";
-    private static final String[] filesToSave = new String[]{"launcher.cfg"};
 
     public SettingsFile config = new SettingsFile("update.cfg");
 
     private String html = null;
-    private ZipFile file;
-    private Exception lastUnzipException;
 
     private final Launcher launcher;
 
     public UpdateManager(Launcher launcher){
         this.launcher = launcher;
         ConsoleUtils.printDebug(getClass(), "Current launcher version: " + VERSION);
+        IOUtils.delete(updateFolder);
     }
 
     public String getLatestVersion() throws UpdateException{
@@ -74,107 +68,36 @@ public class UpdateManager {
         }
     }
 
-    public void downloadUpdate(Consumer<Integer> progress) throws UpdateException{
-        progress.accept(0);
-
-        String downloadLink = getDownloadLink();
-
-        BufferedInputStream in;
+    public void downloadUpdate(Consumer<IOUtils.FileReceivingArguments> progress) throws UpdateException{
         try {
-            URLConnection connection = new URL(downloadLink).openConnection();
-            connection.connect();
-
-            long fileSize = connection.getContentLength();
-            long currentSize = 0;
-
-            in = new BufferedInputStream(new URL(downloadLink).openStream());
-
+            IOUtils.delete(updateFolder);
             Files.createDirectories(Paths.get(updateFolder));
-            for (File fileToDelete : Objects.requireNonNull(new File(updateFolder).listFiles()))
-                deleteDirectory(fileToDelete);
 
-            FileOutputStream fileOutputStream = new FileOutputStream(updateFolder + "/" + zipName + ".zip");
-            byte[] dataBuffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
-                fileOutputStream.write(dataBuffer, 0, bytesRead);
-
-                currentSize += bytesRead;
-                progress.accept((int) ((float) currentSize / (float) fileSize * 100f));
-            }
-            fileOutputStream.close();
-        } catch (FileNotFoundException e) {
+            IOUtils.receiveFile(getDownloadLink(), updateFolder + "/" + zipName + ".zip", progress);
+        }catch (IOException e) {
             e.printStackTrace();
             throw new UpdateException(UpdateException.Stage.DOWNLOAD, 1, e);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            throw new UpdateException(UpdateException.Stage.DOWNLOAD, 2, e);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new UpdateException(UpdateException.Stage.DOWNLOAD, 3, e);
         }
     }
 
-    public void unzipUpdate(Consumer<Integer> progress) throws UpdateException{
-        progress.accept(0);
-
-        file = new ZipFile(updateFolder + "/" + zipName + ".zip");
-        new Thread(() -> {
-            try {
-                file.extractAll(updateFolder);
-            } catch (ZipException e) {
-                e.printStackTrace();
-                lastUnzipException = e;
-                file = null;
-            }
-        }).start();
-
-        while(file != null && file.getProgressMonitor().getPercentDone() < 100) {
-            progress.accept(file.getProgressMonitor().getPercentDone());
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        if(file == null)
-            throw new UpdateException(UpdateException.Stage.UNZIP, 4, lastUnzipException);
-        try {
-            while (Files.exists(Paths.get(updateFolder + "/" + zipName + ".zip")))
-                Files.deleteIfExists(Paths.get(updateFolder + "/" + zipName + ".zip"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new UpdateException(UpdateException.Stage.UNZIP, 5, e);
+    public void unzipUpdate(Consumer<IOUtils.ZipArguments> progress) throws UpdateException{
+        try{
+            IOUtils.unzip(updateFolder + "/" + zipName + ".zip", updateFolder, progress);
+            IOUtils.delete(updateFolder + "/" + zipName + ".zip");
+        }catch (Exception ex){
+            throw new UpdateException(UpdateException.Stage.UNZIP, 2, ex);
         }
     }
 
-    public void unpackUpdateFolder(Consumer<Integer> progress) throws UpdateException{
-        progress.accept(0);
-
-        try {
-            String folder = Objects.requireNonNull(new File(updateFolder).list())[0];
-
-            int files = 1 + Objects.requireNonNull(new File(updateFolder + "/" + folder).list()).length;
-            int currentFile = 0;
-
-            for(String fileToMove : Objects.requireNonNull(new File(updateFolder + "/" + folder).list())) {
-                Files.move(Paths.get(updateFolder + "/" + folder + "/" + fileToMove), Paths.get(updateFolder + "/" + fileToMove));
-                currentFile ++;
-
-                progress.accept((int) ((float) currentFile / (float) files * 100f));
-            }
-            deleteDirectory(new File(updateFolder + "/" + folder));
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new UpdateException(UpdateException.Stage.UNPACK, 6, e);
-        }
+    public void unpackUpdateFolder(Consumer<Double> progress){
+        IOUtils.moveDirectoryContent(IOUtils.fileList(updateFolder)[0].getAbsolutePath(), updateFolder, progress);
     }
 
     public void rebootToApplyUpdate() throws UpdateException{
-        if(!Files.exists(Paths.get("updater.jar")))
-            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException("updater.jar not exist"));
+        if(!Files.exists(Paths.get(updateFolder + "/updater.jar")))
+            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException(updateFolder + "/updater.jar doesn't exist"));
         try {
-            Runtime.getRuntime().exec("java -jar updater.jar " + String.join(" ", filesToSave));
+            Runtime.getRuntime().exec("java -jar " + updateFolder + "/updater.jar --path=\"" + new File(".").getAbsolutePath() + "\" --save=\"" + String.join(",", filesToSave) + "\"");
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();

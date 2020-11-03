@@ -74,7 +74,7 @@ public class ModPanel extends BlurPanel {
             if (info.getIcon() != null)
                 icon.setImage(info.getIcon());
             else
-                icon.setImage(screen.getLauncher().Resources.Texture_EmptyIcon);
+                icon.setImage(null);
         }else{
             name.setText("");
             icon.setImage(null);

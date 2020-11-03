@@ -5,7 +5,6 @@ import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.components.social.SocialLoadGrid;
 import com.husker.glassui.components.social.SocialPanel;
-import com.husker.glassui.components.social.vk.VkPostPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.LabelButton;
 import com.husker.launcher.components.TransparentPanel;
@@ -22,7 +21,7 @@ import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 public abstract class SocialTabPanel extends TransparentPanel {
 
     private final Screen screen;
-    private final SocialLoadGrid social;
+    private final SocialLoadGrid socialGrid;
     private boolean loaded = false;
 
     private WebLabel title, description;
@@ -34,7 +33,7 @@ public abstract class SocialTabPanel extends TransparentPanel {
 
         setLayout(new BorderLayout());
 
-        add(social = new SocialLoadGrid(screen, 4, 2, 2){{
+        add(socialGrid = new SocialLoadGrid(screen, 2, 2){{
             setMargin(0, 35, 15, 35);
             setIndent(15);
         }});
@@ -91,15 +90,17 @@ public abstract class SocialTabPanel extends TransparentPanel {
         else
             loaded = true;
 
-        onLoad();
+        new Thread(() -> {
+            onLoad();
+            socialGrid.updatePanels();
+        }).start();
+
     }
 
-    public void setSocialPanelCount(int count){
-        social.setMaxCount(count);
-    }
 
     public void addSocialPanel(SocialPanel panel){
-        social.addSocialPanel(panel);
+        if(panel != null)
+            socialGrid.addSocialPanel(panel);
     }
 
     public void setLogo(BufferedImage image){

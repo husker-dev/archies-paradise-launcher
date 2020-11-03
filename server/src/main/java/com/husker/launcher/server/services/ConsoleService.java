@@ -21,10 +21,6 @@ public class ConsoleService extends Service {
                 ServerMain.Settings.setPort(line.split(" ")[1]);
                 ConsoleUtils.printDebug(ServerMain.class, "Changes are saved! Please restart server.");
             }
-            if(line.startsWith("key") && line.split(" ").length == 2){
-                ServerMain.Settings.setEncryptionKey(line.split(" ")[1]);
-                ConsoleUtils.printDebug(ServerMain.class, "Changes are saved! Please restart server.");
-            }
 
             if(line.equals("update")){
                 UpdateManager.applyUpdate();

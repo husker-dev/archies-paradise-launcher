@@ -2,9 +2,13 @@ package com.husker.glassui.screens.main.profile.edit;
 
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
+import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.managers.NetManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import static com.husker.launcher.managers.NetManager.*;
 
 public class InfoApplying extends SimpleLoadingScreen {
 
@@ -14,7 +18,8 @@ public class InfoApplying extends SimpleLoadingScreen {
     }
 
     public void process() {
-        String currentPassword = getParameterValue("currentPassword");
+        String currentPassword = getParameterValue(NetManager.PASSWORD);
+        String emailCode = null;
 
         ArrayList<String> changedParameters = new ArrayList<>();
         if(getParameters().containsKey(NetManager.LOGIN)) {
@@ -24,27 +29,28 @@ public class InfoApplying extends SimpleLoadingScreen {
         if(getParameters().containsKey(NetManager.EMAIL)) {
             changedParameters.add(NetManager.EMAIL);
             changedParameters.add(getParameterValue(NetManager.EMAIL));
-            changedParameters.add(NetManager.EMAIL_CODE);
-            changedParameters.add(getParameterValue(NetManager.EMAIL_CODE));
+
+            emailCode = getParameterValue(NetManager.EMAIL_CODE);
         }
 
-        int result = getLauncher().NetManager.PlayerInfo.setData(currentPassword, changedParameters.toArray(new String[0]));
+        int result = getLauncher().NetManager.PlayerInfo.setData(currentPassword, emailCode, changedParameters.toArray(new String[0]));
 
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_OK)
-            getLauncherUI().setScreen("main");
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_WRONG_PASSWORD)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Неправильный пароль!", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_BAD_NAME)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Имя имеет неправильный формат!", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_NAME_TAKEN)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Данное имя уже занято", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_BAD_EMAIL)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Почта имеет неправильный формат!", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_BAD_EMAIL_CODE)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Неправильный код подтверждения!", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_ERROR)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка", "info_edit", getParameters());
-        if(result == getLauncher().NetManager.PlayerInfo.DATASET_SERVER_ERROR)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка на сервере", "info_edit", getParameters());
+        if(result == 0) {
+            getLauncherUI().setScreen(MainScreen.class);
+            return;
+        }
+
+        HashMap<Integer, String> messages = new HashMap<>();
+
+        messages.put(DATASET_INCORRECT_PASSWORD, "Неправильный пароль!");
+        messages.put(DATASET_PASSWORD_FORMAT, messages.get(DATASET_INCORRECT_PASSWORD));
+        messages.put(DATASET_NAME_FORMAT, "Имя имеет неправильный формат!");
+        messages.put(DATASET_NAME_TAKEN, "Данное имя уже занято");
+        messages.put(DATASET_EMAIL_FORMAT, "Почта имеет неправильный формат!");
+        messages.put(DATASET_INCORRECT_EMAIL_CODE, "Неправильный код подтверждения!");
+        messages.put(-1, "Произошла ошибка");
+        messages.put(-2, "Произошла ошибка на сервере");
+
+        Message.showMessage(getLauncherUI(), "Проблемка", messages.get(result), InfoEdit.class, getParameters());
     }
 }

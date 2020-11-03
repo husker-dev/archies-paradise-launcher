@@ -1,9 +1,6 @@
 package com.husker.launcher.server;
 
-import com.husker.launcher.server.utils.ConsoleUtils;
-import com.husker.launcher.server.utils.IOUtils;
-import com.husker.launcher.server.utils.ProfileUtils;
-import com.husker.launcher.server.utils.UpdateManager;
+import com.husker.launcher.server.utils.*;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,9 +23,10 @@ public class Client {
         String ip = client.getInetAddress().getHostAddress();
 
         try {
-            String receivedText = GetRequest.receiveText(socket);
-            if(receivedText.startsWith("get_client:")){
-                String name = receivedText.split("get_client:")[1];
+            GetRequest received = GetRequest.create(socket);
+
+            if(received.has("method") && received.getString("method").equals("client.get")){
+                String name = received.getString("name");
                 if(name.equals("other"))
                     sendFile(UpdateManager.clientFolder + "/other.zip");
                 if(name.equals("mods"))
@@ -39,11 +37,10 @@ public class Client {
                 return;
             }
 
-            GetRequest received = GetRequest.create(receivedText);
             GetRequest outParameters = GetRequest.createWithTitle(received.getTitle());
 
             try {
-                received.put("ip", ip);
+                received.put("$request_ip", ip);
                 textGetters.get(received.getTitle()).apply(received, outParameters);
             }catch (Exception ex){
                 outParameters.put(Profile.RESULT, "-1");
@@ -96,55 +93,72 @@ public class Client {
     }
 
     public static HashMap<String, TextGetter> textGetters = new HashMap<String, Client.TextGetter>(){{
-        put("get_key", (in, out) -> {
-            Profile profile = ProfileUtils.getProfile(in);
+        put("auth.getAccessToken", (in, out) -> {
+            Profile profile = ProfileUtils.getProfile(in, true);
 
-            String key = "-1";
             if(profile != null)
-                key = profile.createKey();
-            out.put("key", key);
+                out.put("access_token", profile.createKey());
+            else
+                out.put("result", "-1");
         });
 
-        put("remove_key", (in, out) -> {
-            Profile profile = ProfileUtils.getProfile(in);
+        put("auth.create", (in, out) -> out.put("result", Profile.create(in.getString(Profile.LOGIN), in.getString(Profile.PASSWORD)) + ""));
 
-            if(profile == null || in.get("key") == null)
-                out.put("return", "-1");
-            else {
-                profile.removeKey(in.getString("key"));
-                out.put("return", "0");
+        put("profile.getData", (in, out) -> out.put("data", ProfileUtils.getProfile(in).getData(in.getString("fields").split(","))));
+
+        put("profile.setData", (in, out) -> {
+            out.put("result", ProfileUtils.getProfile(in).setData(in.getJSONObject("fields"), in.getJSONObject("confirms")));
+        });
+
+        put("profile.isLoginTaken", (in, out) -> out.put("result", ProfileUtils.isNicknameExist(in.getString(Profile.LOGIN)) ? "1" : "0"));
+
+        put("profile.isEmailConfirmed", (in, out) -> out.put("result", ProfileUtils.getProfile(in).isEmailConfirmed() ? "1" : "0"));
+
+        put("profile.sendEmailCode", (in, out) -> out.put("result", ProfileUtils.getProfile(in).sendEmailCode(in.getString(Profile.EMAIL)) + ""));
+
+        put("profile.confirmEmail", (in, out) -> {
+            Profile profile = ProfileUtils.getProfile(in);
+            if(!profile.data.get(Profile.EMAIL).equals("null")){
+                out.put("result", 1);
+                return;
+            }
+
+            if(profile.isValidEmailCode(in.getString(Profile.EMAIL), in.getString(Profile.EMAIL_CODE)))
+                profile.data.set(Profile.EMAIL, in.getString(Profile.EMAIL));
+        });
+
+        put("profile.getSkin", (in, out) -> {
+            out.put("skin", ProfileUtils.getProfile(in).getSkin());
+        });
+
+        put("profile.setSkin", (in, out) -> {
+            Profile profile = ProfileUtils.getProfile(in);
+            try {
+                BufferedImage skin;
+
+                if (in.containsKey("category") && in.containsKey("name"))
+                    skin = ImageIO.read(new File("./skins/" + in.get("category") + "/" + in.get("name") + ".png"));
+                else if(in.containsKey("skin"))
+                    skin = in.getImage("skin");
+                else {
+                    out.put("result", "1");
+                    return;
+                }
+
+                if(skin == null || skin.getWidth() != 64 || skin.getHeight() != 64){
+                    out.put("result", "2");
+                    return;
+                }
+
+                ImageIO.write(skin, "png", new File(profile.getFolder() + "/skin.png"));
+                profile.setData(Profile.SKIN_URL, ProfileUtils.getImageUrl(skin));
+            }catch (Exception ex){
+                ex.printStackTrace();
+                out.put("result", "-1");
             }
         });
 
-        put("get_encrypted_password", (in, out) -> out.put(Profile.PASSWORD, ProfileUtils.getProfile(in).getDataValue(Profile.PASSWORD)));
-        put("get_profile_data", (in, out) -> out.putAll(ProfileUtils.getProfile(in).getData(in.getString("get").split(","))));
-
-        put("set_profile_data", (in, out) -> {
-            Profile profile = ProfileUtils.getProfile(in);
-            if(in.containsKey(Profile.KEY)){
-                in.remove(Profile.KEY);
-            }else{
-                in.put(Profile.CURRENT_PASSWORD, in.get(Profile.PASSWORD));
-                in.remove(Profile.LOGIN);
-                in.remove(Profile.PASSWORD);
-            }
-            out.put("result", profile.setData(in.toStringMap()) + "");
-        });
-
-        put("is_login_taken", (in, out) -> out.put("result", ProfileUtils.isNicknameExist(in.getString(Profile.LOGIN)) ? "1" : "0"));
-
-        put("register", (in, out) -> out.put("result", Profile.create(in.getString(Profile.LOGIN), in.getString(Profile.PASSWORD)) + ""));
-
-        put("is_email_confirmed", (in, out) -> out.put("result", ProfileUtils.getProfile(in).isEmailConfirmed() ? "1" : "0"));
-
-        put("send_email_code", (in, out) -> out.put("result", ProfileUtils.getProfile(in).sendEmailCode(in.getString(Profile.EMAIL)) + ""));
-
-        put("confirm_mail", (in, out) -> out.put("result", ProfileUtils.getProfile(in).setData(new HashMap<String, String>(){{
-            put(Profile.EMAIL, in.getString(Profile.EMAIL));
-            put(Profile.EMAIL_CODE, in.getString(Profile.EMAIL_CODE));
-        }}) + ""));
-
-        put("get_skin_folders", (in, out) -> {
+        put("skins.getCategories", (in, out) -> {
             try {
                 if(!Files.exists(Paths.get("./skins")))
                     Files.createDirectory(Paths.get("./skins"));
@@ -152,21 +166,15 @@ public class Client {
             StringBuilder folders = new StringBuilder();
             for(File file : Objects.requireNonNull(new File("./skins").listFiles(File::isDirectory)))
                 folders.append(file.getName()).append(",");
-            out.put("folders", folders.substring(0, folders.lastIndexOf(",")));
+            out.put("categories", folders.substring(0, folders.lastIndexOf(",")));
         });
 
-        put("skin", (in, out) -> {
-            out.put("skin", ProfileUtils.getProfile(in).getSkin());
-            out.put("result", "0");
-        });
-
-        put("get_skin_folder_preview", (in, out) -> {
-            if(Files.exists(Paths.get("./skins/" + in.get("folder")))){
-                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("folder")).listFiles(file -> file.getName().endsWith(".png")));
+        put("skins.getCategoryPreview", (in, out) -> {
+            if(Files.exists(Paths.get("./skins/" + in.get("category")))){
+                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("category")).listFiles(file -> file.getName().endsWith(".png")));
                 if(skins.length > 0){
                     try {
                         out.put("skin", ImageIO.read(skins[new Random().nextInt(skins.length)]));
-                        out.put("result", "0");
                         return;
                     }catch (Exception ex){
                         ex.printStackTrace();
@@ -176,11 +184,9 @@ public class Client {
             out.put("result", "-1");
         });
 
-        // in: folder
-        // out: skins
-        put("get_skin_folder_skins", (in, out) -> {
-            if(Files.exists(Paths.get("./skins/" + in.get("folder")))){
-                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("folder")).listFiles(file -> file.getName().endsWith(".png")));
+        put("skins.getCategorySkins", (in, out) -> {
+            if(Files.exists(Paths.get("./skins/" + in.get("category")))){
+                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("category")).listFiles(file -> file.getName().endsWith(".png")));
                 if(skins.length > 0){
                     try {
                         StringBuilder list = new StringBuilder();
@@ -200,10 +206,9 @@ public class Client {
             out.put("result", "-1");
         });
 
-        // parameters: folder, name
-        put("get_folder_skin", (in, out) -> {
-            if(Files.exists(Paths.get("./skins/" + in.get("folder")))){
-                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("folder")).listFiles(file -> file.getName().endsWith(".png")));
+        put("skins.getSkin", (in, out) -> {
+            if(Files.exists(Paths.get("./skins/" + in.get("category")))){
+                File[] skins = Objects.requireNonNull(new File("./skins/" + in.get("category")).listFiles(file -> file.getName().endsWith(".png")));
                 if(skins.length > 0){
                     try {
                         for(File file : skins) {
@@ -211,9 +216,9 @@ public class Client {
                                 out.put("name", in.getString("name"));
                                 out.put("skin", ImageIO.read(file));
                                 out.put("result", "0");
+                                return;
                             }
                         }
-                        return;
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
@@ -222,107 +227,47 @@ public class Client {
             out.put("result", "-1");
         });
 
-        put("set_skin", (in, out) -> {
+
+        put("vk.getInfo", (in, out) -> {
+            out.put("id", ServerMain.Settings.getVkGroupId());
+        });
+
+        put("vk.setInfo", (in, out) -> {
             Profile profile = ProfileUtils.getProfile(in);
-            try {
-                BufferedImage skin = null;
-                String name = "null";
-
-                if (in.containsKey("folder") && in.containsKey("name")) {
-                    skin = ImageIO.read(new File("./skins/" + in.get("folder") + "/" + in.get("name") + ".png"));
-                    name = in.getString("name");
-                } else if(in.containsKey("skin"))
-                    skin = in.getImage("skin");
-
-                if(skin != null){
-                    // Player's skin file can't be removed instantly for some reasons, so we write image directly in it
-                    ImageIO.write(skin, "png", new File(profile.getFolder() + "/skin.png"));
-
-                    profile.setData(Profile.SKIN_NAME, name);
-                    out.put("result", "0");
-                    return;
-                }
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-            out.put("result", "-1");
+            if(profile.getDataValue(Profile.STATUS).equals("Администратор") && in.has("id"))
+                ServerMain.Settings.setVkGroupId(in.getString("id"));
         });
 
-        put("social_get_vk_list", (in, out) -> {
-            int count = in.containsKey("count") ? Integer.parseInt(in.getString("count")) : 6;
-            count = Math.min(count, ServerMain.BrowserService.getVkPosts().length);
-
-            out.put("count", count + "");
-
-            ArrayList<JSONObject> posts = new ArrayList<>();
-            for(int i = 0; i < count; i++)
-                posts.add(ServerMain.BrowserService.getVkPosts()[i].getJSON());
-
-            out.put("elements", posts);
+        put("youtube.getInfo", (in, out) -> {
+            out.put("id", ServerMain.Settings.getYoutubeId());
         });
 
-        put("social_get_youtube_list", (in, out) -> {
-            int count = in.containsKey("count") ? Integer.parseInt(in.getString("count")) : 6;
-            count = Math.min(count, ServerMain.BrowserService.getYoutubeVideos().length);
-
-            out.put("count", count + "");
-
-            ArrayList<JSONObject> posts = new ArrayList<>();
-            for(int i = 0; i < count; i++)
-                posts.add(ServerMain.BrowserService.getYoutubeVideos()[i].getJSON());
-
-            out.put("elements", posts);
+        put("youtube.setInfo", (in, out) -> {
+            Profile profile = ProfileUtils.getProfile(in);
+            if(profile.getDataValue(Profile.STATUS).equals("Администратор") && in.has("id"))
+                ServerMain.Settings.setYoutubeId(in.getString("id"));
         });
 
-        put("social_get_vk_info", (in, out) -> {
-            out.put("title", ServerMain.BrowserService.getVkTitle());
-            out.put("url", ServerMain.BrowserService.getVKUrl());
-            out.put("description", ServerMain.BrowserService.getVkDescription());
-            out.put("image", ServerMain.BrowserService.getVkPreviewLogo());
-        });
-
-        put("social_get_youtube_info", (in, out) -> {
-            out.put("title", ServerMain.BrowserService.getYoutubeTitle());
-            out.put("url", ServerMain.BrowserService.getYouTubeUrl());
-            out.put("subscribers", ServerMain.BrowserService.getYoutubeSubscribers());
-            out.put("preview", ServerMain.BrowserService.getYoutubePreviewLogo());
-        });
-
-        put("client_get_version", (in, out) -> {
+        put("client.getInfo", (in, out) -> {
             try {
                 JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
-                out.put("version", object.getString("build"));
+                out.put("build", object.get("build") + "");
+                out.put("build_id", object.get("build_id") + "");
+                out.put("version", object.get("version") + "");
             }catch (Exception ex){
                 ex.printStackTrace();
             }
         });
 
-        put("client_get_short_version", (in, out) -> {
-            try {
-                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
-                out.put("version", "" + object.getLong("build_id"));
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        });
-
-        put("client_get_minecraft_version", (in, out) -> {
-            try {
-                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
-                out.put("version", object.getString("version"));
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        });
-
-        put("client_get_mod_info", (in, out) -> {
+        put("client.getModsInfo", (in, out) -> {
             try {
                 JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
                 JSONArray mods = object.getJSONArray("mods");
+                boolean has_icon = in.has("icon") && in.getBoolean("icon");
 
                 ArrayList<JSONObject> objects = new ArrayList<>();
                 if (in.has("count")) {
-                    if (in.has("icon") && in.getBoolean("icon")) {
+                    if (has_icon) {
                         for (int i = 0; objects.size() < in.getInt("count") && i < mods.length(); i++)
                             if (!mods.getJSONObject(i).getString("icon").equals("null"))
                                 objects.add(mods.getJSONObject(i));
@@ -330,9 +275,8 @@ public class Client {
                         for (int i = 0; i < in.getInt("count"); i++)
                             objects.add(mods.getJSONObject(i));
                     }
-                }
-                if (in.has("index")) {
-                    if (in.has("icon") && in.getBoolean("icon")) {
+                } else if (in.has("index")) {
+                    if (has_icon) {
                         int remain = in.getInt("index");
                         for (int i = 0; i < mods.length(); i++) {
                             if (!mods.getJSONObject(i).getString("icon").equals("null")) {
@@ -353,7 +297,7 @@ public class Client {
             }
         });
 
-        put("get_download_info", (in, out) -> {
+        put("client.getFilesInfo", (in, out) -> {
             try {
                 JSONObject object = new JSONObject(IOUtils.readFileText(UpdateManager.clientFolder + "/files_info.json"));
                 out.put("info", object);
@@ -362,11 +306,39 @@ public class Client {
             }
         });
 
-        put("set_ip", (in, out) -> {
+        put("profile.bindIp", (in, out) -> {
             Profile profile = ProfileUtils.getProfile(in);
-            profile.setIP(in.getString("ip"));
+            profile.setIP(in.getString("$request_ip"));
         });
 
-        put("check_ip", (in, out) -> ProfileUtils.isValidIp(in.getString("uuid"), in.getString("ip")));
+        put("profiles.isIpBound", (in, out) -> out.put("result", ProfileUtils.isValidIp(in.getString("name"), in.getString("ip"))));
+
+        put("profiles.checkFormat", (in, out) -> {
+            JSONObject fields = in.getJSONObject("fields");
+            JSONObject out_fields = new JSONObject();
+
+            if(fields.has(Profile.LOGIN))
+                out_fields.put(Profile.LOGIN, FormatUtils.isCorrectName(fields.getString(Profile.LOGIN)));
+            if(fields.has(Profile.PASSWORD))
+                out_fields.put(Profile.PASSWORD, FormatUtils.isCorrectName(fields.getString(Profile.PASSWORD)));
+            if(fields.has(Profile.EMAIL))
+                out_fields.put(Profile.EMAIL, FormatUtils.isCorrectName(fields.getString(Profile.EMAIL)));
+            out.put("fields", out_fields);
+        });
+
+        put("checksum", (in, out) -> {
+            try {
+                JSONObject object = new JSONObject(FileUtils.readFileToString(new File(UpdateManager.clientFolder + "/client_info.json"), StandardCharsets.UTF_8));
+                out.put("equal_mods", true);
+                out.put("equal_client", true);
+
+                if(!in.has("mods") || !object.getString("mods_MD5").equals(in.getString("mods")))
+                    out.put("equal_mods", false);
+                if(!in.has("client") || !object.getString("client_MD5").equals(in.getString("client")))
+                    out.put("equal_client", false);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        });
     }};
 }

@@ -1,19 +1,26 @@
 package com.husker.launcher.components.skin;
 
+import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.utils.SkinUtils;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class SkinViewer extends GLJPanel {
-
-    private static int ids = 0;
-    private static final ArrayList<Integer> loadingQueue = new ArrayList<>();
-    private final int id;
 
     private int lastMouseX = -1;
     private int lastMouseY = -1;
@@ -24,11 +31,14 @@ public class SkinViewer extends GLJPanel {
     private float camPointY = 16;
     private float camZoom = 50;
 
+    private int textureId = 0;
+    private int bufferTextureId = 0;
+    private HashMap<String, InputStream[]> textures = new HashMap<>();
+
     private BufferedImage playerTexture;
+    private boolean isMale = true;
     private boolean animated = false;
     private boolean rotationEnabled = true;
-
-    private boolean autoResourceUpdate = true;
 
     private final SkinViewerRenderer renderer = new SkinViewerRenderer(this);
 
@@ -43,8 +53,21 @@ public class SkinViewer extends GLJPanel {
             setNumSamples(16);
         }});
 
-        this.id = ids++;
-        this.playerTexture = texture;
+        try {
+            Field act = GLJPanel.class.getDeclaredField("disposeAction");
+            act.setAccessible(true);
+
+            act.set(this, (Runnable) () -> {
+                ConsoleUtils.printDebug(getClass(), "Dispose canceled!");
+            });
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        Threading.disableSingleThreading();
+
+        setPlayerTexture(texture);
 
         setOpaque(false);
         addGLEventListener(renderer);
@@ -75,14 +98,63 @@ public class SkinViewer extends GLJPanel {
         setPreferredSize(new Dimension(200, 200));
     }
 
+    public void removeNotify() {
+
+    }
+
+    public void addNotify() {
+        try{
+            super.addNotify();
+        }catch (Exception ignored){}
+    }
+
     public SkinViewerRenderer getRenderer(){
         return renderer;
     }
 
     public void setPlayerTexture(BufferedImage texture){
         this.playerTexture = texture;
+        isMale = SkinUtils.isMale(texture);
 
-        askForLoadingQueue();
+        updateTextureInputStreams();
+    }
+
+    public void updateTextureInputStreams(){
+        if(playerTexture == null) {
+            textureId++;
+            textures = new HashMap<>();
+        }else {
+            bufferTextureId++;
+            final int threadTextureId = bufferTextureId;
+            new Thread(() -> {
+                HashMap<String, InputStream[]> local = new HashMap<>();
+
+                if (playerTexture != null) {
+                    local.put("leg_left", getLeg(0, 16));
+                    local.put("leg_right", getLeg(16, 48));
+
+                    local.put("hand_left", getHand(40, 16));
+                    local.put("hand_right", getHand(32, 48));
+
+                    local.put("head", getHead(0, 0));
+                    local.put("body", getBody(16, 16));
+
+                    local.put("leg_left_layer", getLeg(0, 32));
+                    local.put("leg_right_layer", getLeg(0, 48));
+
+                    local.put("hand_left_layer", getHand(48, 48));
+                    local.put("hand_right_layer", getHand(40, 32));
+
+                    local.put("head_layer", getHead(32, 0));
+                    local.put("body_layer", getBody(16, 32));
+                }
+                if (bufferTextureId == threadTextureId) {
+                    textures = local;
+                    textureId++;
+                }
+
+            }).start();
+        }
     }
 
     public BufferedImage getPlayerTexture(){
@@ -137,33 +209,107 @@ public class SkinViewer extends GLJPanel {
         this.rotateX = rotateX;
     }
 
-    public boolean isAutoResourceUpdateEnabled() {
-        return autoResourceUpdate;
-    }
-
-    public void setAutoResourceUpdate(boolean autoResourceUpdate) {
-        this.autoResourceUpdate = autoResourceUpdate;
-    }
-
-    public void updateResource(){
-        getRenderer().updateTexture();
-    }
-
-    public void waitForResourceLoad(){
-        getRenderer().waitForResourceLoad();
-    }
-
-    void askForLoadingQueue(){
-        if(!loadingQueue.contains(id))
-            loadingQueue.add(id);
-    }
-
-    void leaveLoadingQueue(){
-        if(loadingQueue.contains(id))
-            loadingQueue.remove((Object)id);
+    public boolean isMaleSkin(){
+        return isMale;
     }
 
     boolean isInLoadingQueue(){
-        return loadingQueue.size() > 0 && loadingQueue.get(0) == id;
+        return true;
+    }
+
+    private InputStream[] getBody(int translateX, int translateY)  {
+        try {
+            return new InputStream[]{
+                getSubTexture(translateX + 4, translateY + 4, 8, 12),
+                getSubTexture(translateX, translateY + 4, 4, 12),
+                getSubTexture(translateX + 16, translateY + 4, 8, 12),
+                getSubTexture(translateX + 12, translateY + 4, 4, 12),
+                getSubTexture(translateX + 4, translateY, 8, 4),
+                getSubTexture(translateX + 12, translateY, 8, 4)
+            };
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
+    private InputStream[] getHead(int translateX, int translateY)  {
+        try {
+            return new InputStream[]{
+                getSubTexture(translateX + 8, translateY + 8, 8, 8),
+                getSubTexture(translateX + 16, translateY + 8, 8, 8),
+                getSubTexture(translateX + 24, translateY + 8, 8, 8),
+                getSubTexture(translateX, translateY + 8, 8, 8),
+                getSubTexture(translateX + 8, translateY, 8, 8),
+                getSubTexture(translateX + 16, translateY, 8, 8)
+            };
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
+    private InputStream[] getLeg(int translateX, int translateY)  {
+        try {
+            return new InputStream[]{
+                getSubTexture(translateX + 4, translateY + 4, 4, 12),
+                getSubTexture(translateX + 8, translateY + 4, 4, 12),
+                getSubTexture(translateX + 12, translateY + 4, 4, 12),
+                getSubTexture(translateX, translateY + 4, 4, 12),
+                getSubTexture(translateX + 4, translateY, 4, 4),
+                getSubTexture(translateX + 8, translateY, 4, 4)
+            };
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
+    private InputStream[] getHand(int translateX, int translateY)  {
+        try {
+            if (isMaleSkin()) {
+                return new InputStream[]{
+                    getSubTexture(translateX + 4, translateY + 4, 4, 12),
+                    getSubTexture(translateX + 8, translateY + 4, 4, 12),
+                    getSubTexture(translateX + 12, translateY + 4, 4, 12),
+                    getSubTexture(translateX, translateY + 4, 4, 12),
+                    getSubTexture(translateX + 4, translateY, 4, 4),
+                    getSubTexture(translateX + 8, translateY, 4, 4)
+                };
+            } else {
+                return new InputStream[]{
+                    getSubTexture(translateX + 4, translateY + 4, 3, 12),
+                    getSubTexture(translateX + 7, translateY + 4, 4, 12),
+                    getSubTexture(translateX + 11, translateY + 4, 3, 12),
+                    getSubTexture(translateX, translateY + 4, 4, 12),
+                    getSubTexture(translateX + 4, translateY, 3, 4),
+                    getSubTexture(translateX + 7, translateY, 3, 4)
+                };
+            }
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
+    public int getTexturesId(){
+        return textureId;
+    }
+
+    public InputStream[] getTexturesInputStream(String name){
+        if(playerTexture == null)
+            return null;
+        return textures.get(name);
+    }
+
+    public InputStream getSubTexture(int x, int y, int width, int height) {
+        return getInputStream(playerTexture.getSubimage(x, y, width, height));
+    }
+
+    public InputStream getInputStream(BufferedImage image){
+        try {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", os);
+            return new ByteArrayInputStream(os.toByteArray());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

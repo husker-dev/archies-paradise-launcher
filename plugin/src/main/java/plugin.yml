@@ -1,0 +1,5 @@
+main: com.husker.launcher.plugin.Main
+name: HAuth
+version: 1.0
+author: Husker
+description: Auth plugin for launcher

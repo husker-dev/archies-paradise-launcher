@@ -36,6 +36,7 @@ public class SettingsFile implements SettingsContainer{
         ConsoleUtils.printDebug(SettingsFile.class, "Reading config file: " + file.getAbsolutePath());
 
         try {
+            file.getParentFile().mkdirs();
             if(!file.exists())
                 file.createNewFile();
 

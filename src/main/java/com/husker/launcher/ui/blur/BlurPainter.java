@@ -283,7 +283,7 @@ public class BlurPainter {
                         changedElements.add("shadow");
                     String changedText = String.join(",", changedElements.toArray(new String[0]));
 
-                    ConsoleUtils.printDebug(getClass(), "Redraw: " + name + " in " + (System.currentTimeMillis() - start) / 1000d + " sec " + (changedText.isEmpty() ? "" : "(" + changedText + ")"));
+                    //ConsoleUtils.printDebug(getClass(), "Redraw: " + name + " in " + (System.currentTimeMillis() - start) / 1000d + " sec " + (changedText.isEmpty() ? "" : "(" + changedText + ")"));
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }

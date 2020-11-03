@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 
 public class Launcher extends JFrame {
 
@@ -29,8 +30,8 @@ public class Launcher extends JFrame {
     private TransparentPanel animationPanel;
 
     private final LauncherConfig config = new LauncherConfig();
-    private final LauncherSettings settings = new LauncherSettings();
-    private final UserSettings user = new UserSettings();
+    private final LauncherSettings settings = new LauncherSettings(this);
+    private final UserInfoFile user = new UserInfoFile(this);
 
     public final UpdateManager UpdateManager = new UpdateManager(this);
     public final Resources Resources = new Resources(this);
@@ -180,7 +181,7 @@ public class Launcher extends JFrame {
         return settings;
     }
 
-    public UserSettings getUserConfig() {
+    public UserInfoFile getUserConfig() {
         return user;
     }
 
@@ -194,44 +195,32 @@ public class Launcher extends JFrame {
             final float speed = 15;
 
             while(true){
-                if(currentUI.getNextScreen() != null){
-                    currentAlpha += speed;
-
-                    if(currentAlpha >= 255){
-                        currentAlpha = 255;
-
-                        currentUI.applyNextScreen();
-                        currentUI.setVisible(false);
-                        currentUI.setVisible(true);
-
-                        try {
+                try{
+                    if(currentUI.getNextScreen() != null){
+                        currentAlpha += speed;
+                        if(currentAlpha >= 255){
+                            currentAlpha = 255;
+                            currentUI.applyNextScreen();
+                            currentUI.setVisible(false);
+                            currentUI.setVisible(true);
                             Thread.sleep(250);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
-
+                    }else{
+                        currentAlpha -= speed;
+                        if(currentAlpha <= 0){
+                            currentAlpha = 0;
+                            isAnimating = false;
+                            animationPanel.setVisible(false);
+                            break;
+                        }
                     }
-                }else{
-
-                    currentAlpha -= speed;
-                    if(currentAlpha <= 0){
-                        currentAlpha = 0;
-
-                        isAnimating = false;
-                        animationPanel.setVisible(false);
-                        break;
-                    }
-                }
-                if(animationPanel != null)
-                    animationPanel.repaint();
-
-                try {
+                    if(animationPanel != null)
+                        animationPanel.repaint();
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                 }
             }
         }).start();
-
     }
 
     public String getCurrentUIName(){
@@ -242,6 +231,23 @@ public class Launcher extends JFrame {
         if(currentUIName.contains("."))
             return currentUIName.split("\\.")[currentUIName.split("\\.").length - 1];
         return currentUIName;
+    }
+
+    public String getSettingsFolder(){
+        try {
+            Process p =  Runtime.getRuntime().exec("reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v personal");
+            p.waitFor();
+
+            InputStream in = p.getInputStream();
+            byte[] b = new byte[in.available()];
+            in.read(b);
+            in.close();
+
+            return new String(b).split("\\s\\s+")[4] + "/" + getConfig().getTitle();
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+        return null;
     }
 
     public void updateUI(){

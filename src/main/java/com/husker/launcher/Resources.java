@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class Resources {
 
@@ -100,8 +101,12 @@ public class Resources {
     public final BufferedImage Icon_Reply;
     public final BufferedImage Icon_Reply_Selected;
     public final BufferedImage Icon_Download;
-
-    public final BufferedImage Texture_EmptyIcon;
+    public final BufferedImage Icon_Reload;
+    public final BufferedImage Icon_Reload_Selected;
+    public final BufferedImage Icon_Code;
+    public final BufferedImage Icon_People;
+    public final BufferedImage Icon_Key;
+    public final BufferedImage Icon_Folder;
 
     public final BufferedImage Social_Loading_Logo;
     public final BufferedImage Logo_Youtube;
@@ -111,7 +116,7 @@ public class Resources {
 
     public final BufferedImage Skin_Steve;
 
-    public final BufferedImage[] Background = new BufferedImage[7];
+    public final BufferedImage[] Background;
 
     public final BufferedImage Icon_Checkbox_On;
     public final BufferedImage Icon_Checkbox_Off;
@@ -119,15 +124,24 @@ public class Resources {
     public Resources(Launcher launcher){
         Logo = getBufferedImage(launcher.getConfig().Launcher.getLogo());
 
+        BufferedImage custom = null;
         try{
             if(Files.exists(Paths.get("./background.jpg")))
-                Background[0] = ImageIO.read(new File("./background.jpg"));
+                custom = ImageIO.read(new File("./background.jpg"));
         }catch (Exception ex){}
-        for(int i = 1; i < Background.length; i++) {
-            try {
-                Background[i] = getBufferedImage("background/bg_" + i + ".jpg");
-            }catch (Exception ex){}
+
+        ArrayList<BufferedImage> bgs = new ArrayList<>();
+        for(int i = 1;;i++){
+            BufferedImage bg = getBufferedImage("background/bg_" + i + ".jpg");
+            if(bg == null)
+                break;
+            bgs.add(bg);
         }
+        Background = new BufferedImage[1 + bgs.size()];
+        Background[0] = custom;
+        for(int i = 0; i < bgs.size(); i++)
+            Background[i + 1] = bgs.get(i);
+
         Icon = getBufferedImage(launcher.getConfig().Launcher.getIcon());
 
         Icon_Info = getBufferedImage("info_icon.png");
@@ -149,8 +163,12 @@ public class Resources {
         Icon_Reply = getBufferedImage("reply.png");
         Icon_Reply_Selected = getBufferedImage("reply_selected.png");
         Icon_Download = getBufferedImage("download_icon.png");
-
-        Texture_EmptyIcon = getBufferedImage("empty_icon.png");
+        Icon_Reload = getBufferedImage("reload.png");
+        Icon_Reload_Selected = getBufferedImage("reload_selected.png");
+        Icon_Code = getBufferedImage("code_icon.png");
+        Icon_People = getBufferedImage("people_icon.png");
+        Icon_Key = getBufferedImage("key_icon.png");
+        Icon_Folder = getBufferedImage("folder_icon.png");
 
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");

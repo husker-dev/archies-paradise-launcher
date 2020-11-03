@@ -19,16 +19,8 @@ public class VkGroupPanel extends SocialTabPanel {
             setLink(getScreen().getLauncher().NetManager.Social.getVkUrl());
         }).start();
 
-        getScreen().getLauncher().NetManager.Social.getVKPostParametersAsync(4, posts -> {
-            int count = Math.min(4, posts.length);
-            setSocialPanelCount(count);
-
-            for(int i = 0; i < count; i++) {
-                VkPostPanel panel = VkPostPanel.create(getScreen(), posts[i]);
-                panel.setInner(true);
-                addSocialPanel(panel);
-            }
-        });
+        for(int i = 0; i < 4; i++)
+            addSocialPanel(VkPostPanel.create(getScreen(), i));
     }
 
 }

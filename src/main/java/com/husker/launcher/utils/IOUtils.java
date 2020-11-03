@@ -5,12 +5,17 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 public class IOUtils {
 
@@ -36,6 +41,11 @@ public class IOUtils {
 
     public static void delete(String path, Consumer<Double> progress){
         progress.accept(0d);
+
+        if(!Files.exists(Paths.get(path))) {
+            progress.accept(100d);
+            return;
+        }
 
         if(new File(path).isDirectory()) {
             int files;
@@ -191,7 +201,35 @@ public class IOUtils {
         fileOutputStream.close();
     }
 
-    public static void unzip(String zipPath, String to, Consumer<UnzippingArguments> progress) throws IOException {
+    public static void receiveFile(String url, String to, Consumer<FileReceivingArguments> progress) throws IOException {
+        URLConnection connection = new URL(url).openConnection();
+        connection.connect();
+        long size = connection.getContentLength();
+
+        InputStream is = new URL(url).openStream();
+
+        long currentSize = 0;
+        long start = System.currentTimeMillis();
+
+        FileOutputStream fileOutputStream = new FileOutputStream(to);
+        byte[] dataBuffer = new byte[1024];
+        int len;
+        while ((len = is.read(dataBuffer, 0, 1024)) != -1) {
+            fileOutputStream.write(dataBuffer, 0, len);
+
+            currentSize += len;
+
+            double deltaTime = System.currentTimeMillis() - start;
+            double speed = 0;
+            if(deltaTime > 0)
+                speed = (currentSize / deltaTime) / 125d;
+
+            progress.accept(new FileReceivingArguments(speed, size, currentSize));
+        }
+        fileOutputStream.close();
+    }
+
+    public static void unzip(String zipPath, String to, Consumer<ZipArguments> progress) throws IOException {
         if(!Files.exists(Paths.get(to)))
             Files.createDirectories(Paths.get(to));
 
@@ -211,11 +249,24 @@ public class IOUtils {
                     bos.write(bytesIn, 0, len);
                     currentSize += len;
 
-                    progress.accept(new UnzippingArguments(size, currentSize));
+                    progress.accept(new ZipArguments(size, currentSize));
                 }
                 bos.close();
+
             } else
                 Files.createDirectories(Paths.get(filePath));
+
+            while(true) {
+                Files.getFileAttributeView(Paths.get(filePath), BasicFileAttributeView.class).setTimes(entry.getLastModifiedTime(), entry.getLastAccessTime(), entry.getCreationTime());
+
+                BasicFileAttributes attributes = Files.readAttributes(Paths.get(filePath), BasicFileAttributes.class);
+
+                if( (entry.getCreationTime() == null || attributes.creationTime().toMillis() == entry.getCreationTime().toMillis()) &&
+                    (entry.getLastAccessTime() == null || attributes.lastAccessTime().toMillis() == entry.getLastAccessTime().toMillis()) &&
+                    (entry.getLastModifiedTime() == null || attributes.lastModifiedTime().toMillis() == entry.getLastModifiedTime().toMillis())
+                )
+                    break;
+            }
             zipIn.closeEntry();
             entry = zipIn.getNextEntry();
         }
@@ -228,6 +279,22 @@ public class IOUtils {
 
     public static void writeFileText(String path, String text) throws IOException {
         FileUtils.write(new File(path), text, StandardCharsets.UTF_8);
+    }
+
+    public static String[] list(String folder){
+        String[] folders = new File(folder).list();
+        if(folders != null)
+            return folders;
+        else
+            return new String[0];
+    }
+
+    public static File[] fileList(String folder){
+        File[] folders = new File(folder).listFiles();
+        if(folders != null)
+            return folders;
+        else
+            return new File[0];
     }
 
     public static long getFileLength(String path){
@@ -245,6 +312,34 @@ public class IOUtils {
             }
         }
         return length;
+    }
+
+    public static void zip(String path, String zipPath){
+        zip(path, zipPath, e -> {});
+    }
+
+    public static void zip(String path, String zipPath, Consumer<ZipArguments> progress){
+        try {
+            ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipPath));
+            FileInputStream fis = new FileInputStream(path);
+
+            long size = (long)(new File(zipPath).length() * 1.67d);
+            long currentSize = 0;
+
+            byte[] dataBuffer = new byte[1024];
+            int len;
+            while ((len = fis.read(dataBuffer, 0, 1024)) != -1) {
+                zout.write(dataBuffer, 0, len);
+
+                currentSize += len;
+                progress.accept(new ZipArguments(size, currentSize));
+            }
+            zout.close();
+        }
+        catch(Exception ex){
+
+            System.out.println(ex.getMessage());
+        }
     }
 
     public static class FileReceivingArguments {
@@ -275,11 +370,11 @@ public class IOUtils {
         }
     }
 
-    public static class UnzippingArguments {
+    public static class ZipArguments {
         private final long size;
         private final long current;
 
-        public UnzippingArguments(long size, long current){
+        public ZipArguments(long size, long current){
             this.size = size;
             this.current = current;
         }

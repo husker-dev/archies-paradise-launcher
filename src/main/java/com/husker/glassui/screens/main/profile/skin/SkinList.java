@@ -1,13 +1,11 @@
 package com.husker.glassui.screens.main.profile.skin;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
-import com.husker.glassui.components.BlurPageList;
+import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.SimpleTitledScreen;
-import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.components.skin.SkinViewer;
 import com.husker.launcher.ui.Screen;
@@ -24,7 +22,7 @@ public class SkinList extends SimpleTitledScreen {
     private int page = 0;
     private final int pageElements = 6;
     private final SkinPanel[] skinPanel = new SkinPanel[pageElements];
-    private BlurPageList pagePanel;
+    private BlurPagePanel pagePanel;
 
     public SkinList() {
         super("Скины", "[Категория]");
@@ -45,7 +43,7 @@ public class SkinList extends SimpleTitledScreen {
         }});
         panel.add(new TransparentPanel(){{
             setMargin(20, 100, 20, 100);
-            add(pagePanel = new BlurPageList(SkinList.this){{
+            add(pagePanel = new BlurPagePanel(SkinList.this){{
                 addPageListener(SkinList.this::setPage);
             }});
         }});
@@ -104,9 +102,6 @@ public class SkinList extends SimpleTitledScreen {
     public static class SkinPanel extends BlurPanel {
 
         private final SkinViewer viewer;
-        private WebLabel nameLabel;
-        private final BlurPanel namePanel;
-        private boolean hovered = false;
 
         private String folder, name;
 
@@ -118,16 +113,10 @@ public class SkinList extends SimpleTitledScreen {
 
             addMouseListener(new MouseAdapter() {
                 public void mouseEntered(MouseEvent mouseEvent) {
-                    hovered = true;
-
-                    nameLabel.setForeground(GlassUI.Colors.labelText);
                     viewer.setCamY(26);
                     viewer.setCamZoom(20);
                 }
                 public void mouseExited(MouseEvent mouseEvent) {
-                    hovered = false;
-
-                    nameLabel.setForeground(GlassUI.Colors.labelLightText);
                     viewer.setCamY(22);
                     viewer.setCamZoom(30);
                     viewer.setRotationX(-23);
@@ -164,30 +153,6 @@ public class SkinList extends SimpleTitledScreen {
                 setRotationEnabled(false);
                 ComponentUtils.makeMouseEventTransparent(this, SkinPanel.this);
             }});
-            add(namePanel = new BlurPanel(screen){
-                {
-                    ComponentUtils.makeMouseEventTransparent(this, SkinPanel.this);
-                    add(nameLabel = new WebLabel("[Name]"){{
-                        setMargin(4, 5, 2, 5);
-                        setPreferredHeight(35);
-                        setVerticalAlignment(CENTER);
-                        setHorizontalAlignment(CENTER);
-                        setForeground(GlassUI.Colors.labelLightText);
-                        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
-                        ComponentUtils.makeMouseEventTransparent(this, SkinPanel.this);
-                    }});
-                }
-
-                public void onBlurApply(BlurParameter parameter, Component component) {
-                    super.onBlurApply(parameter, component);
-                    if(returnOnInvisible(parameter, component))
-                        return;
-                    if(component == this) {
-                        GlassUI.applyTag(parameter);
-                        parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
-                    }
-                }
-            }, BorderLayout.SOUTH);
         }
 
         public void onBlurApply(BlurParameter parameter, Component component) {
@@ -195,10 +160,6 @@ public class SkinList extends SimpleTitledScreen {
             if(returnOnInvisible(parameter, component))
                 return;
             if(component == this){
-                parameter.setVisible(namePanel.isVisible());
-                if(!namePanel.isVisible())
-                    return;
-
                 GlassUI.applyBottomLayer(parameter);
                 parameter.setShadowType(BlurParameter.ShadowType.INNER);
                 parameter.setShadowSize(5);
@@ -209,12 +170,8 @@ public class SkinList extends SimpleTitledScreen {
             this.folder = folder;
             this.name = name;
 
-            namePanel.setVisible(name != null);
-            if(name == null){
+            if(name == null)
                 viewer.setPlayerTexture(null);
-                nameLabel.setText("");
-            }else
-                nameLabel.setText(name);
         }
 
         public void loadSkin(String folder, String name){
@@ -223,7 +180,7 @@ public class SkinList extends SimpleTitledScreen {
                 return;
             }
             try {
-                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getFolderSkin(folder, name);
+                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getCategorySkin(folder, name);
                 viewer.setPlayerTexture(image);
             }catch (Exception ex){
                 viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);

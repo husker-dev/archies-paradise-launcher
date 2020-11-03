@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class LauncherUI extends JPanel {
 
@@ -33,6 +34,26 @@ public abstract class LauncherUI extends JPanel {
         return launcher;
     }
 
+    @SafeVarargs
+    public final void addScreen(Class<? extends Screen>... screens){
+        for(Class<? extends Screen> screen : screens) {
+            try {
+                addScreen(screen.getConstructor().newInstance());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void addScreen(Screen... screens){
+        for(Screen screen : screens)
+            addScreen(screen);
+    }
+
+    public void addScreen(Screen screen){
+        addScreen(screen.getClass().getSimpleName(), screen);
+    }
+
     public void addScreen(String name, Screen screen){
         ConsoleUtils.printDebug(getClass(), "Initializing screen: " + name);
 
@@ -50,6 +71,21 @@ public abstract class LauncherUI extends JPanel {
         }
     }
 
+    public String getScreen(Class<? extends Screen> screenClass){
+        for(Map.Entry<String, Screen> entry : screens.entrySet())
+            if (entry.getValue().getClass() == screenClass)
+                return entry.getKey();
+        return null;
+    }
+
+    public void setScreen(Class<? extends Screen> screenClass){
+        setScreen(getScreen(screenClass));
+    }
+
+    public void setScreen(Class<? extends Screen> screenClass, Screen.Parameters parameters){
+        setScreen(getScreen(screenClass), parameters);
+    }
+
     public void setScreen(String name){
         setScreen(name, new Screen.Parameters());
     }
@@ -59,6 +95,9 @@ public abstract class LauncherUI extends JPanel {
     }
 
     public void setScreen(String name, Screen.Parameters parameters){
+        if(!screens.containsKey(name))
+            throw new NullPointerException("Can't find screen: " + name);
+
         nextScreen = name;
         nextScreenParameters = parameters;
         ConsoleUtils.printDebug(getClass(), "Changing screen to: " + name + "  " + parameters.toString());

@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 public class ServerSettingsFile extends SettingsFile {
 
     private static final String PORT = "port";
-    private static final String ENCRYPTION_KEY = "encryption_key";
 
     private static final String EMAIL = "mail.login";
     private static final String EMAIL_PASSWORD = "mail.password";
@@ -18,8 +17,10 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String EMAIL_TEXT = "mail.text";
 
     private static final String DELAY = "social.delay";
-    private static final String VK_GROUP = "social.vk_group";
-    private static final String YOUTUBE = "social.youtube_id";
+
+    private static final String VK_GROUP = "social.vk.group_id";
+
+    private static final String YOUTUBE = "social.youtube.channel_id";
 
     private static final int DEFAULT_PORT = 15565;
 
@@ -27,13 +28,13 @@ public class ServerSettingsFile extends SettingsFile {
         super(new File("./server_settings.cfg"));
 
         setDefault(PORT, DEFAULT_PORT + "");
-        setDefault(ENCRYPTION_KEY, ProfileUtils.generateKey());
         setDefault(EMAIL, "null");
         setDefault(EMAIL_PASSWORD, "null");
         setDefault(EMAIL_TITLE, "Email title");
         setDefault(EMAIL_TEXT, "Here is your code [code]");
 
         setDefault(VK_GROUP, "id");
+
         setDefault(YOUTUBE, "id");
     }
 
@@ -65,10 +66,6 @@ public class ServerSettingsFile extends SettingsFile {
         return DEFAULT_PORT;
     }
 
-    public String getEncryptionKey(){
-        return get(ENCRYPTION_KEY);
-    }
-
     public void setPort(int port){
         set(PORT, port + "");
     }
@@ -81,16 +78,20 @@ public class ServerSettingsFile extends SettingsFile {
         }
     }
 
-    public void setEncryptionKey(String key){
-        set(ENCRYPTION_KEY, key);
+    public String getVkGroupId(){
+        return get(VK_GROUP);
     }
 
-    public String getVkGroup(){
-        return get(VK_GROUP);
+    public void setVkGroupId(String key){
+        set(VK_GROUP, key);
     }
 
     public String getYoutubeId(){
         return get(YOUTUBE);
+    }
+
+    public void setYoutubeId(String key){
+        set(YOUTUBE, key);
     }
 
     public String getEmailText(){

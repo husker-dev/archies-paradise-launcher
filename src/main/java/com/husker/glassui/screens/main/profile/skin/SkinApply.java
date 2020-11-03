@@ -2,6 +2,7 @@ package com.husker.glassui.screens.main.profile.skin;
 
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
+import com.husker.glassui.screens.main.MainScreen;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -36,7 +37,7 @@ public class SkinApply extends SimpleLoadingScreen {
             }
 
             getLauncher().NetManager.PlayerInfo.updateData();
-            getLauncherUI().setScreen("main");
+            getLauncherUI().setScreen(MainScreen.class);
         }catch (Exception ex){
             ex.printStackTrace();
             Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось загрузить скин", "main");

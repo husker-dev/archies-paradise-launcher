@@ -3,6 +3,7 @@ package com.husker.glassui.screens;
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
+import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.managers.UpdateManager;
@@ -128,9 +129,9 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
         addIndent(0);
 
         addToMenu(new TransparentPanel(){{
-            setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-            setMargin(0, 40, 0, 40);
-            setPreferredHeight(23);
+            setLayout(new VerticalFlowLayout(FlowLayout.CENTER, 0, 0));
+            setMargin(10, 40, 0, 40);
+            //setPreferredHeight(23);
 
             createSubComponents(this);
 

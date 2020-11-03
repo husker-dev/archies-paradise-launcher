@@ -1,13 +1,18 @@
 package com.husker.launcher.managers;
 
-import com.husker.glassui.components.social.vk.VkPostParameter;
-import com.husker.glassui.components.social.youtube.YoutubeVideoParameters;
+import com.husker.glassui.components.social.vk.VkPostInfo;
+import com.husker.glassui.components.social.youtube.YoutubeVideoInfo;
 import com.husker.launcher.Launcher;
+import com.husker.launcher.managers.net.UrlBuilder;
+import com.husker.launcher.managers.net.http.Get;
 import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.IOUtils;
 import com.husker.launcher.utils.MinecraftStarter;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -28,18 +33,26 @@ public class NetManager {
     public static final int DEFAULT_AUTH_SERVER_PORT = 15565;
 
     public static final String RESULT = "result";
-    public static final String KEY = "key";
+    public static final String ACCESS_TOKEN = "access_token";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
     public static final String EMAIL_CODE = "email_code";
     public static final String ENCRYPTED = "encrypted";
     public static final String STATUS = "status";
-    public static final String SKIN_NAME = "skinName";
+    public static final String SKIN_URL = "skin_url";
     public static final String PASSWORD = "password";
     public static final String CURRENT_PASSWORD = "current_password";
-    public static final String HAS_SKIN = "hasSkin";
+    public static final String HAS_SKIN = "has_skin";
     public static final String ID = "id";
-    public static final String UUID = "uuid";
+
+    public static final int DATASET_EMAIL_FORMAT = 8;
+    public static final int DATASET_PASSWORD_FORMAT = 7;
+    public static final int DATASET_NAME_TAKEN = 6;
+    public static final int DATASET_NAME_FORMAT = 5;
+    public static final int DATASET_INCORRECT_EMAIL_CODE = 4;
+    public static final int DATASET_INCORRECT_PASSWORD = 3;
+    public static final int DATASET_EMAIL_REQUIRED = 2;
+    public static final int DATASET_PASSWORD_REQUIRED = 1;
 
     public ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
     private final Launcher launcher;
@@ -167,79 +180,47 @@ public class NetManager {
         return stringBuilder.toString();
     }
 
-    private Socket socket;
-    private BufferedReader in;
-    private BufferedWriter out;
+
 
     public Players Players = new Players(this);
-    public Email Email = new Email(this);
     public Auth Auth = new Auth(this);
     public ProfileInfo PlayerInfo = new ProfileInfo(this);
     public Skins Skins = new Skins(this);
     public Social Social = new Social(this);
     public Client Client = new Client(this);
 
-    public ArrayList<Long> threadQueue = new ArrayList<>();
 
-    public void connect() throws IOException {
-        joinThreadQueue();
-        socket = new Socket();
+    public Socket connect() throws IOException {
+        Socket socket = new Socket();
         socket.connect(new InetSocketAddress(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort()), launcher.getConfig().Net.Auth.getTimeout());
-
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        return socket;
     }
 
-    public void disconnect(){
+    public void disconnect(Socket socket){
         try {
             socket.close();
         }catch (Exception ignored){}
-        try {
-            in.close();
-        }catch (Exception ignored){}
-        try {
-            out.close();
-        }catch (Exception ignored){}
-        leaveThreadQueue();
     }
 
-    public void sendText(String text) throws IOException {
-        out.write(text + "\n");
-        out.flush();
+    public void sendText(Socket socket, String text) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        writer.write(text + "\n");
+        writer.flush();
     }
 
-    public String receiveText() throws IOException {
-        return in.readLine();
+    public String receiveText(Socket socket) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        return reader.readLine();
     }
 
     public GetRequest get(GetRequest parameters) throws IOException {
-        try {
-            connect();
-            parameters.send(socket);
+        Socket socket = connect();
+        parameters.send(socket);
 
-            GetRequest received = GetRequest.create(socket);
-            disconnect();
+        GetRequest received = GetRequest.create(socket);
+        disconnect(socket);
 
-            return received;
-        }catch (Exception exception){
-            disconnect();
-            throw exception;
-        }
-    }
-
-    private void joinThreadQueue(){
-        threadQueue.add(Thread.currentThread().getId());
-        while(threadQueue.size() > 0 && !threadQueue.get(0).equals(Thread.currentThread().getId())){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void leaveThreadQueue(){
-        threadQueue.remove(Thread.currentThread().getId());
+        return received;
     }
 
     public static class Skins {
@@ -249,20 +230,20 @@ public class NetManager {
             this.manager = manager;
         }
 
-        public String[] getFolders() throws IOException {
-            return manager.get(GetRequest.createWithTitle("get_skin_folders")).getString("folders").split(",");
+        public String[] getCategories() throws IOException {
+            return manager.get(GetRequest.createWithTitle("skins.getCategories")).getString("categories").split(",");
         }
 
-        public String[] getFolderSkinCount(String folder) throws IOException {
-            return manager.get(GetRequest.createWithTitle("get_skin_folder_skins", "folder", folder)).getString("skins").split(",");
+        public String[] getCategorySkins(String category) throws IOException {
+            return manager.get(GetRequest.createWithTitle("skins.getCategorySkins", "category", category)).getString("skins").split(",");
         }
 
-        public BufferedImage getFolderSkin(String folder, String name) throws IOException {
-            return manager.get(GetRequest.createWithTitle("get_folder_skin", "folder", folder, "name", name)).getImage("skin");
+        public BufferedImage getCategorySkin(String category, String name) throws IOException {
+            return manager.get(GetRequest.createWithTitle("skins.getSkin", "category", category, "name", name)).getImage("skin");
         }
 
-        public BufferedImage getFolderPreview(String folder) throws IOException {
-            return manager.get(GetRequest.createWithTitle("get_skin_folder_preview", "folder", folder)).getImage("skin");
+        public BufferedImage getCategoryPreview(String category) throws IOException {
+            return manager.get(GetRequest.createWithTitle("skins.getCategoryPreview", "category", category)).getImage("skin");
         }
     }
 
@@ -274,53 +255,15 @@ public class NetManager {
         }
 
         public final int ERROR = -1;
-        public final int NAME_NOT_TAKEN = 0;
         public final int NAME_TAKEN = 1;
 
         public final int SUCCESSFUL_REGISTRATION = 0;
         public final int BAD_PASSWORD = 2;
 
-        public int checkNickname(String name){
-            try {
-                return manager.get(GetRequest.createWithTitle("is_login_taken", LOGIN, name)).getInt(RESULT);
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-            return -1;
-        }
 
         public int register(String login, String password){
             try {
-                return manager.get(GetRequest.createWithTitle("register", LOGIN, login, PASSWORD, password)).getInt(RESULT);
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-            return -1;
-        }
-    }
-
-    public static class Email {
-
-        public final int ERROR = -1;
-        public final int OK = 0;
-
-        private final NetManager manager;
-        public Email(NetManager manager){
-            this.manager = manager;
-        }
-
-        public int sendConfirmCode(String login, String password, String email, boolean encrypted){
-            try {
-                return manager.get(GetRequest.createWithTitle("send_email_code", LOGIN, login, PASSWORD, password, EMAIL, email, ENCRYPTED, encrypted ? "1" : "0")).getInt(RESULT);
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-            return -1;
-        }
-
-        public int confirmMail(String login, String password, String email, String code, boolean encrypted){
-            try {
-                return manager.get(GetRequest.createWithTitle("confirm_mail", LOGIN, login, PASSWORD, password, EMAIL, email, EMAIL_CODE, code, ENCRYPTED, encrypted ? "1" : "0")).getInt(RESULT);
+                return manager.get(GetRequest.createWithTitle("auth.create", LOGIN, login, PASSWORD, password)).getInt(RESULT);
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -339,13 +282,13 @@ public class NetManager {
             this.manager = manager;
         }
 
-        public int auth(String login, String password, boolean encrypted){
+        public int auth(String login, String password){
             try {
-                String result = manager.get(GetRequest.createWithTitle("get_key", LOGIN, login, PASSWORD, password, ENCRYPTED, encrypted ? "1" : "0")).getString(KEY);
-                if(result.equals("-1"))
+                GetRequest request = manager.get(GetRequest.createWithTitle("auth.getAccessToken", LOGIN, login, PASSWORD, password));
+                if(request.getString(RESULT).equals("-1"))
                     return WRONG_DATA;
                 else {
-                    manager.PlayerInfo.applyKey(result);
+                    manager.PlayerInfo.applyKey(request.getString(ACCESS_TOKEN));
                     return OK;
                 }
             }catch (Exception ex){
@@ -365,21 +308,10 @@ public class NetManager {
         private String status = "Статус";
         private long id = -1;
         private boolean has_skin = false;
-        private String skin_name = null;
-        private String uuid = null;
+        private String skin_url = null;
         private BufferedImage skin;
         private boolean emailConfirmed = false;
 
-        private String encryptedPassword;
-
-        public final int DATASET_BAD_EMAIL_CODE = 5;
-        public final int DATASET_BAD_EMAIL = 4;
-        public final int DATASET_NAME_TAKEN = 3;
-        public final int DATASET_BAD_NAME = 2;
-        public final int DATASET_WRONG_PASSWORD = 1;
-        public final int DATASET_OK = 0;
-        public final int DATASET_SERVER_ERROR = -1;
-        public final int DATASET_ERROR = -2;
 
         private final NetManager manager;
         public ProfileInfo(NetManager manager){
@@ -393,23 +325,42 @@ public class NetManager {
         }
 
         public void updateData() throws IOException{
-            GetRequest parameters = manager.get(GetRequest.createWithTitle("get_profile_data", "get", String.join(",", new String[]{LOGIN, EMAIL, SKIN_NAME, HAS_SKIN, ID, STATUS, UUID}), KEY, key));
-            name = parameters.getString(LOGIN);
-            email = parameters.getString(EMAIL);
-            id = parameters.getLong(ID);
-            has_skin = parameters.getString(HAS_SKIN).equals("1");
-            skin_name = parameters.getString(SKIN_NAME).equals("null") ? null : parameters.getString(SKIN_NAME);
-            status = parameters.getString(STATUS);
-            uuid = parameters.getString(UUID);
+            GetRequest parameters = manager.get(GetRequest.createWithTitle("profile.getData", "fields", String.join(",", new String[]{LOGIN, EMAIL, SKIN_URL, HAS_SKIN, ID, STATUS}), ACCESS_TOKEN, key));
 
-            encryptedPassword = manager.get(GetRequest.createWithTitle("get_encrypted_password", KEY, key)).getString(PASSWORD);
+            JSONObject data = parameters.getJSONObject("data");
+            name = data.getString(LOGIN);
+            email = data.getString(EMAIL);
+            id = data.getLong(ID);
+            has_skin = data.getString(HAS_SKIN).equals("1");
+            skin_url = data.getString(SKIN_URL).equals("null") ? null : data.getString(SKIN_URL);
+            status = data.getString(STATUS);
 
-            emailConfirmed = manager.get(GetRequest.createWithTitle("is_email_confirmed", KEY, key)).getInt(RESULT) == 1;
+            emailConfirmed = manager.get(GetRequest.createWithTitle("profile.isEmailConfirmed", ACCESS_TOKEN, key)).getInt(RESULT) == 1;
 
             if(has_skin)
-                skin = manager.get(GetRequest.createWithTitle("skin", KEY, key)).getImage("skin");
+                skin = manager.get(GetRequest.createWithTitle("profile.getSkin", ACCESS_TOKEN, key)).getImage("skin");
             else
                 skin = manager.launcher.Resources.Skin_Steve;
+
+            manager.launcher.getUserConfig().setLogin(name);
+        }
+
+        public int sendConfirmCode(String email){
+            try {
+                return manager.get(GetRequest.createWithTitle("profile.sendEmailCode", ACCESS_TOKEN, key, EMAIL, email)).getInt(RESULT);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return -1;
+        }
+
+        public int confirmMail(String email, String code){
+            try {
+                return manager.get(GetRequest.createWithTitle("profile.confirmEmail", ACCESS_TOKEN, key, EMAIL, email, EMAIL_CODE, code)).getInt(RESULT);
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+            return -1;
         }
 
         public String getNickname(){
@@ -433,45 +384,47 @@ public class NetManager {
         }
 
         public String getSkinName(){
-            return skin_name;
+            return skin_url;
         }
 
         public String getStatus() {
             return status;
         }
 
-        public String getEncryptedPassword(){
-            return encryptedPassword;
-        }
-
         public boolean isEmailConfirmed() {
             return emailConfirmed;
         }
 
-        public String getUUID(){
-            return uuid;
-        }
-
-        public int setData(String currentPassword, String... data){
+        public int setData(String currentPassword, String emailCode, String... data){
             try {
-                ArrayList<String> dataList = new ArrayList<>(Arrays.asList(data));
-                dataList.add(CURRENT_PASSWORD);
-                dataList.add(currentPassword);
-                dataList.add(KEY);
-                dataList.add(key);
-                int result = manager.get(GetRequest.createWithTitle("set_profile_data", dataList.toArray(new String[0]))).getInt(RESULT);
-                if(result == DATASET_OK)
+                GetRequest request = GetRequest.createWithTitle("profile.setData");
+
+                JSONObject fields = new JSONObject();
+                for(int i = 0; i < data.length; i += 2)
+                    fields.put(data[i], data[i + 1]);
+                request.put("fields", fields);
+
+                JSONObject confirms = new JSONObject();
+                if(currentPassword != null)
+                    confirms.put(PASSWORD, currentPassword);
+                if(emailCode != null)
+                    confirms.put(EMAIL_CODE, emailCode);
+                request.put("confirms", confirms);
+
+                request.put(ACCESS_TOKEN, key);
+                int result = manager.get(request).getInt(RESULT);
+                if(result == 0)
                     updateData();
                 return result;
             }catch (Exception ex){
                 ex.printStackTrace();
             }
-            return DATASET_ERROR;
+            return -1;
         }
 
         public int applyIP(){
             try {
-                GetRequest request = GetRequest.createWithTitle("set_ip", KEY, key);
+                GetRequest request = GetRequest.createWithTitle("profile.bindIp", ACCESS_TOKEN, key);
                 return manager.get(request).getInt(RESULT);
             }catch (Exception ex){
                 return -1;
@@ -484,12 +437,12 @@ public class NetManager {
             email = "";
             id = -1;
             has_skin = false;
-            skin_name = "";
+            skin_url = "";
         }
 
         public int setSkin(BufferedImage image){
             try {
-                GetRequest request = GetRequest.createWithTitle("set_skin", KEY, key);
+                GetRequest request = GetRequest.createWithTitle("profile.setSkin", ACCESS_TOKEN, key);
                 request.put("skin", image);
 
                 return manager.get(request).getInt(RESULT);
@@ -498,9 +451,9 @@ public class NetManager {
             }
         }
 
-        public int setSkin(String folder, String name){
+        public int setSkin(String category, String name){
             try {
-                return manager.get(GetRequest.createWithTitle("set_skin", "folder", folder, "name", name, KEY, key)).getInt(RESULT);
+                return manager.get(GetRequest.createWithTitle("profile.setSkin", "category", category, "name", name, ACCESS_TOKEN, key)).getInt(RESULT);
             }catch (Exception ex){
                 return -1;
             }
@@ -512,126 +465,167 @@ public class NetManager {
         private final NetManager manager;
         public Social(NetManager manager){
             this.manager = manager;
+            checkForVK();
+            checkForYouTube();
         }
 
-        public GetRequest vkInfo;
-        public GetRequest youtubeInfo;
+        private final ArrayList<YoutubeVideoInfo> videos = new ArrayList<>();
+        private final ArrayList<VkPostInfo> posts = new ArrayList<>();
+
+        private String vk_title;
+        private String vk_description;
+        private BufferedImage vk_logo;
+        private String vk_url;
+
+        private String yt_title;
+        private String yt_subscribers;
+        private BufferedImage yt_logo;
+        private String yt_url;
 
         public String getVkTitle(){
-            checkForVKInfo();
-            return vkInfo.getString("title");
+            checkForVK();
+            return vk_title;
         }
 
         public String getVkDescription(){
-            checkForVKInfo();
-            return vkInfo.getString("description");
+            checkForVK();
+            return vk_description;
         }
 
         public BufferedImage getVkLogo(){
-            checkForVKInfo();
-            return vkInfo.getImage("image");
+            checkForVK();
+            return vk_logo;
         }
 
         public String getVkUrl(){
-            checkForVKInfo();
-            return vkInfo.getString("url");
+            checkForVK();
+            return vk_url;
         }
 
         public String getYoutubeTitle(){
-            checkForYoutubeInfo();
-            return youtubeInfo.getString("title");
+            checkForYouTube();
+            return yt_title;
         }
 
         public String getYoutubeSubscribers(){
-            checkForYoutubeInfo();
-            return youtubeInfo.getString("subscribers");
+            checkForYouTube();
+            return yt_subscribers;
         }
 
         public BufferedImage getYoutubeLogo(){
-            checkForYoutubeInfo();
-            return youtubeInfo.getImage("preview");
+            checkForYouTube();
+            return yt_logo;
         }
 
         public String getYoutubeUrl(){
-            checkForYoutubeInfo();
-            return youtubeInfo.getString("url");
+            checkForYouTube();
+            return yt_url;
         }
 
-        private void checkForVKInfo(){
+        public VkPostInfo getPost(int index){
+            checkForVK();
+            return posts.get(index);
+        }
+
+        public YoutubeVideoInfo getYoutubeVideo(int index){
+            checkForYouTube();
+            return videos.get(index);
+        }
+
+        private void checkForYouTube(){
             try {
-                if (vkInfo == null)
-                    vkInfo = manager.get(GetRequest.createWithTitle("social_get_vk_info"));
+                if(videos.size() > 0)
+                    return;
+
+                GetRequest request = manager.get(GetRequest.createWithTitle("youtube.getInfo"));
+
+                Get get = new Get(new UrlBuilder("youtube.com/channel/" + request.getString("id")));
+                get.execute();
+
+                JSONObject content = new JSONObject(get.getHtmlContent().split("window\\[\"ytInitialData\"] =")[1].split("</script>")[0]);
+
+                yt_title = content.getJSONObject("metadata").getJSONObject("channelMetadataRenderer").getString("title");
+                yt_url = "https://youtube.com/channel/" + request.getString("id");
+                yt_logo = ImageIO.read(new URL(content.getJSONObject("metadata").getJSONObject("channelMetadataRenderer").getJSONObject("avatar").getJSONArray("thumbnails").getJSONObject(0).getString("url")));
+                yt_subscribers = content.getJSONObject("header").getJSONObject("c4TabbedHeaderRenderer").getJSONObject("subscriberCountText").getString("simpleText");
+
+                JSONArray json_videos = content.getJSONObject("contents").getJSONObject("twoColumnBrowseResultsRenderer")
+                        .getJSONArray("tabs").getJSONObject(0).getJSONObject("tabRenderer")
+                        .getJSONObject("content").getJSONObject("sectionListRenderer").getJSONArray("contents").getJSONObject(1)
+                        .getJSONObject("itemSectionRenderer").getJSONArray("contents").getJSONObject(0)
+                        .getJSONObject("shelfRenderer").getJSONObject("content").getJSONObject("horizontalListRenderer").getJSONArray("items");
+
+                for(int i = 0; i < Math.min(4, json_videos.length()); i++){
+                    BufferedImage preview = ImageIO.read(new URL(json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("thumbnail").getJSONArray("thumbnails").getJSONObject(3).getString("url")));
+                    String title = json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("title").getString("simpleText");
+                    String url = "https://www.youtube.com/watch?v=" + json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getString("videoId");
+                    videos.add(new YoutubeVideoInfo(i, title, preview, url));
+                }
             }catch (Exception ex){
                 ex.printStackTrace();
             }
         }
 
-        private void checkForYoutubeInfo(){
+        private void checkForVK(){
             try {
-                if (youtubeInfo == null)
-                    youtubeInfo = manager.get(GetRequest.createWithTitle("social_get_youtube_info"));
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
+                if(posts.size() > 0)
+                    return;
 
-        public VkPostParameter[] getVKPostParameters(int count){
-            try {
-                ArrayList<VkPostParameter> out = new ArrayList<>();
+                GetRequest request = manager.get(GetRequest.createWithTitle("vk.getInfo"));
 
-                GetRequest request = manager.get(GetRequest.createWithTitle("social_get_vk_list", "count", count + ""));
-                for(int i = 0; i < request.getInt("count"); i++){
-                    JSONObject object = request.getJSONArray("elements").getJSONObject(i);
-                    String type = object.getString("type");
-                    String text = object.getString("text");
-                    String url = object.getString("url");
+                Get get = new Get(new UrlBuilder("vk.com/" + request.getString("id")));
+                get.execute();
 
-                    if(type.equals("default"))
-                        out.add(new VkPostParameter(text, url));
-                    if(type.equals("picture"))
-                        out.add(new VkPostParameter.Picture(text, url, GetRequest.fromBase64(object.getString("image"))));
-                    if(type.equals("video"))
-                        out.add(new VkPostParameter.Video(text, url, GetRequest.fromBase64(object.getString("image"))));
-                    if(type.equals("Snippet"))
-                        out.add(new VkPostParameter.Snippet(text, url, GetRequest.fromBase64(object.getString("image")), object.getString("title"), object.getString("author")));
+                String content = get.getHtmlContent();
+
+                vk_logo = ImageIO.read(new URL(content.split("class=\"basisGroup__mainInfoRow\"")[1].split("src=\"")[1].split("\"")[0]));
+                vk_title = content.split("class=\"basisGroup__groupTitle op_header\">")[1].split("</h2>")[0].trim();
+                if(content.contains("class=\"pp_status\">"))
+                    vk_description = content.split("class=\"pp_status\">")[1].split("</div>")[0];
+                else
+                    vk_description = "";
+                vk_url = "https://vk.com/" + request.getString("id");
+
+                String[] content_items = content.split("container=\"group_wall\">")[1].split("<div class=\"wall_item\">");
+                for(String item : content_items){
+
+                    // Если закреплённая
+                    if(item.contains("wi_explain") || !item.contains("wi_info"))
+                        continue;
+
+                    String url = "https://vk.com" + item.split("wi_info")[1].split("href=\"")[1].split("\"")[0];
+
+                    String text = item.contains("pi_text") ? item.split("pi_text\">")[1].split("</div>")[0] : null;
+                    String photo = item.contains("thumb_map thumb_map_wide thumb_map_l al_photo") ? item.split("background-image: url\\(")[1].split("\\)")[0] : null;
+                    String videoPreview = item.contains("thumb_map thumb_map_wide thumb_map_l") ? item.split("background-image: url\\(")[1].split("\\)")[0] : null;
+                    String snippetPreview = item.contains("articleSnippet") ? item.split("background-image: url\\(")[1].split("\\)")[0] : null;
+                    String snippetTitle = item.contains("articleSnippet") ? item.split("articleSnippet_title\">")[1].split("</div>")[0] : null;
+                    String snippetAuthor = item.contains("articleSnippet") ? item.split("articleSnippet_author\">")[1].split("<span>")[0] : null;
+
+                    // Snippet
+                    if(snippetPreview != null){
+                        posts.add(new VkPostInfo.Snippet(posts.size(), text, ImageIO.read(new URL(snippetPreview)), url, snippetTitle, snippetAuthor));
+                        continue;
+                    }
+                    // Picture
+                    if(photo != null){
+                        posts.add(new VkPostInfo.Picture(posts.size(), text, ImageIO.read(new URL(photo)), url));
+                        continue;
+                    }
+                    // Video
+                    if(videoPreview != null){
+                        posts.add(new VkPostInfo.Video(posts.size(), text, ImageIO.read(new URL(videoPreview)), url));
+                        continue;
+                    }
+                    posts.add(new VkPostInfo(posts.size(), text, null, url));
                 }
 
-                return out.toArray(new VkPostParameter[0]);
             }catch (Exception ex){
                 ex.printStackTrace();
-                return new VkPostParameter[0];
             }
         }
 
-        public void getVKPostParametersAsync(int count, Consumer<VkPostParameter[]> consumer){
-            new Thread(() -> consumer.accept(getVKPostParameters(count))).start();
-        }
 
-        public YoutubeVideoParameters[] getYoutubeVideoParameters(int count){
-            try {
-                ArrayList<YoutubeVideoParameters> out = new ArrayList<>();
-
-                GetRequest request = manager.get(GetRequest.createWithTitle("social_get_youtube_list", "count", count + ""));
-                for(int i = 0; i < request.getInt("count"); i++){
-                    JSONObject object = request.getJSONArray("elements").getJSONObject(i);
-                    String text = object.getString("title");
-                    String url = object.getString("url");
-                    String image = object.getString("image");
-                    long date = object.getLong("date");
-
-                    out.add(new YoutubeVideoParameters(GetRequest.fromBase64(image), text, url, date));
-                }
-
-                return out.toArray(new YoutubeVideoParameters[0]);
-            }catch (Exception ex){
-                ex.printStackTrace();
-                return new YoutubeVideoParameters[0];
-            }
-        }
-
-        public void getYoutubeVideoParametersAsync(int count, Consumer<YoutubeVideoParameters[]> consumer){
-            new Thread(() -> consumer.accept(getYoutubeVideoParameters(count))).start();
-        }
     }
 
     public static class Client{
@@ -648,7 +642,7 @@ public class NetManager {
 
         public String getClientVersion(){
             try {
-                return manager.get(GetRequest.createWithTitle("client_get_version")).getString("version");
+                return manager.get(GetRequest.createWithTitle("client.getInfo")).getString("build");
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -668,7 +662,7 @@ public class NetManager {
 
         public String getShortClientVersion(){
             try {
-                return manager.get(GetRequest.createWithTitle("client_get_short_version")).getString("version");
+                return manager.get(GetRequest.createWithTitle("client.getInfo")).getString("build_id");
             }catch (Exception ex){
                 ex.printStackTrace();
             }
@@ -677,7 +671,7 @@ public class NetManager {
 
         public String getJarVersion(){
             try {
-                return manager.get(GetRequest.createWithTitle("client_get_minecraft_version")).getString("version");
+                return manager.get(GetRequest.createWithTitle("client.getInfo")).getString("version");
             }catch (Exception ex){
                 return "Unknown";
             }
@@ -701,7 +695,7 @@ public class NetManager {
 
         public ModInfo getModInfo(int index, boolean hasIcons){
             try {
-                GetRequest request = manager.get(GetRequest.createWithTitle("client_get_mod_info", "index", index + "", "icon", hasIcons + ""));
+                GetRequest request = manager.get(GetRequest.createWithTitle("client.getModsInfo", "index", index + "", "icon", hasIcons + ""));
                 return new ModInfo(request.getJSONArray("mods").getJSONObject(0));
             }catch (Exception ex){
             }
@@ -711,6 +705,7 @@ public class NetManager {
         public void playOrDownload(Consumer<DownloadingProcessArguments> process){
             new Thread(() -> {
                 int state = hasUpdate();
+                ConsoleUtils.printDebug(getClass(), "Client state: " + state);
                 if(state == ERROR)
                     return;
                 if(state == UPDATE || state == DOWNLOAD){
@@ -721,7 +716,7 @@ public class NetManager {
                         Files.createDirectories(Paths.get("client"));
 
                         // Downloading
-                        JSONObject downloadInfo = manager.get(GetRequest.createWithTitle("get_download_info"));
+                        JSONObject downloadInfo = manager.get(GetRequest.createWithTitle("client.getFilesInfo"));
                         JSONObject zipInfo = downloadInfo.getJSONObject("info").getJSONObject("zip");
                         long zipVersions = zipInfo.getLong("versions");
                         long zipMods = zipInfo.getLong("mods");
@@ -790,14 +785,65 @@ public class NetManager {
                     try{
                         process.accept(new DownloadingProcessArguments(5));
 
-                        if(manager.PlayerInfo.applyIP() == -1){
-                            process.accept(new DownloadingProcessArguments(-2));
-                            return;
+                        while(true) {
+                            String md5_mods = getModsMD5();
+                            String md5_client = getClientMD5();
+
+                            GetRequest checksumResult = manager.get(GetRequest.createWithTitle("client.checksum", "mods", md5_mods, "client", md5_client));
+                            if (checksumResult.getString("result").equals("0") && (checksumResult.has("dif_mods") || checksumResult.has("dif_versions"))) {
+                                JOptionPane.showMessageDialog(null, "Файлы игры отличаются от файлов на сервере!", "Предупреждение", JOptionPane.INFORMATION_MESSAGE);
+                                boolean mods = checksumResult.has("dif_mods") && checksumResult.getBoolean("dif_mods");
+                                boolean versions = checksumResult.has("dif_client") && checksumResult.getBoolean("dif_client");
+
+                                JSONObject downloadInfo = manager.get(GetRequest.createWithTitle("get_download_info"));
+                                JSONObject folderInfo = downloadInfo.getJSONObject("info").getJSONObject("folders");
+                                long folderVersions = folderInfo.getLong("versions");
+                                long folderMods = folderInfo.getLong("mods");
+
+                                if (mods) {
+                                    if (Files.exists(Paths.get("client/mods")))
+                                        IOUtils.delete("client/mods", percent -> process.accept(new DownloadingProcessArguments(0, percent)));
+
+                                    receiveClientPart("mods", args -> process.accept(new DownloadingProcessArguments(1) {{
+                                        setCurrentSize(args.getCurrentSize());
+                                        setFullSize(args.getSize());
+                                        setSpeed(args.getSpeed());
+                                    }}));
+
+                                    simpleUnzip("client/mods.zip", args -> process.accept(new DownloadingProcessArguments(2) {{
+                                        setCurrentSize(args.getCurrentSize());
+                                        setFullSize(folderMods);
+                                    }}));
+                                }
+
+                                if (versions) {
+                                    if (Files.exists(Paths.get("client/versions")))
+                                        IOUtils.delete("client/versions", percent -> process.accept(new DownloadingProcessArguments(0, percent)));
+
+                                    receiveClientPart("versions", args -> process.accept(new DownloadingProcessArguments(1) {{
+                                        setCurrentSize(args.getCurrentSize());
+                                        setFullSize(args.getSize());
+                                        setSpeed(args.getSpeed());
+                                    }}));
+
+                                    simpleUnzip("client/versions.zip", args -> process.accept(new DownloadingProcessArguments(2) {{
+                                        setCurrentSize(args.getCurrentSize());
+                                        setFullSize(folderVersions);
+                                    }}));
+                                }
+                            }else
+                                break;
                         }
+
+
+                        if(manager.PlayerInfo.applyIP() == -1)
+                            JOptionPane.showMessageDialog(null, "В данный момент вход на сервер недоступен, но вы можете играть в одиночной игре", "Предупреждение", JOptionPane.INFORMATION_MESSAGE);
+
                         MinecraftStarter starter = new MinecraftStarter("client"){{
                             addServer(manager.launcher.getConfig().Net.Minecraft.getIp());
                             setNickname(manager.PlayerInfo.getNickname());
-                            setUUID(manager.PlayerInfo.getUUID());
+                            setFullscreen(!manager.launcher.getSettings().isWindowed());
+                            setRam(manager.launcher.getSettings().getRAM());
                         }};
                         starter.launch();
 
@@ -814,29 +860,48 @@ public class NetManager {
             }).start();
         }
 
-        private void simpleUnzip(String path, Consumer<IOUtils.UnzippingArguments> process) throws IOException {
+        public String getModsMD5(){
+            try{
+                Vector<FileInputStream> streams = new Vector<>();
+                for(File file : new File("client/mods").listFiles(file -> file.getName().endsWith(".jar"))){
+                    try {
+                        streams.add(new FileInputStream(file));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
+
+                return DigestUtils.md5Hex(new SequenceInputStream(streams.elements()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        public String getClientMD5(){
+            try{
+                File clientFolder = new File("client/versions").listFiles(File::isDirectory)[0];
+                File clientFile = clientFolder.listFiles(file -> file.getName().endsWith(".jar"))[0];
+
+                return DigestUtils.md5Hex(new FileInputStream(clientFile));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        private void simpleUnzip(String path, Consumer<IOUtils.ZipArguments> process) throws IOException {
             IOUtils.unzip(path, "client/", process);
             IOUtils.delete(path);
         }
 
         private void receiveClientPart(String name, Consumer<IOUtils.FileReceivingArguments> listener) throws IOException {
             ConsoleUtils.printDebug(getClass(), "Receiving \"" + name + "\"...");
-            manager.connect();
-            manager.sendText("get_client:" + name);
-            IOUtils.receiveFile(manager.socket, "client/" + name + ".zip", listener);
-            manager.disconnect();
-        }
-
-        private String echoText(String text) throws IOException {
-            manager.connect();
-            manager.sendText(text);
-            String received = manager.receiveText();
-            manager.disconnect();
-            return received;
-        }
-
-        private static double thirdPart(int index, double percent){
-            return 100d / 3d * (double)index + percent / 3d;
+            Socket socket = manager.connect();
+            manager.sendText(socket, "{\"method\":\"client.get\",\"name\":\"" + name + "\"}");
+            //manager.get(GetRequest.createWithTitle("client.get", "name", name));
+            IOUtils.receiveFile(socket, "client/" + name + ".zip", listener);
+            manager.disconnect(socket);
         }
 
         public static class DownloadingProcessArguments {
@@ -927,7 +992,7 @@ public class NetManager {
         public static JSONObject info(String ip, int port) throws IOException {
             InetSocketAddress host = new InetSocketAddress(ip, port);
             Socket socket = new Socket();
-            socket.connect(host, 3000);
+            socket.connect(host, 10000);
             DataOutputStream output = new DataOutputStream(socket.getOutputStream());
             DataInputStream input = new DataInputStream(socket.getInputStream());
             byte [] handshakeMessage = createHandshakeMessage(ip, port);

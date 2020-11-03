@@ -183,6 +183,7 @@ public abstract class SocialPanel extends BlurPanel {
     }
 
     public abstract void onContentInit(TransparentPanel panel);
+    public abstract void update();
 
     public void onClick(){}
 

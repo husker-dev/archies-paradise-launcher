@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group 'com.husker.launcher'
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/java"
+        }
+    }
+}
+
+dependencies {
+    implementation files('C:\\Users\\redfa\\Desktop\\bukkit\\Spigot\\Spigot-API\\target\\spigot-api-1.16.3-R0.1-SNAPSHOT.jar')
+}

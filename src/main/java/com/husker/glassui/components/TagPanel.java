@@ -31,7 +31,7 @@ public class TagPanel extends TransparentPanel {
 
         setLayout(new BorderLayout());
         add(new TransparentPanel(){{
-            setLayout(new FlowLayout(FlowLayout.LEFT));
+            setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
             add(tag);
             add(button);
         }}, BorderLayout.NORTH);
@@ -49,8 +49,16 @@ public class TagPanel extends TransparentPanel {
         content.add(component);
     }
 
+    public TransparentPanel getContent(){
+        return content;
+    }
+
     public void setTag(String text){
         tag.setText(text);
+    }
+
+    public void addButtonAction(Runnable action){
+        button.addActionListener(action);
     }
 
     public void setButtonIcons(BufferedImage def, BufferedImage selected){

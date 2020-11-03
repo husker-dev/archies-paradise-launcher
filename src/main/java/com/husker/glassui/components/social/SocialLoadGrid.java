@@ -6,64 +6,56 @@ import com.husker.launcher.ui.Screen;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class SocialLoadGrid extends TransparentPanel {
 
     private final Screen screen;
-    private final TransparentPanel blankContent;
-    private final TransparentPanel content;
-    private int max;
     private int current = 0;
 
-    public SocialLoadGrid(Screen screen, int max, int gridWidth, int gridHeight) {
+    public SocialLoadGrid(Screen screen, int gridWidth, int gridHeight) {
         setMargin(12);
 
         this.screen = screen;
 
-        super.setLayout(new OverlayLayout(this));
-        add(content = new TransparentPanel());
-        add(blankContent = new TransparentPanel());
-
-        content.setLayout(new GridLayout(gridHeight, gridWidth, 12, 12));
-        blankContent.setLayout(new GridLayout(gridHeight, gridWidth, 12, 12));
-
-        setMaxCount(max);
+        setLayout(new GridLayout(gridHeight, gridWidth, 12, 12));
     }
 
     public void setIndent(int size){
-        ((GridLayout)content.getLayout()).setHgap(size);
-        ((GridLayout)content.getLayout()).setVgap(size);
-        ((GridLayout)blankContent.getLayout()).setHgap(size);
-        ((GridLayout)blankContent.getLayout()).setVgap(size);
-    }
-
-    public void setMaxCount(int max){
-        if(this.max != max) {
-            this.max = max;
-
-            blankContent.removeAll();
-            content.removeAll();
-            for (int i = 0; i < max; i++)
-                blankContent.add(new BlankSocialPanel(screen));
-            for (int i = 0; i < max; i++)
-                content.add(new TransparentPanel());
-        }
+        ((GridLayout)getLayout()).setHgap(size);
+        ((GridLayout)getLayout()).setVgap(size);
     }
 
     public void addSocialPanel(SocialPanel panel){
-        if(current >= max)
+        if(panel == null)
             return;
-
-        content.remove(current);
-        content.add(panel, current);
-
-        ((BlankSocialPanel) blankContent.getComponent(current)).hidePanel();
-
+        add(panel, current);
         current++;
-
-        if(current == max)
-            blankContent.removeAll();
-
         screen.getLauncher().updateUI();
+    }
+
+    public SocialPanel[] getSocialPanels(){
+        ArrayList<SocialPanel> panels = new ArrayList<>();
+
+        for(Component component : getComponents())
+            if(component instanceof SocialPanel)
+                panels.add((SocialPanel) component);
+        return panels.toArray(new SocialPanel[0]);
+    }
+
+    public void updatePanels(){
+        for(SocialPanel panel : getSocialPanels()) {
+            panel.update();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                screen.getLauncher().updateUI();
+            }).start();
+        }
+
+
     }
 }

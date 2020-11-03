@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,11 +64,11 @@ public class GetRequest extends JSONObject{
         return new GetRequest(text);
     }
 
-    public static GetRequest createWithTitle(String title, String... parameters){
+    public static GetRequest createWithTitle(String title, Object... parameters){
         return new GetRequest(){{
             put(REQUEST_TAG, title);
             for(int i = 0; i < parameters.length; i+= 2)
-                put(parameters[i], parameters[i + 1]);
+                put(parameters[i].toString(), parameters[i + 1]);
         }};
     }
 
@@ -80,17 +81,15 @@ public class GetRequest extends JSONObject{
     }
 
     private static void sendText(Socket socket, String text) throws IOException {
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
         out.write(text + "\n");
         out.flush();
     }
 
     private static String receiveText(Socket socket) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-        String text = in.readLine();
-        return text;
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
+        return in.readLine();
     }
 
     public static String toBase64(BufferedImage image) {

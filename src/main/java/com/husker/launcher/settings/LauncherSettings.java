@@ -1,13 +1,14 @@
 package com.husker.launcher.settings;
 
+import com.husker.launcher.Launcher;
 import com.husker.launcher.utils.settings.SettingsFile;
 
 import java.io.File;
 
 public class LauncherSettings extends SettingsFile {
 
-    public LauncherSettings() {
-        super(new File("launcher.cfg"));
+    public LauncherSettings(Launcher launcher) {
+        super(new File(launcher.getSettingsFolder() + "/launcher.cfg"));
 
         setDefault("auto_auth", "true");
         setDefault("background", "1");

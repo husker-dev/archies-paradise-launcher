@@ -6,23 +6,14 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.glu.GLU;
-import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Arrays;
 
 import static com.jogamp.opengl.GL.*;
-import static com.jogamp.opengl.GL2ES1.GL_ALPHA_TEST;
-import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_LOD_BIAS;
+import static com.jogamp.opengl.GL2ES1.*;
 
 public class SkinViewerRenderer implements GLEventListener {
 
@@ -31,7 +22,7 @@ public class SkinViewerRenderer implements GLEventListener {
     private final GLU glu = new GLU();
 
     private boolean disposed = false;
-    private BufferedImage lastTexture;
+    private int textureId = -1;
 
     private int[] rightLeg = new int[6];
     private int[] leftLeg = new int[6];
@@ -59,7 +50,6 @@ public class SkinViewerRenderer implements GLEventListener {
     private long lastTime = -1;
 
     private float alpha = 0;
-    private boolean textureLoaded = false;
 
     private final SkinViewer viewer;
 
@@ -73,7 +63,6 @@ public class SkinViewerRenderer implements GLEventListener {
         float delta = (System.currentTimeMillis() - lastTime) / 100f;
         lastTime = System.currentTimeMillis();
 
-        updateResources(gl);
         updateAnimation(delta);
 
         // Smooth value changing
@@ -86,9 +75,9 @@ public class SkinViewerRenderer implements GLEventListener {
         gl.glClear(GL2.GL_COLOR_BUFFER_BIT | GL2.GL_DEPTH_BUFFER_BIT);
         gl.glLoadIdentity();
 
-        checkForTextureChanges();
+        checkForTextureChanges(gl);
 
-        if(viewer.getPlayerTexture() != null && textureLoaded && lastTexture != null && !disposed && tasks.size() == 0) {
+        if(viewer.getPlayerTexture() != null && !disposed && viewer.getTexturesId() == textureId) {
             gl.glTranslatef(0f, 0, -currentZoom);
             gl.glRotatef(currentRotateY, 1, 0, 0);
             gl.glRotatef(currentRotateX, 0, 1, 0);
@@ -102,14 +91,14 @@ public class SkinViewerRenderer implements GLEventListener {
 
             drawLeg(gl, new Point3D(0, 0, -2), angle, rightLeg);
             drawLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg);
-            drawHand(gl, new Point3D(-8, 12, -2), angle, leftHand);
+            drawHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, leftHand);
             drawHand(gl, new Point3D(4, 12, -2), -angle, rightHand);
             drawCuboid(gl, new Point3D(-4, 12, -2), 8, 12, 4, body);
             drawCuboid(gl, new Point3D(-4, 24, -4), 8, 8, 8, head);
 
             drawFatLeg(gl, new Point3D(0, 0, -2), angle, rightLeg_layer);
             drawFatLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg_layer);
-            drawFatHand(gl, new Point3D(-8, 12, -2), angle, leftHand_layer);
+            drawFatHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, leftHand_layer);
             drawFatHand(gl, new Point3D(4, 12, -2), -angle, rightHand_layer);
             drawCuboid(gl, new Point3D(-4 - layerIndent, 12 - layerIndent, -2 - layerIndent), 8 + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, body_layer);
             drawCuboid(gl, new Point3D(-4 - layerIndent, 24 - layerIndent, -4 - layerIndent), 8 + layerIndent * 2f, 8 + layerIndent * 2f, 8 + layerIndent * 2f, head_layer);
@@ -133,26 +122,30 @@ public class SkinViewerRenderer implements GLEventListener {
     }
 
     public void drawFatHand(GL2 gl, Point3D point, float rotation, int... textures){
+        int size = viewer.isMaleSkin() ? 4 : 3;
+
         gl.glPushMatrix();
-        gl.glTranslated(point.x + 2, point.y + 10, point.z + 2);
+        gl.glTranslated(point.x + (size / 2d), point.y + 10, point.z + 2);
         gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + 2), -(point.y + 10), -(point.z + 2));
+        gl.glTranslated(-(point.x + (size / 2d)), -(point.y + 10), -(point.z + 2));
 
         point.x -= layerIndent;
         point.y -= layerIndent;
         point.z -= layerIndent;
-        drawCuboid(gl, point, 4 + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, textures);
+        drawCuboid(gl, point, size + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, textures);
 
         gl.glPopMatrix();
     }
 
     public void drawHand(GL2 gl, Point3D point, float rotation, int... textures){
-        gl.glPushMatrix();
-        gl.glTranslated(point.x + 2, point.y + 10, point.z + 2);
-        gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + 2), -(point.y + 10), -(point.z + 2));
+        int size = viewer.isMaleSkin() ? 4 : 3;
 
-        drawCuboid(gl, point, 4, 12, 4, textures);
+        gl.glPushMatrix();
+        gl.glTranslated(point.x + (size / 2d), point.y + 10, point.z + 2);
+        gl.glRotated(rotation,1,0,0);
+        gl.glTranslated(-(point.x + (size / 2d)), -(point.y + 10), -(point.z + 2));
+
+        drawCuboid(gl, point, size, 12, 4, textures);
 
         gl.glPopMatrix();
     }
@@ -211,9 +204,7 @@ public class SkinViewerRenderer implements GLEventListener {
 
     public void dispose(GLAutoDrawable drawable) {
         ConsoleUtils.printDebug(SkinViewer.class, "Dispose");
-        disposed = true;
 
-        viewer.leaveLoadingQueue();
     }
 
     public void updateAnimation(float delta){
@@ -255,138 +246,58 @@ public class SkinViewerRenderer implements GLEventListener {
         }
     }
 
-    public void checkForTextureChanges(){
-        if(viewer.getPlayerTexture() != null && viewer.isAutoResourceUpdateEnabled() && (lastTexture != viewer.getPlayerTexture() || disposed))
-            updateTexture();
+    public void checkForTextureChanges(GL2 gl){
+        if(viewer.getPlayerTexture() != null && (disposed || viewer.getTexturesId() != textureId))
+            updateTexture(gl);
     }
 
-    public boolean isTextureLoaded(){
-        return textureLoaded;
-    }
-
-    public void waitForResourceLoad(){
-        while(tasks.size() > 0 || lastTexture != viewer.getPlayerTexture()){
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void updateTexture(){
+    public void updateTexture(GL2 gl){
         alpha = 0;
-        textureLoaded = false;
-        lastTexture = viewer.getPlayerTexture();
+
+
+        if(viewer.getPlayerTexture() != null) {
+            rightLeg = fromTextures(gl, viewer.getTexturesInputStream("leg_right"));
+            leftLeg = fromTextures(gl, viewer.getTexturesInputStream("leg_left"));
+
+            rightLeg_layer = fromTextures(gl, viewer.getTexturesInputStream("leg_right_layer"));
+            leftLeg_layer = fromTextures(gl, viewer.getTexturesInputStream("leg_left_layer"));
+
+            rightHand = fromTextures(gl, viewer.getTexturesInputStream("hand_right"));
+            leftHand = fromTextures(gl, viewer.getTexturesInputStream("hand_left"));
+
+            rightHand_layer = fromTextures(gl, viewer.getTexturesInputStream("hand_right_layer"));
+            leftHand_layer = fromTextures(gl, viewer.getTexturesInputStream("hand_left_layer"));
+
+            body = fromTextures(gl, viewer.getTexturesInputStream("body"));
+            body_layer = fromTextures(gl, viewer.getTexturesInputStream("body_layer"));
+
+            head = fromTextures(gl, viewer.getTexturesInputStream("head"));
+            head_layer = fromTextures(gl, viewer.getTexturesInputStream("head_layer"));
+        }
+        textureId = viewer.getTexturesId();
         disposed = false;
-
-        viewer.askForLoadingQueue();
-
-        tasks.put("1", gl -> {
-            rightLeg = getHandOrLeg(gl, 16, 48);
-            leftLeg = getHandOrLeg(gl, 0, 16);
-        });
-
-        tasks.put("2", gl -> {
-            leftHand = getHandOrLeg(gl, 40, 16);
-            rightHand = getHandOrLeg(gl, 32, 48);
-        });
-
-        tasks.put("3", gl -> {
-            leftHand = getHandOrLeg(gl, 40, 16);
-            rightHand = getHandOrLeg(gl, 32, 48);
-        });
-
-        tasks.put("4", gl -> {
-            body = getBody(gl, 16, 16);
-            head = getHead(gl, 0, 0);
-        });
-
-        tasks.put("5", gl -> {
-            rightLeg_layer = getHandOrLeg(gl, 0, 48);
-            leftLeg_layer = getHandOrLeg(gl, 0, 32);
-        });
-
-        tasks.put("6", gl -> {
-            leftHand_layer = getHandOrLeg(gl, 48, 48);
-            rightHand_layer = getHandOrLeg(gl, 40, 32);
-        });
-        tasks.put("7", gl -> {
-            body_layer = getBody(gl, 16, 32);
-            head_layer = getHead(gl, 32, 0);
-
-            textureLoaded = true;
-        });
     }
 
-    public int[] getHandOrLeg(GL2 gl, int translateX, int translateY){
-        int[] out = new int[6];
-        out[0] = getSubTexture(gl, translateX + 4, translateY + 4, 4, 12);
-        out[1] = getSubTexture(gl, translateX + 8, translateY + 4, 4, 12);
-        out[2] = getSubTexture(gl, translateX + 12, translateY + 4, 4, 12);
-        out[3] = getSubTexture(gl, translateX, translateY + 4, 4, 12);
-        out[4] = getSubTexture(gl, translateX + 4, translateY, 4, 4);
-        out[5] = getSubTexture(gl, translateX + 8, translateY, 4, 4);
-        return out;
-    }
+    private int[] fromTextures(GL2 gl, InputStream[] textures){
+        if(textures == null)
+            return null;
 
-    public int[] getBody(GL2 gl, int translateX, int translateY){
-        int[] out = new int[6];
-        out[0] = getSubTexture(gl, translateX + 4, translateY + 4, 8, 12);
-        out[1] = getSubTexture(gl, translateX, translateY + 4, 4, 12);
-        out[2] = getSubTexture(gl, translateX + 16, translateY + 4, 8, 12);
-        out[3] = getSubTexture(gl, translateX + 12, translateY + 4, 4, 12);
-        out[4] = getSubTexture(gl, translateX + 4, translateY, 8, 4);
-        out[5] = getSubTexture(gl, translateX + 12, translateY, 8, 4);
-        return out;
-    }
-
-    public int[] getHead(GL2 gl, int translateX, int translateY){
-        int[] out = new int[6];
-        out[0] = getSubTexture(gl, translateX + 8, translateY + 8, 8, 8);
-        out[1] = getSubTexture(gl, translateX + 16, translateY + 8, 8, 8);
-        out[2] = getSubTexture(gl, translateX + 24, translateY + 8, 8, 8);
-        out[3] = getSubTexture(gl, translateX + 0, translateY + 8, 8, 8);
-        out[4] = getSubTexture(gl, translateX + 8, translateY + 0, 8, 8);
-        out[5] = getSubTexture(gl, translateX + 16, translateY + 0, 8, 8);
-        return out;
-    }
-
-    public int getSubTexture(GL2 gl, int x, int y, int width, int height){
-        Texture texture = null;
-        try {
-            if(viewer.getPlayerTexture() != null) {
-                texture = TextureIO.newTexture(getInputStream(viewer.getPlayerTexture().getSubimage(x, y, width, height)), false, "png");
+        int[] values = new int[textures.length];
+        for(int i = 0; i < textures.length; i++) {
+            try {
                 gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                gl.glGenerateMipmap(GL_TEXTURE_2D);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1);
-
-                FloatBuffer buffer = FloatBuffer.allocate(1);
-                gl.glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, buffer);
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, buffer.get());
+                values[i] = TextureIO.newTexture(textures[i], false, "png").getTextureObject(gl);
+            }catch (Exception ex){
+                values[i] = -1;
             }
-        }catch (Exception ex){
-            ex.printStackTrace();
         }
-        if(texture != null)
-            return texture.getTextureObject(gl);
-        else
-            return -1;
+        return values;
     }
 
-    public InputStream getInputStream(BufferedImage image){
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ImageIO.write(image, "png", os);
-            return new ByteArrayInputStream(os.toByteArray());
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return null;
-    }
 
     public void drawCuboid(GL2 gl, Point3D location, float sizeX, float sizeY, float sizeZ, int... textures){
+        if(textures == null)
+            return;
         Point3D p1 = location;  // Face left bottom
         Point3D p2 = new Point3D(location.getX() + sizeX, location.getY(), location.getZ());  // Face right bottom
         Point3D p3 = new Point3D(location.getX() + sizeX, location.getY() + sizeY, location.getZ());  // Face right top
@@ -423,18 +334,6 @@ public class SkinViewerRenderer implements GLEventListener {
         gl.glVertex3f(p4.getX(), p4.getY(), p4.getZ());
 
         gl.glEnd();
-    }
-
-    private final LinkedHashMap<String, Consumer<GL2>> tasks = new LinkedHashMap<>();
-    public void updateResources(GL2 gl){
-        if(tasks.size() > 0 && viewer.isInLoadingQueue()) {
-            Map.Entry<String, Consumer<GL2>> entry = tasks.entrySet().iterator().next();
-            entry.getValue().accept(gl);
-            tasks.remove(entry.getKey());
-
-            if(tasks.size() == 0)
-                viewer.leaveLoadingQueue();
-        }
     }
 
     public static class Point3D{

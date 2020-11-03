@@ -47,7 +47,7 @@ public class BlurButton extends WebButton implements BlurComponent{
         setFont(Resources.Fonts.ChronicaPro_ExtraBold);
         setPreferredHeight(30);
         setForeground(GlassUI.Colors.labelText);
-        setMargin(3, 0, 0, 0);
+        setMargin(3, 15, 0, 15);
     }
 
     public void setColor(Color color){

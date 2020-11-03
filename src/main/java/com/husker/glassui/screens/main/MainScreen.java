@@ -1,7 +1,10 @@
 package com.husker.glassui.screens.main;
 
 import com.husker.glassui.components.BlurTabPanel;
+import com.husker.glassui.screens.main.control.ControlPanel;
+import com.husker.glassui.screens.main.keys.KeysPanel;
 import com.husker.glassui.screens.main.info.InfoPanel;
+import com.husker.glassui.screens.main.people.PeoplePanel;
 import com.husker.glassui.screens.main.play.PlayPanel;
 import com.husker.glassui.screens.main.profile.ProfilePanel;
 import com.husker.glassui.screens.main.settings.SettingsPanel;
@@ -23,45 +26,75 @@ public class MainScreen extends AbstractMainScreen {
     private ProfilePanel profilePanel;
     private PlayPanel playPanel;
 
+    private KeysPanel keysPanel;
+    private PeoplePanel peoplePanel;
+    private ControlPanel controlPanel;
+
+    public void onInit(){
+        try{
+            super.onInit();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
     void onMenuInit(TransparentPanel menu) {
-        menu.setLayout(new BorderLayout());
+        try {
+            menu.setLayout(new BorderLayout());
 
-        menu.add(tabPanel = new BlurTabPanel(this){{
-            setPreferredHeight(450);
-            addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
-            addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
-            addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
-            addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
-            addBottomTab("settings", "Настройки", getIcon(getLauncher().Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
-            addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), new InfoPanel(MainScreen.this));
+            menu.add(tabPanel = new BlurTabPanel(this) {{
+                setPreferredHeight(450);
+                addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
+                addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
+                addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
+                addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
+                addBottomTab("settings", "Настройки", getIcon(getLauncher().Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
+                addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), new InfoPanel(MainScreen.this));
 
-            addTabChangedListener(id -> {
-                if(id.equals("news"))
-                    vkPanel.onShow();
-                if(id.equals("videos"))
-                    youtubePanel.onShow();
-                if(id.equals("profile"))
-                    profilePanel.onShow();
-            });
-        }});
+                addTabChangedListener(id -> onShowPanelEvent());
+            }});
+
+            controlPanel = new ControlPanel(MainScreen.this);
+            keysPanel = new KeysPanel(MainScreen.this);
+            peoplePanel = new PeoplePanel(MainScreen.this);
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     public void onShow(){
-        String id = tabPanel.getSelectedTabId();
+        try {
+            onShowPanelEvent();
+            newsPanel.load();
 
-        newsPanel.load();
+            tabPanel.removeTab("control");
+            tabPanel.removeTab("keys");
+            tabPanel.removeTab("people");
+            if(getLauncher().NetManager.PlayerInfo.getStatus().equals("Администратор")){
+                tabPanel.addTab("control", "Управление", getIcon(getLauncher().Resources.Icon_Folder), controlPanel);
+                tabPanel.addBottomTab("keys", "Ключи", getIcon(getLauncher().Resources.Icon_Key), keysPanel);
+                tabPanel.addBottomTab("people", "Пользователи", getIcon(getLauncher().Resources.Icon_People), peoplePanel);
+            }
 
-        if(id.equals("news"))
-            vkPanel.onShow();
-        if(id.equals("videos"))
-            youtubePanel.onShow();
-        if(id.equals("profile"))
-            profilePanel.onShow();
-        if(id.equals("play"))
-            playPanel.onShow();
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
-    // YouTube videos panel
+    public void onShowPanelEvent(){
+        String id = tabPanel.getSelectedTabId();
+        if (id.equals("news"))
+            vkPanel.onShow();
+        if (id.equals("videos"))
+            youtubePanel.onShow();
+        if (id.equals("profile"))
+            profilePanel.onShow();
+        if (id.equals("play"))
+            playPanel.onShow();
+        if (id.equals("keys"))
+            keysPanel.onShow();
+    }
+
     void onRightMenuInit(TransparentPanel menu) {
         menu.setLayout(new BorderLayout());
         menu.add(newsPanel = new NewsPanel(this));

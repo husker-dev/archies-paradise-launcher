@@ -4,6 +4,11 @@ import com.husker.launcher.server.GetRequest;
 import com.husker.launcher.server.Profile;
 import com.husker.launcher.server.ServerMain;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -53,16 +58,19 @@ public class ProfileUtils {
         }
     }
 
-    public static boolean isValidIp(String uuid, String ip){
-        Profile profile = Profile.getByUUID(uuid);
-        try {
-            if (profile.getIP().equals(ip))
-                return true;
-            else
-                return false;
-        }catch (Exception ex){
-            return false;
+    public static boolean isValidIp(String name, String ip){
+        for(int i = 1; i <= getUserCount(); i++) {
+            try {
+                Profile profile = new Profile(i);
+                if (profile.getDataValue(Profile.LOGIN).equals(name)) {
+                    if (profile.getIP().equals(ip))
+                        return true;
+                    else
+                        return false;
+                }
+            }catch (Exception ex){}
         }
+        return false;
     }
 
     public static boolean isValidKey(long time){
@@ -112,44 +120,42 @@ public class ProfileUtils {
     }
 
     public static Profile getProfile(GetRequest parameters){
-        if(parameters.containsKey(Profile.KEY))
+        return getProfile(parameters, false);
+    }
+    public static Profile getProfile(GetRequest parameters, boolean useLoginAndPassword){
+        if(useLoginAndPassword)
+            return Profile.get(parameters.getString(Profile.LOGIN), parameters.getString(Profile.PASSWORD));
+        else
             return Profile.get(parameters.getString(Profile.KEY));
-        else {
-            if(parameters.containsKey(Profile.ENCRYPTED) && parameters.get(Profile.ENCRYPTED).equals("1"))
-                return Profile.get(parameters.getString(Profile.LOGIN), decrypt(parameters.getString(Profile.PASSWORD)));
-            else
-                return Profile.get(parameters.getString(Profile.LOGIN), parameters.getString(Profile.PASSWORD));
+    }
+
+    public static boolean canChangeName(Profile profile, String newName){
+        for(int i = 1; i <= getUserCount(); i++) {
+            if(profile.getId() == i)
+                continue;
+            try {
+                if (new Profile(i).getDataValue(Profile.LOGIN).equals(newName))
+                    return false;
+            }catch (Exception ignored){}
         }
+        return true;
     }
 
     public static boolean isNicknameExist(String nickname){
-        for(int i = 1; i <= getUserCount(); i++)
-            if(new Profile(i).getDataValue(Profile.LOGIN).equals(nickname))
-                return true;
+        for(int i = 1; i <= getUserCount(); i++) {
+            try {
+                if (new Profile(i).getDataValue(Profile.LOGIN).equals(nickname))
+                    return true;
+            }catch (Exception ex){}
+        }
         return false;
     }
 
-    public static boolean isUUIDExist(String uuid){
-        for(int i = 1; i <= getUserCount(); i++)
-            if(new Profile(i).getDataValue(Profile.UUID).equals(uuid))
-                return true;
-        return false;
+    public static boolean arePasswordsEquals(String hashed, String password){
+        return hashed.equals(DigestUtils.md2Hex(password));
     }
 
-    public static String createUuid(){
-        String uuid;
-        do{
-            uuid = UUID.randomUUID().toString();
-        }while (isUUIDExist(uuid));
-        return uuid;
-    }
-
-    public static void sendText(Socket socket, Object text) throws IOException {
-        BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-        bf.write(text + "\n");
-        bf.flush();
-    }
-
+    /*
     public static String encrypt(final String text) {
         return Base64.encodeBase64String(xor(text.getBytes()));
     }
@@ -169,6 +175,30 @@ public class ProfileUtils {
                 spos = 0;
         }
         return output;
+    }
+
+     */
+
+    public static String getImageUrl(BufferedImage image) throws IOException {
+        HttpClient client = new HttpClient();
+        PostMethod method = new PostMethod("https://api.imgbb.com/1/upload?expiration=600&key=" + "fdb302408cc5748ed3b938331723914a");
+
+        method.addParameter("image", GetRequest.toBase64(image));
+
+        int statusCode = client.executeMethod(method);
+
+        if (statusCode != -1) {
+            Scanner scanner = new Scanner(method.getResponseBodyAsStream());
+
+            StringBuilder s = new StringBuilder();
+            while(scanner.hasNext())
+                s.append(scanner.nextLine());
+            String text = s.toString().replace("\\/", "/");
+            JSONObject object = new JSONObject(text);
+
+            return object.getJSONObject("data").getString("url");
+        }else
+            throw new IOException("Bad status code " + statusCode);
     }
 
 }

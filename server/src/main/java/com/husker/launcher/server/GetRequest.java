@@ -7,6 +7,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class GetRequest extends JSONObject{
     }
 
     public static void sendText(Socket socket, String text) throws IOException {
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8));
 
         out.write(text + "\n");
         out.flush();
@@ -99,7 +100,7 @@ public class GetRequest extends JSONObject{
     }
 
     public static String receiveText(Socket socket) throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 
         String text = in.readLine();
         if(text != null)

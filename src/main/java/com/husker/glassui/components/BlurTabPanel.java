@@ -143,6 +143,20 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             setSelectedTab(id);
     }
 
+    public void removeTab(String id){
+        if(!tabContent.containsKey(id))
+            return;
+
+        tabContent.remove(id);
+        WebLabel label = tabLabels.remove(id);
+        tabText.remove(label);
+
+        if(topTabPanel.contains(label))
+            topTabPanel.remove(label);
+        if(bottomTabPanel.contains(label))
+            bottomTabPanel.remove(label);
+    }
+
     protected WebLabel createLabel(Icon icon){
         return new WebLabel(){{
             setIcon(icon);

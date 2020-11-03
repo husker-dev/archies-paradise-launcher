@@ -5,17 +5,31 @@ import com.husker.glassui.components.social.ImageSocialPanel;
 
 public class YoutubeVideoPanel extends ImageSocialPanel {
 
-    private YoutubeVideoParameters parameters;
+    public int index;
+    public String url;
 
-    public YoutubeVideoPanel(Screen screen, YoutubeVideoParameters parameters){
+    public YoutubeVideoPanel(Screen screen, int index){
         super(screen);
-        this.parameters = parameters;
-        setTitle(parameters.getTitle());
+        this.index = index;
         setIcon(getScreen().getLauncher().Resources.Logo_Youtube);
-        setImage(parameters.getImage());
+    }
+
+    public void update(){
+        YoutubeVideoInfo info = getScreen().getLauncher().NetManager.Social.getYoutubeVideo(index);
+        if(info == null)
+            return;
+
+        setTitle(info.getTitle());
+        url = info.getUrl();
+
+        setImage(info.getPreview());
     }
 
     public void onClick() {
-        getScreen().getLauncher().NetManager.openLink(parameters.getUrl());
+        getScreen().getLauncher().NetManager.openLink(url);
+    }
+
+    public static YoutubeVideoPanel create(Screen screen, int index){
+        return new YoutubeVideoPanel(screen, index);
     }
 }

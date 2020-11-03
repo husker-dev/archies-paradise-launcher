@@ -3,11 +3,13 @@ package com.husker.glassui.screens.main.settings;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
+import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.utils.ConsoleUtils;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -16,6 +18,9 @@ import java.awt.event.MouseEvent;
 import static java.awt.FlowLayout.CENTER;
 
 public class BackgroundSelection extends SimpleTitledScreen {
+
+    private BlurPagePanel pages;
+    private BlurScalableImage[] images = new BlurScalableImage[6];
 
     public BackgroundSelection() {
         super("Настройки", "Фон");
@@ -37,9 +42,9 @@ public class BackgroundSelection extends SimpleTitledScreen {
             setPreferredWidth(550);
             setPreferredHeight(250);
 
-            for(int i = 1; i < getLauncher().Resources.Background.length; i++){
+            for(int i = 1; i <= 6; i++){
                 final int I = i;
-                BlurScalableImage scalableImage = new BlurScalableImage(BackgroundSelection.this, getLauncher().Resources.Background[i]){
+                images[i - 1] = new BlurScalableImage(BackgroundSelection.this){
                     {
                         setFitType(FitType.FILL_XY);
                     }
@@ -53,17 +58,57 @@ public class BackgroundSelection extends SimpleTitledScreen {
                         }
                     }
                 };
-                scalableImage.addMouseListener(new MouseAdapter() {
+                images[i - 1].addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
-                        getLauncher().setBackgroundImage(getLauncher().Resources.Background[I]);
-                        getLauncher().getSettings().setBackgroundIndex(I);
-                        getLauncher().updateUI();
+                        if(pages.getPage() * 6 + I < getLauncher().Resources.Background.length) {
+                            getLauncher().setBackgroundImage(getLauncher().Resources.Background[pages.getPage() * 6 + I]);
+                            getLauncher().getSettings().setBackgroundIndex(pages.getPage() * 6 + I);
+                            getLauncher().updateUI();
+                        }
                     }
                 });
-                scalableImage.setPreferredSize(new Dimension(150, 100));
-                add(scalableImage);
+                images[i - 1].setPreferredSize(new Dimension(150, 100));
+                add(images[i - 1]);
             }
         }});
+
+        panel.add(new TransparentPanel(){{
+            setLayout(new FlowLayout(CENTER));
+            add(pages = new BlurPagePanel(BackgroundSelection.this){{
+                setPreferredWidth(400);
+                int pages = getLauncher().Resources.Background.length / 6;
+                if(getLauncher().Resources.Background.length % 6 != 0)
+                    pages ++;
+
+                setPages(pages);
+                addPageListener(BackgroundSelection.this::setPage);
+                setSelectedPage(0);
+            }});
+        }}, BorderLayout.SOUTH);
+
+    }
+
+    public void onShow() {
+        super.onShow();
+        pages.setSelectedPage(0);
+        setPage(0);
+    }
+
+    public void setPage(int page){
+        int count = 6;
+        int from = 6 * page;
+
+        if(page == getLauncher().Resources.Background.length / 6)
+            count = getLauncher().Resources.Background.length % 6;
+
+        ConsoleUtils.printDebug(getClass(), "Count: " + count + "  From:" + from);
+
+        for(int i = from; i < from + 6; i++){
+            if(i < getLauncher().Resources.Background.length - 1)
+                images[i - from].setImage(getLauncher().Resources.Background[i + 1]);
+            else
+                images[i - from].setImage(null);
+        }
     }
 
     public void onButtonsInit(TransparentPanel panel) {

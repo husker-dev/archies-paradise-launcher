@@ -3,6 +3,10 @@ package com.husker.glassui;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.husker.glassui.components.BlurComponent;
+import com.husker.glassui.screens.confirm.C_1_Email;
+import com.husker.glassui.screens.confirm.C_2_SendingCode;
+import com.husker.glassui.screens.confirm.C_3_Code;
+import com.husker.glassui.screens.confirm.C_4_ConfirmingCode;
 import com.husker.glassui.screens.main.profile.skin.*;
 import com.husker.glassui.screens.main.settings.*;
 import com.husker.glassui.screens.*;
@@ -19,6 +23,7 @@ import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.screens.main.profile.edit.InfoApplying;
 import com.husker.glassui.screens.main.profile.skin.SkinFoldersLoading;
+import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.ShapeUtils;
 
 import java.awt.*;
@@ -58,19 +63,20 @@ public class GlassUI extends LauncherUI {
         setAnimated(true);
 
         // Message
-        addScreen("message", new Message());
+        addScreen(Message.class);
 
         // Login
-        addScreen("login", new Login());
-        addScreen("authProcess", new AuthProcess());
+        addScreen(Login.class, LoginProcess.class);
 
         // Registration
-        addScreen("registration", new R_1_LoginNPassword());
-        addScreen("nicknameCheck", new R_2_NameCheck());
-        addScreen("registration_1", new R_3_Email());
-        addScreen("sendEmail", new R_4_SendEmail());
-        addScreen("emailConfirm", new R_5_CodeConfirm());
-        addScreen("checkingEmailCode", new R_6_Final());
+        addScreen(Registration.class, RegistrationProgress.class);
+
+        // Confirmation
+        addScreen(
+                C_1_Email.class,
+                C_2_SendingCode.class,
+                C_3_Code.class,
+                C_4_ConfirmingCode.class);
 
         // Main
         addScreen("main", new MainScreen());
@@ -82,18 +88,15 @@ public class GlassUI extends LauncherUI {
         addScreen("skin_list", new SkinList());
         addScreen("skin_apply", new SkinApply());
 
-        addScreen("info_edit", new InfoEdit());
-        addScreen("info_edit_apply", new InfoApplying());
-        addScreen("info_email_confirm", new EmailConfirm());
+        addScreen(InfoEdit.class, InfoApplying.class, EmailConfirm.class, SendingCode.class);
 
         if(getLauncher().getSettings().isAutoAuth() && getLauncher().getUserConfig().hasAccount()){
-            setScreen("authProcess", new Screen.Parameters(){{
+            setScreen(LoginProcess.class, new Screen.Parameters(){{
                 put(NetManager.LOGIN, getLauncher().getUserConfig().getLogin());
                 put(NetManager.PASSWORD, getLauncher().getUserConfig().getPassword());
-                put(NetManager.ENCRYPTED, "true");
             }});
         }else
-            setScreen("main");
+            setScreen(Login.class);
     }
 
     public Dimension getDefaultSize() {
@@ -218,6 +221,6 @@ public class GlassUI extends LauncherUI {
         String login = getLauncher().NetManager.PlayerInfo.getNickname();
         getLauncher().NetManager.PlayerInfo.logout();
         getLauncher().getUserConfig().reset();
-        setScreen("login", new Screen.Parameters("login", login));
+        setScreen(Login.class, new Screen.Parameters("login", login));
     }
 }

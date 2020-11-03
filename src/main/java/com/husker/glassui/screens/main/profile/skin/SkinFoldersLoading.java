@@ -12,7 +12,7 @@ public class SkinFoldersLoading extends SimpleLoadingScreen {
 
     public void process() {
         try {
-            String[] folders = getLauncher().NetManager.Skins.getFolders();
+            String[] folders = getLauncher().NetManager.Skins.getCategories();
             getLauncherUI().setScreen("skin_folders", new Parameters("folders", String.join(",", folders), "notReset", getParameterValue("notReset", "0")));
         }catch (Exception ex){
             Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось загрузить список скинов :(", "main");

@@ -1,11 +1,6 @@
 package com.husker.launcher.utils;
 
 import com.husker.launcher.managers.UpdateManager;
-import net.querz.nbt.io.NBTUtil;
-import net.querz.nbt.io.NamedTag;
-import net.querz.nbt.io.SNBTUtil;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -29,6 +24,8 @@ public class MinecraftStarter {
     private final ArrayList<String> servers = new ArrayList<>();
     private String nickname = "Player";
     private String uuid = "00000000-0000-0000-0000-000000000000";
+    private boolean fullscreen = false;
+    private long ram = -1;
 
     public MinecraftStarter(String folder) throws IOException {
         this.folder = new File(folder).getAbsolutePath().replace("\\", "/");
@@ -50,6 +47,14 @@ public class MinecraftStarter {
         this.uuid = uuid;
     }
 
+    public void setFullscreen(boolean fullscreen){
+        this.fullscreen = fullscreen;
+    }
+
+    public void setRam(long ram){
+        this.ram = ram;
+    }
+
     public void launch(){
         try {
             String startString = getStartString();
@@ -65,43 +70,22 @@ public class MinecraftStarter {
                     String s;
                     while ((s = stdInput.readLine()) != null)
                         ConsoleUtils.printDebug(MinecraftStarter.class, s);
-                }catch (Exception ex){}
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }).start();
             new Thread(() -> {
                 try {
                     String s;
                     while ((s = stdError.readLine()) != null)
                         ConsoleUtils.printDebug(MinecraftStarter.class, s);
-                }catch (Exception ex){}
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
             }).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void prepareServers(){
-        if(servers.size() == 0)
-            return;
-
-        try {
-            NamedTag namedTag = NBTUtil.read("C:\\Users\\redfa\\AppData\\Roaming\\.minecraft\\servers.dat");
-            ConsoleUtils.printDebug(getClass(), namedTag.getTag());
-            CompoundTag info = new CompoundTag(){{
-                ListTag<CompoundTag> list = new ListTag<>(CompoundTag.class);
-                put("servers", list);
-
-                for(String server : servers){
-                    CompoundTag compoundTag = new CompoundTag();
-                    compoundTag.putString("name", server);
-                    list.add(compoundTag);
-                }
-            }};
-            ConsoleUtils.printDebug(getClass(), info);
-            NBTUtil.write(info, folder + "/servers.dat");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private String getStartString(){
@@ -111,6 +95,8 @@ public class MinecraftStarter {
         arguments.add("-Djava.library.path=\"" + versionFolder + "\\natives\"");
         arguments.add("-Dminecraft.launcher.brand=minecraft-launcher");
         arguments.add("-Dminecraft.launcher.version=" + UpdateManager.VERSION);
+        if(ram > 0)
+            arguments.add("-Xmx" + ram + "m");
         if(isWindows())
             arguments.add("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
         arguments.add("-classpath \"" + getLibraries() + "\" " + object.getString("mainClass"));
@@ -123,6 +109,8 @@ public class MinecraftStarter {
         arguments.add("--versionType release");
         arguments.add("--accessToken null");
         arguments.add("--uuid " + uuid);
+        if(fullscreen)
+            arguments.add("--fullscreen");
 
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         arguments.add("--width " + gd.getDisplayMode().getWidth() / 2);

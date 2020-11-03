@@ -4,7 +4,7 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.WebLookAndFeel;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
-import com.husker.glassui.components.BlurPageList;
+import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.launcher.Resources;
@@ -29,7 +29,7 @@ public class SkinFolders extends SimpleTitledScreen {
     private int page = 0;
     private final int pageElements = 6;
     private final SkinFolderPanel[] skinPanel = new SkinFolderPanel[pageElements];
-    private BlurPageList pagePanel;
+    private BlurPagePanel pagePanel;
 
     public SkinFolders() {
         super("Скины", "Категории");
@@ -50,7 +50,7 @@ public class SkinFolders extends SimpleTitledScreen {
         }});
         panel.add(new TransparentPanel(){{
             setMargin(20, 100, 20, 100);
-            add(pagePanel = new BlurPageList(SkinFolders.this){{
+            add(pagePanel = new BlurPagePanel(SkinFolders.this){{
                 addPageListener(SkinFolders.this::setPage);
             }});
         }});
@@ -254,7 +254,7 @@ public class SkinFolders extends SimpleTitledScreen {
             }
 
             try {
-                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getFolderPreview(name);
+                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getCategoryPreview(name);
                 viewer.setPlayerTexture(image);
             }catch (Exception ex){
                 viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);

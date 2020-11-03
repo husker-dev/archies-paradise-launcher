@@ -3,16 +3,22 @@ package com.husker.glassui.screens.main.play;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
-import com.husker.launcher.components.ProgressBar;
+
 import com.husker.glassui.components.TagPanel;
+import com.husker.launcher.components.ProgressBar;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
+import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.utils.MinecraftStarter;
+import com.husker.launcher.utils.RenderUtils;
+import com.husker.launcher.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.text.DecimalFormat;
+
+import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 
 public class PlayPanel extends TransparentPanel {
 
@@ -41,6 +47,8 @@ public class PlayPanel extends TransparentPanel {
 
             // Info
             add(new TagPanel(screen, "Информация"){{
+                addButtonAction(() -> updateData());
+                setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
                 addContent(GlassUI.createParameterLine("Версия", versionLabel = GlassUI.createParameterLineValueLabel(false)));
                 addContent(GlassUI.createParameterLine("Номер сборки", buildVersionLabel = GlassUI.createParameterLineValueLabel(false)));
             }});
@@ -83,14 +91,13 @@ public class PlayPanel extends TransparentPanel {
 
             // Progress
             add(loadingPanel = new TransparentPanel(){{
-                setVisible(false);
-                setVisible(false);
-                setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
-                add(progressBar = new ProgressBar(screen));
-                progressBar.setPreferredWidth(500);
+                //setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+                setMargin(5, 15, 5, 15);
+
+                add(progressBar = new ProgressBar());
+                progressBar.setPreferredSize(new Dimension(500, 100));
             }});
             setMargin(5, 0, 0, 0);
-
         }}, BorderLayout.SOUTH);
         setProcessVisible(false);
     }
@@ -104,7 +111,7 @@ public class PlayPanel extends TransparentPanel {
             int id = args.getProcessId();
             double percent = args.getPercent();
 
-            if(id == -1) {
+            if(id == -1 || id == -2) {
                 screen.getLauncher().setVisible(true);
                 setProcessVisible(false);
                 updateData();
