@@ -16,6 +16,7 @@ String received = new Scanner(socket.getInputStream()).nextLine();
 socket.close();
 ```
 </details>
+
 ## Общая информация
 Каждый запрос должен содержать обязательные параметры:
 - ```method``` - Название вызываемого метода. Значение имеет формат: ```category.method```
