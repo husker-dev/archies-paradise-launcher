@@ -429,6 +429,7 @@ socket.close();
   ```
   ---
 </details>
+
 ## Скины
 <details>
   <summary><code>getCategories</code></summary>
@@ -617,6 +618,7 @@ socket.close();
   ```
   ---
 </details>
+
 ## YouTube
 <details>
   <summary><code>getVideo</code></summary>
@@ -688,6 +690,7 @@ socket.close();
   ```
   ---
 </details>
+
 ## Клиент
 <details>
   <summary><code>getInfo</code></summary>
