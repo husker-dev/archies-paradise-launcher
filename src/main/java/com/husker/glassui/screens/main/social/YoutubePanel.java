@@ -1,6 +1,6 @@
 package com.husker.glassui.screens.main.social;
 
-import com.husker.glassui.components.social.youtube.YoutubeVideoPanel;
+import com.husker.glassui.components.social.impl.YoutubeVideoPanel;
 import com.husker.launcher.ui.Screen;
 
 public class YoutubePanel extends SocialTabPanel {
@@ -13,9 +13,9 @@ public class YoutubePanel extends SocialTabPanel {
     }
 
     public void onLoad() {
-        setLogo(getScreen().getLauncher().NetManager.Social.getYoutubeLogo());
-        setTitle(getScreen().getLauncher().NetManager.Social.getYoutubeTitle());
-        setDescription(getScreen().getLauncher().NetManager.Social.getYoutubeSubscribers());
-        setLink(getScreen().getLauncher().NetManager.Social.getYoutubeUrl());
+        setLogo(getScreen().getLauncher().API.Social.getYoutubeLogo());
+        setTitle(getScreen().getLauncher().API.Social.getYoutubeTitle());
+        setDescription(getScreen().getLauncher().API.Social.getYoutubeSubscribers());
+        setLink(getScreen().getLauncher().API.Social.getYoutubeUrl());
     }
 }

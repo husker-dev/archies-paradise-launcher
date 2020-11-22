@@ -111,6 +111,7 @@ public class Resources {
     public final BufferedImage Social_Loading_Logo;
     public final BufferedImage Logo_Youtube;
     public final BufferedImage Logo_VK;
+    public final BufferedImage Logo_Instagram;
 
     public final BufferedImage Loading_Background;
 
@@ -173,6 +174,7 @@ public class Resources {
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");
         Logo_VK = getBufferedImage("vk_logo.png");
+        Logo_Instagram = getBufferedImage("instagram_logo.png");
 
         Loading_Background = getBufferedImage("loading_background.png");
 

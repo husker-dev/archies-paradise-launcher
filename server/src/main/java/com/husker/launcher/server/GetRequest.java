@@ -96,7 +96,7 @@ public class GetRequest extends JSONObject{
         out.write(text + "\n");
         out.flush();
 
-        ConsoleUtils.printDebug(Client.class, socket.getInetAddress().getHostAddress() + " <- " + text);
+        ConsoleUtils.printDebug(ApiRequests.class, socket.getInetAddress().getHostAddress() + " <- " + text);
     }
 
     public static String receiveText(Socket socket) throws IOException {
@@ -104,7 +104,7 @@ public class GetRequest extends JSONObject{
 
         String text = in.readLine();
         if(text != null)
-            ConsoleUtils.printDebug(Client.class, socket.getInetAddress().getHostAddress() + " -> " + text);
+            ConsoleUtils.printDebug(ApiRequests.class, socket.getInetAddress().getHostAddress() + " -> " + text);
         return text;
     }
 

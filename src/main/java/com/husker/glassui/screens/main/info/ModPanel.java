@@ -1,10 +1,11 @@
-package com.husker.glassui.screens.main.play;
+package com.husker.glassui.screens.main.info;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.managers.API;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -67,14 +68,16 @@ public class ModPanel extends BlurPanel {
     }
 
     public void updateInfo(){
-        NetManager.Client.ModInfo info = screen.getLauncher().NetManager.Client.getModInfo(index, true);
+        API.Client.ModInfo info = screen.getLauncher().API.Client.getModInfo(index, true);
         if(info != null) {
             name.setText(info.getName());
 
-            if (info.getIcon() != null)
-                icon.setImage(info.getIcon());
-            else
-                icon.setImage(null);
+            new Thread(() -> {
+                if (info.hasIcon())
+                    icon.setImage(screen.getLauncher().API.Client.getModIcon(info.getIndex()));
+                else
+                    icon.setImage(null);
+            }).start();
         }else{
             name.setText("");
             icon.setImage(null);

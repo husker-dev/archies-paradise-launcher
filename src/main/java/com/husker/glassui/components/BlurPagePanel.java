@@ -2,7 +2,6 @@ package com.husker.glassui.components;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
-import com.husker.glassui.screens.main.profile.skin.SkinFolders;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;

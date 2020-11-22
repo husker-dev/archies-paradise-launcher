@@ -1,5 +1,6 @@
 package com.husker.launcher.server;
 
+import com.husker.launcher.server.services.HtmlService;
 import com.husker.launcher.server.utils.FormatUtils;
 import com.husker.launcher.server.utils.ProfileUtils;
 import com.husker.launcher.server.utils.settings.SettingsFile;
@@ -27,7 +28,7 @@ public class Profile {
     public static final String ipFile = "ip.txt";
 
     public static final String RESULT = "result";
-    public static final String KEY = "access_token";
+    public static final String ACCESS_TOKEN = "access_token";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
     public static final String EMAIL_CODE = "email_code";
@@ -66,6 +67,19 @@ public class Profile {
             ex.printStackTrace();
         }
         return -1;
+    }
+
+    public static Profile getByName(String name){
+        for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
+            try {
+                Profile profile = new Profile(id);
+                if(profile.getDataValue(LOGIN).equals(name))
+                    return profile;
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public static Profile get(String key){
@@ -209,7 +223,7 @@ public class Profile {
         }
     }
 
-    public int setData(JSONObject object, JSONObject confirms){
+    public HtmlService.ErrorMessage setData(JSONObject object, JSONObject confirms){
         HashMap<String, String> map = new HashMap<>();
         for(Map.Entry<String, Object> entry : object.toMap().entrySet())
             map.put(entry.getKey(), entry.getValue() + "");
@@ -220,31 +234,29 @@ public class Profile {
         return setData(map, confirms_map);
     }
 
-    public int setData(String... parameters){
+    public HtmlService.ErrorMessage setData(String... parameters){
         return setData(null, parameters);
     }
 
-    public int setData(HashMap<String, String> confirms, String... parameters){
+    public HtmlService.ErrorMessage setData(HashMap<String, String> confirms, String... parameters){
         HashMap<String, String> parameterMap = new HashMap<>();
         for(int i = 0; i < parameters.length; i += 2)
             parameterMap.put(parameters[0], parameters[1]);
         return setData(parameterMap, confirms);
     }
 
-    public int setData(HashMap<String, String> fields, HashMap<String, String> confirms){
+    public HtmlService.ErrorMessage setData(HashMap<String, String> fields, HashMap<String, String> confirms){
         try {
             HashMap<String, FieldSetter> setters = new HashMap<>();
 
-            int PASSWORD_REQUIRED = 1;
-            int CODE_REQUIRED = 2;
-            int INCORRECT_PASSWORD = 3;
-            int INCORRECT_EMAIL_CODE = 4;
-
-            int INCORRECT_LOGIN_FORMAT = 5;
-            int LOGIN_EXIST = 6;
-
-            int INCORRECT_EMAIL_FORMAT = 7;
-            int INCORRECT_PASSWORD_FORMAT = 8;
+            HtmlService.ErrorMessage PASSWORD_REQUIRED = new HtmlService.ErrorMessage("Current password required", 1);
+            HtmlService.ErrorMessage CODE_REQUIRED = new HtmlService.ErrorMessage("Email code required", 2);
+            HtmlService.ErrorMessage INCORRECT_PASSWORD = new HtmlService.ErrorMessage("Current password is incorrect", 3);
+            HtmlService.ErrorMessage INCORRECT_EMAIL_CODE = new HtmlService.ErrorMessage("Current email code is incorrect", 4);
+            HtmlService.ErrorMessage INCORRECT_LOGIN_FORMAT = new HtmlService.ErrorMessage("Incorrect login format", 5);
+            HtmlService.ErrorMessage LOGIN_EXIST = new HtmlService.ErrorMessage("Required login is already exist", 6);
+            HtmlService.ErrorMessage INCORRECT_EMAIL_FORMAT = new HtmlService.ErrorMessage("Incorrect email format", 7);
+            HtmlService.ErrorMessage INCORRECT_PASSWORD_FORMAT = new HtmlService.ErrorMessage("Incorrect password format", 8);
 
             // Setters
             setters.put(LOGIN, new FieldSetter(){{
@@ -268,8 +280,6 @@ public class Profile {
             setters.put(SKIN_URL, new FieldSetter(){{
                 setAction(value -> data.set(SKIN_URL, value));
             }});
-
-
 
             // Logic
             boolean passwordConfirmed = false;
@@ -310,18 +320,18 @@ public class Profile {
                     FieldSetter setter = setters.get(entry.getKey());
                     String value = entry.getValue();
 
-                    int conditionResult = setter.checkConditions(value);
-                    if(conditionResult == 0)
+                    HtmlService.ErrorMessage conditionResult = setter.checkConditions(value);
+                    if(conditionResult == null)
                         setter.run(value);
                     else
                         return conditionResult;
                 }
             }
 
-            return 0;
+            return null;
         }catch (Exception ex){
             ex.printStackTrace();
-            return -1;
+            return new HtmlService.ErrorMessage("Unknown exception while reading profile data", -2);
         }
     }
 
@@ -332,7 +342,7 @@ public class Profile {
 
         private Consumer<String> action;
 
-        private HashMap<Predicate<String>, Integer> conditions = new HashMap<>();
+        private final HashMap<Predicate<String>, HtmlService.ErrorMessage> conditions = new HashMap<>();
 
         public void setPasswordRequired(boolean required){
             password = required;
@@ -350,15 +360,15 @@ public class Profile {
             return email;
         }
 
-        public void addCondition(int code, Predicate<String> condition){
+        public void addCondition(HtmlService.ErrorMessage code, Predicate<String> condition){
             conditions.put(condition, code);
         }
 
-        public int checkConditions(String value){
-            for(Map.Entry<Predicate<String>, Integer> entry : conditions.entrySet())
+        public HtmlService.ErrorMessage checkConditions(String value){
+            for(Map.Entry<Predicate<String>, HtmlService.ErrorMessage> entry : conditions.entrySet())
                 if(!entry.getKey().test(value))
                     return entry.getValue();
-            return 0;
+            return null;
         }
 
         public void setAction(Consumer<String> action){

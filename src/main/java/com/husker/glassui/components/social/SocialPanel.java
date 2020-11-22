@@ -2,6 +2,7 @@ package com.husker.glassui.components.social;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.managers.style.StyleId;
+import com.alee.utils.swing.extensions.SizeMethods;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
@@ -42,12 +43,28 @@ public abstract class SocialPanel extends BlurPanel {
 
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                if(isSelectable)
+                if(isSelectable) {
+                    titleLabel.setMaximumRows(6);
+                    titleLabel.setMaximumHeight(80);
+                    titleLabel.setMinimumHeight(80);
+                    titleLabel.setPreferredHeight(SizeMethods.UNDEFINED);
+                    titleLabel.updateUI();
+                    screen.getLauncher().updateUI();
+
                     titleLabel.setForeground(hoveredTitleColor);
+                }
             }
             public void mouseExited(MouseEvent e) {
-                if(isSelectable)
+                if(isSelectable) {
+                    titleLabel.setMaximumRows(2);
+                    titleLabel.setMaximumHeight(35);
+                    titleLabel.setMinimumHeight(35);
+                    titleLabel.setPreferredHeight(35);
+                    titleLabel.updateUI();
+                    screen.getLauncher().updateUI();
+
                     titleLabel.setForeground(defaultTitleColor);
+                }
             }
             public void mouseClicked(MouseEvent e) {
                 onClick();
@@ -73,6 +90,10 @@ public abstract class SocialPanel extends BlurPanel {
             setLayout(new BorderLayout());
             add(titleLabel = createTitleLabel(), BorderLayout.SOUTH);
         }}, 0);
+    }
+
+    public boolean isHovered(){
+        return titleLabel.getForeground() == hoveredTitleColor;
     }
 
     public WebStyledLabel getTitleLabel(){
@@ -160,7 +181,7 @@ public abstract class SocialPanel extends BlurPanel {
                 setForeground(defaultTitleColor);
                 setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(10f));
 
-                setMaximumTextWidth(160);
+                setMaximumTextWidth(180);
 
                 getScreen().addBlurSegment("SocialPanel.Title", parameter -> onBlurApply(parameter, this));
             }

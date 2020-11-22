@@ -22,6 +22,7 @@ public abstract class AbstractMainScreen extends Screen {
 
     abstract void onMenuInit(TransparentPanel menu);
     abstract void onRightMenuInit(TransparentPanel menu);
+    abstract void onLeftMenuInit(TransparentPanel menu);
 
     public void onInit() {
         setLayout(new GridBagLayout());
@@ -103,6 +104,7 @@ public abstract class AbstractMainScreen extends Screen {
         add(new TransparentPanel(){{
             setPreferredWidth(220);
             setPreferredHeight(450);
+            onLeftMenuInit(this);
         }}, new GridBagConstraints(){{
             this.weightx = 1;
             this.anchor = GridBagConstraints.EAST;

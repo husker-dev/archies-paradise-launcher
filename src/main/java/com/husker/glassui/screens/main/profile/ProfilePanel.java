@@ -10,8 +10,7 @@ import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.glassui.screens.main.profile.edit.InfoEdit;
-import com.husker.glassui.screens.main.profile.skin.SkinFoldersLoading;
-import com.husker.glassui.screens.main.profile.skin.SkinListLoading;
+import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.components.skin.SkinViewer;
@@ -85,7 +84,7 @@ public class ProfilePanel extends TransparentPanel {
                 add(GlassUI.createParameterLine("Статус", status = GlassUI.createParameterLineValueLabel(false)));
                 add(GlassUI.createParameterLine("Id", id = GlassUI.createParameterLineValueLabel(false)));
                 add(Box.createRigidArea(new Dimension(0, 5)));
-                add(createTitleLabel("Скин", () -> screen.getLauncherUI().setScreen(SkinFoldersLoading.class)));
+                add(createTitleLabel("Скин", () -> screen.getLauncherUI().setScreen(SkinCategoriesLoading.class)));
                 add(GlassUI.createParameterLine("Тип", skinType = GlassUI.createParameterLineValueLabel(false)));
             }});
             add(new TransparentPanel(){{
@@ -122,13 +121,13 @@ public class ProfilePanel extends TransparentPanel {
     }
 
     public void onShow(){
-        name.setText(screen.getLauncher().NetManager.PlayerInfo.getNickname());
-        email.setText(screen.getLauncher().NetManager.PlayerInfo.getEmail());
-        status.setText(screen.getLauncher().NetManager.PlayerInfo.getStatus());
-        id.setText(screen.getLauncher().NetManager.PlayerInfo.getId() + "");
-        skinType.setText(SkinUtils.isMale(screen.getLauncher().NetManager.PlayerInfo.getSkin()) ? "Обычный" : "Тонкий");
-        if(skinViewer.getPlayerTexture() != screen.getLauncher().NetManager.PlayerInfo.getSkin())
-            skinViewer.setPlayerTexture(screen.getLauncher().NetManager.PlayerInfo.getSkin());
+        name.setText(screen.getLauncher().API.PlayerInfo.getNickname());
+        email.setText(screen.getLauncher().API.PlayerInfo.getEmail());
+        status.setText(screen.getLauncher().API.PlayerInfo.getStatus());
+        id.setText(screen.getLauncher().API.PlayerInfo.getId() + "");
+        skinType.setText(SkinUtils.isMale(screen.getLauncher().API.PlayerInfo.getSkin()) ? "Обычный" : "Тонкий");
+        if(skinViewer.getPlayerTexture() != screen.getLauncher().API.PlayerInfo.getSkin())
+            skinViewer.setPlayerTexture(screen.getLauncher().API.PlayerInfo.getSkin());
     }
 
     public Component createTitleLabel(String text, Runnable action){

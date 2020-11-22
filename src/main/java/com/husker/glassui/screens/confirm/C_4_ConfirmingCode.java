@@ -18,7 +18,7 @@ public class C_4_ConfirmingCode extends SimpleLoadingScreen {
         String email = getParameterValue("email");
         String code = getParameterValue("code");
 
-        int result = getLauncher().NetManager.PlayerInfo.confirmMail(email, code);
+        int result = getLauncher().API.PlayerInfo.confirmMail(email, code);
         if(result == 0)
             Message.showMessage(getLauncherUI(), "Уведомление", "Аккаунт был создан!", LoginProcess.class, new Parameters(){{
                 put("login", login);

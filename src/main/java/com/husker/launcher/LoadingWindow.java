@@ -12,10 +12,12 @@ import com.husker.launcher.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.ArrayList;
 
 import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
 
@@ -246,6 +248,9 @@ public class LoadingWindow extends JFrame {
                         break;
                 }
                 logException(ex.getException());
+            }catch (Exception e){
+                e.printStackTrace();
+                setStatusText("Неизвестная ошибка", "", 0);
             }
         }).start();
 
@@ -295,9 +300,20 @@ public class LoadingWindow extends JFrame {
 
     private void setErrorText(){
         if(!System.getProperty("java.version").startsWith("1.8"))
-            setStatusText("Для работы пекомендуется Java 1.8", 0);
+            setStatusText("Для работы рекомендуется Java 1.8", 0);
         else
             setStatusText("Ошибка при запуске!", 0);
+
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if(e.getKeyCode() == KeyEvent.VK_F5){
+                ArrayList<String> text = new ArrayList<>();
+                text.add("Java version: " + System.getProperty("java.version"));
+                text.add("JAVA_HOME: " + System.getProperty("java.home"));
+
+                JOptionPane.showConfirmDialog(this, String.join("\n", text.toArray(new String[0])), "Дополнительная информация", JOptionPane.OK_CANCEL_OPTION);
+            }
+            return false;
+        });
     }
 
     public static class FrameDragListener extends MouseAdapter {

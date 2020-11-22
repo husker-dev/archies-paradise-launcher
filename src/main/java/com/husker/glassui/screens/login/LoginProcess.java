@@ -23,10 +23,10 @@ public class LoginProcess extends SimpleLoadingScreen {
         getLauncher().getUserConfig().setLogin(login);
         getLauncher().getUserConfig().setPassword(password);
 
-        int result = getLauncher().NetManager.Auth.auth(login, password);
+        int result = getLauncher().API.Auth.auth(login, password);
 
-        if(result == getLauncher().NetManager.Auth.OK) {
-            if(getLauncher().NetManager.PlayerInfo.isEmailConfirmed())
+        if(result == getLauncher().API.Auth.OK) {
+            if(getLauncher().API.PlayerInfo.isEmailConfirmed())
                 getLauncherUI().setScreen(MainScreen.class);
             else
                 getLauncherUI().setScreen(C_1_Email.class, new Parameters(){{
@@ -35,15 +35,15 @@ public class LoginProcess extends SimpleLoadingScreen {
                 }});
             return;
         }
-        if(result == getLauncher().NetManager.Auth.CONNECTION_ERROR) {
-            Message.showMessage(getLauncherUI(), "Ошибка", "Сервер авторизации недоступен!", Login.class, new Parameters("login", login));
+        if(result == getLauncher().API.Auth.CONNECTION_ERROR) {
+            Message.showMessage(getLauncherUI(), "Ошибка", "Сервер авторизации недоступен!", Login.class, new Parameters("login", login, "password", password));
             return;
         }
-        if(result == getLauncher().NetManager.Auth.WRONG_DATA) {
+        if(result == getLauncher().API.Auth.WRONG_DATA) {
             Message.showMessage(getLauncherUI(), "Ошибка", "Неправильный логин или пароль", Login.class, new Parameters("login", login));
             return;
         }
-        Message.showMessage(getLauncherUI(), "Ошибка", "Сервер вернул неизвестный код...", Login.class, new Parameters("login", login));
+        Message.showMessage(getLauncherUI(), "Ошибка", "Сервер вернул неизвестный код...", Login.class, new Parameters("login", login, "password", password));
 
     }
 

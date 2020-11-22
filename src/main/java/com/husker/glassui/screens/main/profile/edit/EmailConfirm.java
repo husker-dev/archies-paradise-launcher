@@ -6,6 +6,7 @@ import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.managers.API;
 import com.husker.launcher.managers.NetManager;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
@@ -71,18 +72,18 @@ public class EmailConfirm extends InfoEditPanel{
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(this, "Назад"){{
             setPreferredWidth(120);
-            addActionListener(e -> getLauncherUI().setScreen(InfoEdit.class, new Parameters(NetManager.LOGIN, getParameterValue(NetManager.LOGIN), NetManager.EMAIL, getParameterValue(NetManager.EMAIL))));
+            addActionListener(e -> getLauncherUI().setScreen(InfoEdit.class, new Parameters(API.LOGIN, getParameterValue(API.LOGIN), API.EMAIL, getParameterValue(API.EMAIL))));
         }});
         panel.add(next = new BlurButton(this, "Далее"){{
             setEnabled(false);
             setPreferredWidth(120);
             addActionListener(e -> {
                 getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
-                    put(NetManager.PASSWORD, getParameter(NetManager.PASSWORD));
-                    if(getParameters().containsKey(NetManager.LOGIN))
-                        put(NetManager.LOGIN, getParameter(NetManager.LOGIN));
-                    put(NetManager.EMAIL, getParameter(NetManager.EMAIL));
-                    put(NetManager.EMAIL_CODE, code.getText());
+                    put(API.PASSWORD, getParameter(API.PASSWORD));
+                    if(getParameters().containsKey(API.LOGIN))
+                        put(API.LOGIN, getParameter(API.LOGIN));
+                    put(API.EMAIL, getParameter(API.EMAIL));
+                    put(API.EMAIL_CODE, code.getText());
                 }});
             });
         }});
@@ -95,9 +96,9 @@ public class EmailConfirm extends InfoEditPanel{
         resend.setEnabled(false);
 
         new Thread(() -> {
-            String email = getParameterValue(NetManager.EMAIL);
+            String email = getParameterValue(API.EMAIL);
 
-            int result = getLauncher().NetManager.PlayerInfo.sendConfirmCode(email);
+            int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
 
             if(result == -1)
                 Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "info_email_confirm", getParameters());
@@ -112,6 +113,6 @@ public class EmailConfirm extends InfoEditPanel{
         code.setText("");
         seconds = 60;
         resend.setEnabled(false);
-        emailLabel.setText("Код подтверждения был отправлен на {" + getParameterValue(NetManager.EMAIL) + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
+        emailLabel.setText("Код подтверждения был отправлен на {" + getParameterValue(API.EMAIL) + " :c(" + GlassUI.Colors.labelText.getRed() + "," + GlassUI.Colors.labelText.getGreen() + "," + GlassUI.Colors.labelText.getBlue() + ")}");
     }
 }

@@ -2,19 +2,13 @@ package com.husker.launcher.server.utils;
 
 import com.husker.launcher.server.GetRequest;
 import com.husker.launcher.server.Profile;
-import com.husker.launcher.server.ServerMain;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -119,15 +113,7 @@ public class ProfileUtils {
         return Objects.requireNonNull(new File(Profile.profilesFolder).list()).length;
     }
 
-    public static Profile getProfile(GetRequest parameters){
-        return getProfile(parameters, false);
-    }
-    public static Profile getProfile(GetRequest parameters, boolean useLoginAndPassword){
-        if(useLoginAndPassword)
-            return Profile.get(parameters.getString(Profile.LOGIN), parameters.getString(Profile.PASSWORD));
-        else
-            return Profile.get(parameters.getString(Profile.KEY));
-    }
+
 
     public static boolean canChangeName(Profile profile, String newName){
         for(int i = 1; i <= getUserCount(); i++) {

@@ -1,10 +1,11 @@
 package com.husker.glassui.screens.main.info;
 
 import com.alee.extended.label.WebStyledLabel;
-import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
+import com.husker.glassui.components.BlurButtonLineChooser;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.glassui.components.TagPanel;
+
 import com.husker.launcher.Resources;
 import com.husker.launcher.components.TransparentPanel;
 import com.husker.launcher.managers.UpdateManager;
@@ -26,56 +27,152 @@ public class InfoPanel extends TransparentPanel {
 
     private final Screen screen;
 
+    private boolean inited = false;
+
+    private TransparentPanel launcherPanel, clientPanel;
+
+    private ServerInfoPanel serverInfo;
+    private WebLabel versionLabel;
+    private WebLabel buildVersionLabel;
+    private final ModPanel[] modPanels = new ModPanel[5];
+
     public InfoPanel(Screen screen){
         this.screen = screen;
 
-        setLayout(new VerticalFlowLayout(0, 6));
-        setMargin(10, -10, 0, -10);
-        add(new WebStyledLabel(WebStyledLabel.CENTER){{
-            setPreferredWidth(300);
+        setLayout(new BorderLayout());
+
+        launcherPanel = new TransparentPanel(){{
+            setLayout(new BorderLayout());
+            setMargin(0, -10, 0, -10);
+            add(new WebStyledLabel(WebStyledLabel.CENTER){{
+                //setMargin(10, 0, 0, 0);
+                setPreferredWidth(300);
+                setPreferredHeight(70);
+                setMaximumRows(30);
+                setForeground(GlassUI.Colors.labelText);
+                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(28f));
+                setText(screen.getLauncher().getConfig().getTitle());
+            }}, BorderLayout.NORTH);
+            add(new BlurPanel(screen) {
+                {
+                    String repo = "empty/repo";
+                    try {
+                        repo = getScreen().getLauncher().API.Social.getGitHubRepo();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    setLayout(new FlowLayout(CENTER));
+                    setMargin(20, 20, 0, 20);
+                    add(createInfoParameter("Версия", UpdateManager.VERSION));
+                    add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
+                    add(createInfoParameter("Владелец", screen.getLauncher().getConfig().About.Owner.getName(), screen.getLauncher().getConfig().About.Owner.getURL()));
+                    add(createInfoParameter("GitHub",  repo.replace("/", "/ "), "https://github.com/" + repo));
+                    add(createInfoParameter("Поддержка", screen.getLauncher().getConfig().About.Support.getName(), screen.getLauncher().getConfig().About.Support.getURL()));
+                }
+
+                public void onBlurApply(BlurParameter parameter, Component component) {
+                    super.onBlurApply(parameter, component);
+                    parameter.setShadowType(BlurParameter.ShadowType.INNER);
+
+                    if(parameter.getShape() != null) {
+                        parameter.setShape(parameter.getShape().getBounds());
+                        Rectangle shape = parameter.getShape().getBounds();
+
+                        shape.x += 10;
+                        shape.width -= 20;
+                        parameter.setClip(shape);
+                    }
+                }
+            });
+        }};
+
+        clientPanel = new TransparentPanel(){{
+            setLayout(new BorderLayout());
+            setMargin(10, 10, 0, 10);
+
+            add(new TransparentPanel(){{
+                setLayout(new BorderLayout());
+
+                // Info
+                add(new TagPanel(screen, "Информация"){{
+                    addButtonAction(() -> updateData());
+                    setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                    addContent(GlassUI.createParameterLine("Версия", versionLabel = GlassUI.createParameterLineValueLabel(false)));
+                    addContent(GlassUI.createParameterLine("Номер сборки", buildVersionLabel = GlassUI.createParameterLineValueLabel(false)));
+                }});
+
+                // Card
+                add(new TransparentPanel(){{
+                    setMargin(0, 20, 0, 0);
+                    add(serverInfo = new ServerInfoPanel(screen));
+                }}, BorderLayout.EAST);
+            }}, BorderLayout.NORTH);
+
+            add(new TagPanel(screen, "Моды"){{
+                setMargin(10, 0, 0, 0);
+                setContentLayout(new BorderLayout());
+                addContent(new TransparentPanel(){{
+                    setLayout(new GridBagLayout());
+                    for(int i = 0; i < modPanels.length; i++)
+                        add(modPanels[i] = new ModPanel(screen, i), new GridBagConstraints(){{
+                            this.weightx = 1;
+                            this.weighty = 1;
+                            this.fill = 1;
+                            this.insets = new Insets(5, 5, 5, 5);
+                        }});
+                }});
+            }});
+        }};
+
+        add(launcherPanel);
+
+        add(new TransparentPanel(){{
+            setLayout(new GridBagLayout());
             setPreferredHeight(50);
-            setMaximumRows(30);
-            setForeground(GlassUI.Colors.labelText);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(28f));
-            setText(screen.getLauncher().getConfig().getTitle());
-        }});
 
-        add(new BlurPanel(screen) {
-            {
-                setPreferredWidth(200);
-                setPreferredHeight(225);
-                setLayout(new FlowLayout(CENTER));
-                setMargin(20, 20, 0, 20);
-                add(createInfoParameter("Версия", UpdateManager.VERSION));
-                add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
-                add(createInfoParameter("Владелец", screen.getLauncher().getConfig().About.Owner.getName(), screen.getLauncher().getConfig().About.Owner.getURL()));
-                add(createInfoParameter("GitHub", "husker-dev/ minecraft-launcher", "https://github.com/husker-dev/minecraft-launcher"));
-                add(createInfoParameter("Поддержка", screen.getLauncher().getConfig().About.Support.getName(), screen.getLauncher().getConfig().About.Support.getURL()));
-            }
+            add(new BlurButtonLineChooser(screen){{
+                addButton(" Лаунчер ");
+                addButton(" Клиент ");
+                addSelectedListener(index -> {
+                    if(index == 0){
+                        InfoPanel.this.add(launcherPanel);
+                        InfoPanel.this.remove(clientPanel);
+                    }
+                    if(index == 1){
+                        InfoPanel.this.remove(launcherPanel);
+                        InfoPanel.this.add(clientPanel);
+                        updateData();
+                    }
+                });
+            }}, new GridBagConstraints(){{
+                this.weightx = 1;
+                this.weighty = 1;
+            }});
+        }}, BorderLayout.SOUTH);
+    }
 
-            public void onBlurApply(BlurParameter parameter, Component component) {
-                super.onBlurApply(parameter, component);
-                parameter.setShadowType(BlurParameter.ShadowType.INNER);
+    public void onShow(){
+        if(!inited)
+            updateData();
+        inited = true;
+    }
 
-                if(parameter.getShape() != null) {
-                    parameter.setShape(parameter.getShape().getBounds());
-                    Rectangle shape = parameter.getShape().getBounds();
+    public void updateData(){
+        new Thread(() -> {
+            new Thread(serverInfo::updateInfo).start();
 
-                    shape.x += 10;
-                    shape.width -= 20;
-                    parameter.setClip(shape);
+            versionLabel.setText(screen.getLauncher().API.Client.getJarVersion());
+            buildVersionLabel.setText(screen.getLauncher().API.Client.getShortClientVersion());
+
+            for(ModPanel panel : modPanels) {
+                try {
+                    panel.updateInfo();
+                }catch (Exception ex){
+                    ex.printStackTrace();
                 }
             }
-        });
-        add(new TransparentPanel(){{
-            setLayout(new FlowLayout(CENTER, 10, 0));
-            setMargin(15, 10, 0, 10);
-
-            add(createLightText("Java: " + System.getProperty("java.version")));
-            add(createLightText("UI: " + screen.getLauncher().getCurrentUITitle()));
-            add(createLightText("Arch: " + System.getProperty("os.arch")));
-            add(createLightText("WebLaF: 1.2.12"));
-        }});
+        }).start();
     }
 
     public WebLabel createLightText(String text){

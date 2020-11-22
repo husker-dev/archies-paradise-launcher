@@ -180,7 +180,7 @@ public class SkinList extends SimpleTitledScreen {
                 return;
             }
             try {
-                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getCategorySkin(folder, name);
+                BufferedImage image = getScreen().getLauncher().API.Skins.getCategorySkin(folder, name);
                 viewer.setPlayerTexture(image);
             }catch (Exception ex){
                 viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);

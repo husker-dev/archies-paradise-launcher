@@ -12,7 +12,7 @@ public class SkinListLoading extends SimpleLoadingScreen {
 
     public void process() {
         try {
-            String[] skins = getLauncher().NetManager.Skins.getCategorySkins(getParameterValue("folder"));
+            String[] skins = getLauncher().API.Skins.getCategorySkins(getParameterValue("folder"));
             getLauncherUI().setScreen("skin_list", new Parameters("folder", getParameterValue("folder"), "skins", String.join(",", skins), "notReset", getParameterValue("notReset", "0")));
         }catch (Exception ex){
             ex.printStackTrace();

@@ -3,7 +3,7 @@ package com.husker.glassui.screens.main.profile.skin;
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
 
-public class SkinFoldersLoading extends SimpleLoadingScreen {
+public class SkinCategoriesLoading extends SimpleLoadingScreen {
 
     public void onContentInit() {
         setTitle("Загрузка");
@@ -12,7 +12,7 @@ public class SkinFoldersLoading extends SimpleLoadingScreen {
 
     public void process() {
         try {
-            String[] folders = getLauncher().NetManager.Skins.getCategories();
+            String[] folders = getLauncher().API.Skins.getCategories();
             getLauncherUI().setScreen("skin_folders", new Parameters("folders", String.join(",", folders), "notReset", getParameterValue("notReset", "0")));
         }catch (Exception ex){
             Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось загрузить список скинов :(", "main");

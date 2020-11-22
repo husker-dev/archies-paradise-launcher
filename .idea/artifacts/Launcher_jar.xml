@@ -1,0 +1,53 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Launcher:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts</output-path>
+    <root id="archive" name="launcher.main.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/manifests/launcher/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="launcher.main" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.13/e5f6cae5ca7ecaac1ec2827a9e2d65ae2869cada/httpclient-4.5.13.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/becd519b1f741176561d93645abd90971ca0dca0/jogl-all-2.3.2-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/2da2215dbe1091c54cb83cf2484f8a54a4d0cf7a/jogl-all-2.3.2-natives-macosx-universal.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/7227ae9e480354909d80f4df92b30bbb965387be/gluegen-rt-2.3.2-natives-macosx-universal.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/99e0f64bb8882f054825ae4a8a527a17b544a0b5/jogl-all-2.3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/2130295b94ef5c19f85fb4ba6107ca193e987858/gluegen-rt-2.3.2-natives-android-armv6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/ab2c18b8a1327255cc354c19c720807d262baa75/jogl-all-2.3.2-natives-android-armv6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/9a23cd22c59e3f04082e7589e850b79c9e696dc4/gluegen-rt-2.3.2-natives-solaris-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/edc35ccfc13d4a4ad02c50d580874c18bf48bbef/gluegen-rt-2.3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.mortennobel/java-image-scaling/0.8.6/5765b7f90f1b8f30fe3acd94aa363e746f5cf7b5/java-image-scaling-0.8.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/477a6bc4f9256d8c9935b75d55e2b7b01314440b/gluegen-rt-2.3.2-natives-linux-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jdom/jdom2/2.0.6/6f14738ec2e9dd0011e343717fa624a10f8aab64/jdom2-2.0.6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.fifesoft/rsyntaxtextarea/2.6.1/f12ae07aafc7fdc6939203b19b0bed8b1de32671/rsyntaxtextarea-2.6.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/bde11ff064181af9c307180d8f3f1744b7bdc11d/jogl-all-2.3.2-natives-solaris-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.weblookandfeel/weblaf-ui/1.2.13/aa438f4889a507dee5ead004398db57501e6ccd/weblaf-ui-1.2.13.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.weblookandfeel/weblaf-core/1.2.13/9737cf44861f391c1f684a9b8230e9c3e54fa9d7/weblaf-core-1.2.13.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/5db8db5eca6b4445db6cd14f68938736630ae976/jogl-all-2.3.2-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/4c104c7aef98cda5c404eacb96b1a4e04fe0dd68/gluegen-rt-2.3.2-natives-android-aarch64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.27/b628ec7448e775334ed58554eff9731a66bafdae/slf4j-api-1.7.27.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.13/853b96d3afbb7bf8cc303fe27ee96836a10c1834/httpcore-4.4.13.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.json/json/20200518/41a767de4bde8f01d53856b905c49b2db8862f13/json-20200518.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/f9b848384a343f39f454e59cead435c2c0cbf542/gluegen-rt-2.3.2-natives-windows-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-io/commons-io/2.5/2852e6e05fbb95076fc091f6d1780f1f8fe35e0f/commons-io-2.5.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.htmlparser.jericho/jericho-html/3.3/bf3aa8c67df4683da93d49e98d56cd0bc48f7c62/jericho-html-3.3.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.jhlabs/filters/2.0.235/af6a2dfefef70f1ab2d7a8d1f8173f67e276b3f4/filters-2.0.235.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.weblookandfeel/svg-salamander/1.1.2.2/360505fd369584559fda6a46e24c5e6fee23ff03/svg-salamander-1.1.2.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/59b7a336c0ee54161e33662d2ca8ac9d8f6c476d/jogl-all-2.3.2-natives-linux-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/85213c97a5a50d8dd37de4c35ef32cd4b0ac2ef0/gluegen-rt-2.3.2-natives-windows-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/da68aff010edd35a9ee89b1801dce6e284c7e673/gluegen-rt-2.3.2-natives-linux-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/c55cd566d98d4fcd004b9aaa2c502c8c2dcec192/gluegen-rt-2.3.2-natives-linux-armv6.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/166147f43cf7419c4d858cd31f4b5922d6d10c81/jogl-all-2.3.2-natives-android-aarch64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt-main/2.3.2/6a86a9ce357c085e3052efcf639447f9957b82b8/gluegen-rt-main-2.3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/a5d9ee96c7a365055fba41e30f9a10f42a3c1a3e/gluegen-rt-2.3.2-natives-solaris-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/ffd1c6bd5f6fb088df6cad25e25721eb55ad2228/jogl-all-2.3.2-natives-linux-amd64.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-logging/commons-logging/1.2/4bfc12adfe4842bf07b657f0369c4cb522955686/commons-logging-1.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/94d1ed501fe53b7f75eab0f712f39802390d0f5b/jogl-all-2.3.2-natives-solaris-i586.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.gluegen/gluegen-rt/2.3.2/f6d3587b061d7ae6e68932fc62317e3500d2112d/gluegen-rt-2.3.2-natives-linux-armv6hf.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.15/49d94806b6e3dc933dacbd8acb0fdbab8ebd1e5d/commons-codec-1.15.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all-main/2.3.2/6a86a9ce357c085e3052efcf639447f9957b82b8/jogl-all-main-2.3.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/2c434c560dbd821b0ed569e44d3d441727491dac/jogl-all-2.3.2-natives-linux-armv6hf.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.thoughtworks.xstream/xstream/1.4.9/c43f6e6bfa79b56e04a8898a923c3cf7144dd460/xstream-1.4.9.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jogamp.jogl/jogl-all/2.3.2/6d14f46336be9e2dc5f85d5df17490cee5d09a90/jogl-all-2.3.2-natives-linux-armv6.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

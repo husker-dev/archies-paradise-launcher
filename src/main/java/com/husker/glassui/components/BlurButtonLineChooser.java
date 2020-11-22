@@ -119,6 +119,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
             }
         });
         label.setText(text);
+        label.setMargin(0, 12, 0, 12);
         add(label, new GridBagConstraints() {{
             this.weightx = 1;
             this.fill = 1;

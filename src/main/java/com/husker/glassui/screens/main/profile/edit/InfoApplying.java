@@ -3,12 +3,12 @@ package com.husker.glassui.screens.main.profile.edit;
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
 import com.husker.glassui.screens.main.MainScreen;
-import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.managers.API;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.husker.launcher.managers.NetManager.*;
+import static com.husker.launcher.managers.API.*;
 
 public class InfoApplying extends SimpleLoadingScreen {
 
@@ -18,22 +18,22 @@ public class InfoApplying extends SimpleLoadingScreen {
     }
 
     public void process() {
-        String currentPassword = getParameterValue(NetManager.PASSWORD);
+        String currentPassword = getParameterValue(API.PASSWORD);
         String emailCode = null;
 
         ArrayList<String> changedParameters = new ArrayList<>();
-        if(getParameters().containsKey(NetManager.LOGIN)) {
-            changedParameters.add(NetManager.LOGIN);
-            changedParameters.add(getParameterValue(NetManager.LOGIN));
+        if(getParameters().containsKey(API.LOGIN)) {
+            changedParameters.add(API.LOGIN);
+            changedParameters.add(getParameterValue(API.LOGIN));
         }
-        if(getParameters().containsKey(NetManager.EMAIL)) {
-            changedParameters.add(NetManager.EMAIL);
-            changedParameters.add(getParameterValue(NetManager.EMAIL));
+        if(getParameters().containsKey(API.EMAIL)) {
+            changedParameters.add(API.EMAIL);
+            changedParameters.add(getParameterValue(API.EMAIL));
 
-            emailCode = getParameterValue(NetManager.EMAIL_CODE);
+            emailCode = getParameterValue(API.EMAIL_CODE);
         }
 
-        int result = getLauncher().NetManager.PlayerInfo.setData(currentPassword, emailCode, changedParameters.toArray(new String[0]));
+        int result = getLauncher().API.PlayerInfo.setData(currentPassword, emailCode, changedParameters.toArray(new String[0]));
 
         if(result == 0) {
             getLauncherUI().setScreen(MainScreen.class);

@@ -13,7 +13,7 @@ public class C_2_SendingCode extends SimpleLoadingScreen {
     public void process() {
         String email = getParameterValue("email");
 
-        int result = getLauncher().NetManager.PlayerInfo.sendConfirmCode(email);
+        int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
         if(result == 0)
             getLauncherUI().setScreen(C_3_Code.class, getParameters());
         if(result == -1)

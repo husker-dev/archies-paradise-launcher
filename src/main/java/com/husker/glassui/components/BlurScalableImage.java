@@ -25,8 +25,8 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     private boolean isAnimated = false;
 
     public BlurScalableImage(Screen screen, BufferedImage image){
-        super(image);
         this.screen = screen;
+        setImage(image);
         setFitType(FitType.FILL_Y);
         screen.addBlurSegment("ScalableImage", parameter -> onBlurApply(parameter, this));
 
@@ -59,6 +59,11 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
             Graphics gr = img.createGraphics();
             super.paint(gr);
         }
+    }
+
+    public void setImage(BufferedImage image){
+        super.setImage(image);
+        screen.getLauncher().updateUI();
     }
 
     public void onBlurApply(BlurParameter parameter, Component component) {

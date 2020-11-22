@@ -1,5 +1,6 @@
 package com.husker.launcher.plugin;
 
+/*
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,9 +12,11 @@ import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+ */
 
-public class Main extends JavaPlugin {
 
+public class Main /*extends JavaPlugin*/ {
+/*
     private Socket socket;
     private final FileConfiguration config = this.getConfig();
 
@@ -61,4 +64,6 @@ public class Main extends JavaPlugin {
         socket = null;
         return input.contains("\"allow\":true");
     }
+
+ */
 }

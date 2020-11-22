@@ -11,6 +11,7 @@ import com.husker.glassui.screens.main.settings.SettingsPanel;
 import com.husker.glassui.screens.main.social.VkGroupPanel;
 import com.husker.glassui.screens.main.social.YoutubePanel;
 import com.husker.launcher.components.TransparentPanel;
+import javafx.scene.layout.BorderPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,11 +21,14 @@ import java.awt.image.BufferedImage;
 public class MainScreen extends AbstractMainScreen {
 
     private NewsPanel newsPanel;
+    private UpdatePanel updatePanel;
+
     private BlurTabPanel tabPanel;
     private VkGroupPanel vkPanel;
     private YoutubePanel youtubePanel;
     private ProfilePanel profilePanel;
     private PlayPanel playPanel;
+    private InfoPanel infoPanel;
 
     private KeysPanel keysPanel;
     private PeoplePanel peoplePanel;
@@ -49,7 +53,7 @@ public class MainScreen extends AbstractMainScreen {
                 addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
                 addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
                 addBottomTab("settings", "Настройки", getIcon(getLauncher().Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
-                addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), new InfoPanel(MainScreen.this));
+                addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), infoPanel = new InfoPanel(MainScreen.this));
 
                 addTabChangedListener(id -> onShowPanelEvent());
             }});
@@ -70,12 +74,11 @@ public class MainScreen extends AbstractMainScreen {
             tabPanel.removeTab("control");
             tabPanel.removeTab("keys");
             tabPanel.removeTab("people");
-            if(getLauncher().NetManager.PlayerInfo.getStatus().equals("Администратор")){
+            if(getLauncher().API.PlayerInfo.getStatus().equals("Администратор")){
                 tabPanel.addTab("control", "Управление", getIcon(getLauncher().Resources.Icon_Folder), controlPanel);
-                tabPanel.addBottomTab("keys", "Ключи", getIcon(getLauncher().Resources.Icon_Key), keysPanel);
+                tabPanel.addBottomTab("keys", "Ссылки", getIcon(getLauncher().Resources.Icon_Code), keysPanel);
                 tabPanel.addBottomTab("people", "Пользователи", getIcon(getLauncher().Resources.Icon_People), peoplePanel);
             }
-
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -93,11 +96,18 @@ public class MainScreen extends AbstractMainScreen {
             playPanel.onShow();
         if (id.equals("keys"))
             keysPanel.onShow();
+        if(id.equals("info"))
+            infoPanel.onShow();
     }
 
     void onRightMenuInit(TransparentPanel menu) {
         menu.setLayout(new BorderLayout());
         menu.add(newsPanel = new NewsPanel(this));
+    }
+
+    void onLeftMenuInit(TransparentPanel menu) {
+        menu.setLayout(new BorderLayout());
+        menu.add(updatePanel = new UpdatePanel(this), BorderLayout.NORTH);
     }
 
     public static ImageIcon getIcon(BufferedImage image){

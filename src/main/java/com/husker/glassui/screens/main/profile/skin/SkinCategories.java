@@ -24,14 +24,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 
-public class SkinFolders extends SimpleTitledScreen {
+public class SkinCategories extends SimpleTitledScreen {
 
     private int page = 0;
     private final int pageElements = 6;
     private final SkinFolderPanel[] skinPanel = new SkinFolderPanel[pageElements];
     private BlurPagePanel pagePanel;
 
-    public SkinFolders() {
+    public SkinCategories() {
         super("Скины", "Категории");
     }
 
@@ -44,14 +44,14 @@ public class SkinFolders extends SimpleTitledScreen {
             setPreferredHeight(360);
 
             for(int i = 0; i < skinPanel.length; i++) {
-                skinPanel[i] = new SkinFolderPanel(SkinFolders.this);
+                skinPanel[i] = new SkinFolderPanel(SkinCategories.this);
                 add(skinPanel[i]);
             }
         }});
         panel.add(new TransparentPanel(){{
             setMargin(20, 100, 20, 100);
-            add(pagePanel = new BlurPagePanel(SkinFolders.this){{
-                addPageListener(SkinFolders.this::setPage);
+            add(pagePanel = new BlurPagePanel(SkinCategories.this){{
+                addPageListener(SkinCategories.this::setPage);
             }});
         }});
     }
@@ -254,8 +254,7 @@ public class SkinFolders extends SimpleTitledScreen {
             }
 
             try {
-                BufferedImage image = getScreen().getLauncher().NetManager.Skins.getCategoryPreview(name);
-                viewer.setPlayerTexture(image);
+                viewer.setPlayerTexture(getScreen().getLauncher().API.Skins.getCategoryPreview(name));
             }catch (Exception ex){
                 viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);
             }

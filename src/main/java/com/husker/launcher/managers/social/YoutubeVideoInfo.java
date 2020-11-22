@@ -1,4 +1,4 @@
-package com.husker.glassui.components.social.youtube;
+package com.husker.launcher.managers.social;
 
 
 import javax.imageio.ImageIO;
@@ -6,17 +6,18 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 
 public class YoutubeVideoInfo {
+
     private final String title;
     private final String url;
-
+    private final String previewUrl;
     private BufferedImage preview;
 
     private final int index;
 
-    public YoutubeVideoInfo(int index, String title, BufferedImage preview, String url){
+    public YoutubeVideoInfo(int index, String title, String previewUrl, String url){
         this.title = title;
         this.url = url;
-        this.preview = preview;
+        this.previewUrl = previewUrl;
         this.index = index;
     }
 
@@ -32,8 +33,14 @@ public class YoutubeVideoInfo {
         return url;
     }
 
-
     public BufferedImage getPreview(){
+        if(preview == null) {
+            try {
+                preview = ImageIO.read(new URL(previewUrl));
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+        }
         return preview;
     }
 }

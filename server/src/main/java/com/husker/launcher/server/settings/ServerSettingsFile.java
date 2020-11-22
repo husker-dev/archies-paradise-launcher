@@ -1,6 +1,5 @@
 package com.husker.launcher.server.settings;
 
-import com.husker.launcher.server.utils.ProfileUtils;
 import com.husker.launcher.server.utils.settings.SettingsFile;
 
 import java.io.File;
@@ -19,8 +18,9 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String DELAY = "social.delay";
 
     private static final String VK_GROUP = "social.vk.group_id";
-
     private static final String YOUTUBE = "social.youtube.channel_id";
+    private static final String INSTAGRAM_NAME = "social.instagram.name";
+    private static final String GITHUB_REPO = "social.github.repo";
 
     private static final int DEFAULT_PORT = 15565;
 
@@ -28,14 +28,15 @@ public class ServerSettingsFile extends SettingsFile {
         super(new File("./server_settings.cfg"));
 
         setDefault(PORT, DEFAULT_PORT + "");
-        setDefault(EMAIL, "null");
-        setDefault(EMAIL_PASSWORD, "null");
+        setDefault(EMAIL, "[email]");
+        setDefault(EMAIL_PASSWORD, "[password]");
         setDefault(EMAIL_TITLE, "Email title");
         setDefault(EMAIL_TEXT, "Here is your code [code]");
 
-        setDefault(VK_GROUP, "id");
-
-        setDefault(YOUTUBE, "id");
+        setDefault(VK_GROUP, "[id]");
+        setDefault(YOUTUBE, "[id]");
+        setDefault(INSTAGRAM_NAME, "[name]");
+        setDefault(GITHUB_REPO, "[repo]");
     }
 
     public String getEmail(){
@@ -78,20 +79,36 @@ public class ServerSettingsFile extends SettingsFile {
         }
     }
 
-    public String getVkGroupId(){
+    public String getVKGroupId(){
         return get(VK_GROUP);
     }
 
-    public void setVkGroupId(String key){
+    public void setVKGroupId(String key){
         set(VK_GROUP, key);
     }
 
-    public String getYoutubeId(){
+    public String getYouTubeId(){
         return get(YOUTUBE);
     }
 
-    public void setYoutubeId(String key){
+    public void setYouTubeId(String key){
         set(YOUTUBE, key);
+    }
+
+    public String getInstagramId(){
+        return get(INSTAGRAM_NAME);
+    }
+
+    public void setInstagramId(String key){
+        set(INSTAGRAM_NAME, key);
+    }
+
+    public String getGitHubId(){
+        return get(GITHUB_REPO);
+    }
+
+    public void setGitHubId(String key){
+        set(GITHUB_REPO, key);
     }
 
     public String getEmailText(){

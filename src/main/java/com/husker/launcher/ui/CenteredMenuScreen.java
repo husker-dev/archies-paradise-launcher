@@ -11,7 +11,7 @@ import java.awt.*;
 
 public abstract class CenteredMenuScreen extends Screen{
 
-    private BlurPanel centeredPanel;
+    private TransparentPanel centeredPanel;
 
     public CenteredMenuScreen(){
 
@@ -26,7 +26,7 @@ public abstract class CenteredMenuScreen extends Screen{
     public void onInit() {
         setLayout(new GridBagLayout());
 
-        add(centeredPanel = new BlurPanel(this){{
+        add(centeredPanel = new TransparentPanel(){{
             setPreferredWidth(350);
 
             setLayout(new VerticalFlowLayout(0, 0));

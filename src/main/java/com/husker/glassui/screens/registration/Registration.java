@@ -50,7 +50,7 @@ public class Registration extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton(1, "Далее", () -> {
+        nextButton = createButton("Далее", () -> {
             getLauncherUI().setScreen(RegistrationProgress.class, new Parameters(){{
                 put("login", loginField.getText());
                 put("password", passwordField.getText());

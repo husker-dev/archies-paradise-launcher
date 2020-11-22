@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="MinecraftCustomLauncher:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/MinecraftCustomLauncher</output-path>
-    <root id="archive" name="MinecraftCustomLauncher.main.jar">
-      <element id="module-output" name="MinecraftCustomLauncher.main" />
-    </root>
-  </artifact>
-</component>

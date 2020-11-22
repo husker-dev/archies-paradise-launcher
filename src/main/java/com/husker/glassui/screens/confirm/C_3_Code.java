@@ -57,13 +57,13 @@ public class C_3_Code extends TitledLogoScreen {
             add(code = new BlurTextField(C_3_Code.this){{
                 addTextListener(text -> nextButton.setEnabled(code.getText().length() == 6));
             }});
-            add(resendButton = createButton(1, "Повторить", () -> {
+            add(resendButton = createButton("Повторить", () -> {
                 seconds = 60;
 
                 new Thread(() -> {
                     String email = getParameterValue("email");
 
-                    int result = getLauncher().NetManager.PlayerInfo.sendConfirmCode(email);
+                    int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
 
                     if(result == -1)
                         Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "emailConfirm", getParameters());
@@ -73,7 +73,7 @@ public class C_3_Code extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton(2, "Далее", () -> {
+        nextButton = createButton("Далее", () -> {
             getLauncherUI().setScreen(C_4_ConfirmingCode.class, new Parameters(){{
                 put("login", getParameter("login"));
                 put("password", getParameter("password"));
@@ -82,7 +82,7 @@ public class C_3_Code extends TitledLogoScreen {
             }});
         });
         nextButton.setEnabled(false);
-        panel.add(createButton(2, "Назад", () -> getLauncherUI().setScreen(C_1_Email.class, getParameters())));
+        panel.add(createButton("Назад", () -> getLauncherUI().setScreen(C_1_Email.class, getParameters())));
         panel.add(nextButton);
 
     }

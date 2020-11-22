@@ -33,6 +33,7 @@ public class Launcher extends JFrame {
     private final LauncherSettings settings = new LauncherSettings(this);
     private final UserInfoFile user = new UserInfoFile(this);
 
+    public final API API = new API(this);
     public final UpdateManager UpdateManager = new UpdateManager(this);
     public final Resources Resources = new Resources(this);
     public final NetManager NetManager = new NetManager(this);
@@ -45,6 +46,7 @@ public class Launcher extends JFrame {
         }catch (Exception ex){
             ex.printStackTrace();
         }
+
         try {
             ConsoleUtils.printDebug(getClass(), "Installing the WebLaF library");
             WebLookAndFeel.install();

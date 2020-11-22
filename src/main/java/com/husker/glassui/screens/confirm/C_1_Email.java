@@ -28,7 +28,7 @@ public class C_1_Email extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton(2, "Далее", () -> {
+        nextButton = createButton("Далее", () -> {
             getLauncherUI().setScreen(C_2_SendingCode.class, new Parameters(){{
                 put("login", getParameter("login"));
                 put("password", getParameter("password"));
@@ -36,7 +36,7 @@ public class C_1_Email extends TitledLogoScreen {
             }});
         });
         nextButton.setEnabled(false);
-        panel.add(createButton(2, "Назад", () -> ((GlassUI)getLauncherUI()).logout()));
+        panel.add(createButton("Назад", () -> ((GlassUI)getLauncherUI()).logout()));
         panel.add(nextButton);
     }
 

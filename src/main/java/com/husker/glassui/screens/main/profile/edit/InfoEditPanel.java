@@ -13,6 +13,7 @@ import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.screens.SimpleCenteredScreen;
 import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.utils.UIUtils;
 
 import java.awt.*;
 
@@ -32,10 +33,19 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                 setPreferredWidth(340);
                 setLayout(new BorderLayout(0, 0));
 
-                add(new BlurPanel(InfoEditPanel.this, true){{
-                    setLayout(new BorderLayout(0, 0));
-                    add(titleLabel = GlassUI.createTitleLabel("Редактирование"));
-                }}, BorderLayout.NORTH);
+                add(new BlurPanel(InfoEditPanel.this, true){
+                    {
+                        setLayout(new BorderLayout(0, 0));
+                        add(titleLabel = GlassUI.createTitleLabel("Редактирование"));
+                    }
+                    public void onBlurApply(BlurParameter parameter, Component component) {
+                        super.onBlurApply(parameter, component);
+                        if(returnOnInvisible(parameter, component))
+                            return;
+                        if(component == this)
+                            parameter.setShadowClip(UIUtils.keepShadow(parameter, 25, UIUtils.ShadowSide.BOTTOM));
+                    }
+                }, BorderLayout.NORTH);
 
                 add(new TransparentPanel(){{
                     setLayout(new VerticalFlowLayout(0, 0));
@@ -78,8 +88,10 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                             super.onBlurApply(parameter, component);
                             if(returnOnInvisible(parameter, component))
                                 return;
-                            if(component == this)
+                            if(component == this) {
                                 parameter.setShape(cutRectangle(parameter.getShape()));
+                                parameter.setShadowClip(UIUtils.keepShadow(parameter, 25, UIUtils.ShadowSide.TOP));
+                            }
                         }
                     });
                 }});
@@ -151,7 +163,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
     }
 
     public void onShow() {
-        viewer.setPlayerTexture(getLauncher().NetManager.PlayerInfo.getSkin());
+        viewer.setPlayerTexture(getLauncher().API.PlayerInfo.getSkin());
     }
 }
 

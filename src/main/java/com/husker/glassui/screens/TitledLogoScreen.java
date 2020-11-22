@@ -2,6 +2,7 @@ package com.husker.glassui.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
+import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
@@ -119,18 +120,29 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
         }});
         addIndent(20);
 
-        addToMenu(new TransparentPanel(){{
-            setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
-            setMargin(0, 40, 0, 40);
+        TransparentPanel componentsPanel = new TransparentPanel(){
+            {
+                setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
+                setMargin(0, 0, 0, 0);
+            }
+            public Component add(Component component) {
+                if (getComponentCount() == 1) {
+                    SizeMethodsImpl.setPreferredWidth((JComponent) getComponent(0), 120);
+                    SizeMethodsImpl.setPreferredWidth((JComponent)component, 120);
+                } else
+                    SizeMethodsImpl.setPreferredWidth((JComponent)component, 170);
 
-            createComponents(this);
-        }});
+                return super.add(component);
+            }
+        };
+        addToMenu(componentsPanel);
+        createComponents(componentsPanel);
 
         addIndent(0);
 
         addToMenu(new TransparentPanel(){{
             setLayout(new VerticalFlowLayout(FlowLayout.CENTER, 0, 0));
-            setMargin(10, 40, 0, 40);
+            setMargin(5, 40, 0, 40);
             //setPreferredHeight(23);
 
             createSubComponents(this);
@@ -151,9 +163,9 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
         }};
     }
 
-    public BlurButton createButton(int col, String text, Runnable runnable){
+    public BlurButton createButton(String text, Runnable runnable){
         return new BlurButton(this, text){{
-            setPreferredWidth((200 - 20 * (col - 1)) / col);
+            setPreferredWidth(170);
             addActionListener(e -> {
                 if(runnable != null)
                     runnable.run();

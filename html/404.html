@@ -1,0 +1,124 @@
+<html>
+
+<head>
+    <style>
+        * {
+            font-family: Lucida Console, Lucida Sans Typewriter, monaco, Bitstream Vera Sans Mono, monospace;
+            font-size: 16px;
+            color: rgb(0, 200, 0);
+            background-color: black;
+            border: none;
+        }
+        body {
+            margin: 0;
+        }
+        p, td, tr{
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        table{
+            border-collapse: collapse;
+        }
+
+        #input {
+            resize: none;
+            outline: none;
+            overflow: hidden;
+            caret-color: transparent;
+            height: 1em;
+            width: 1ch;
+            padding: 0;
+        }
+        .prefix {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        .cursor {
+            font-family: arial, serif;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            text-decoration: blink;
+            animation: blinker 1s step-start infinite;
+            font-weight: bolder;
+
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        #console-text{
+            padding: 10px 10px 0 10px;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.0; }
+        }
+
+    </style>
+    <script>
+        function globalKeyPress(){
+            const event = window.event || event.which;
+            if(!event.ctrlKey)
+                document.getElementById('input').focus()
+        }
+
+        function calcSize(){
+            const field = document.getElementById("input");
+            field.style.width = (field.value.length + 0.3) + "ch";
+        }
+
+        function checkInput() {
+            const event = window.event || event.which;
+            const field = document.getElementById("input");
+
+            if (event.keyCode == 13) {
+                event.preventDefault();
+                print(">" + field.value);
+                onCommand(field.value)
+                print("");
+
+                field.value = "";
+                calcSize();
+            }
+        }
+
+        function print(line) {
+            document.getElementById("console-text").insertAdjacentHTML('beforeend', line + "</br>");
+        }
+
+        function onCommand(command){
+
+            print("I told you not to touch anything!")
+        }
+    </script>
+    <title>Page not found - 404</title>
+</head>
+<body onkeydown="globalKeyPress()">
+    <p id="console-text">
+        </br>
+        404<br>
+        Page not found<br>
+        <br>
+        [<a href='/'>Go to main page</a>]<br>
+        </br>
+    </p>
+    <div style="width: calc(100% - 20px);height: calc(100px - 40px);padding: 0 10px 10px 10px" onclick="document.getElementById('input').focus();">
+        <table>
+            <tr>
+                <td>
+                    <p class="prefix">></p>
+                </td>
+                <td>
+                    <textarea id="input" oninput="calcSize();" onkeydown="checkInput();" autofocus></textarea>
+                </td>
+                <td>
+                    <p class="cursor">_</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

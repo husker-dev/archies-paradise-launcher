@@ -39,7 +39,7 @@ public class MailManager {
             message.setSubject(title);
             message.setText(text);
             Transport.send(message);
-        } catch (MessagingException mex) {
+        } catch (Exception mex) {
             mex.printStackTrace();
             return false;
         }

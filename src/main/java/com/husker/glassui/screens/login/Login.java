@@ -42,13 +42,15 @@ public class Login extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        loginButton = createButton(1, "Войти", () -> {
+        BlurButton createButton = createButton("Создать", () -> getLauncherUI().setScreen(Registration.class));
+        loginButton = createButton("Войти", () -> {
             getLauncherUI().setScreen(LoginProcess.class, new Parameters(){{
                 put("login", loginField.getText());
                 put("password", new String(passwordField.getPassword()));
             }});
         });
         loginButton.setEnabled(false);
+        panel.add(createButton);
         panel.add(loginButton);
     }
 
@@ -56,11 +58,12 @@ public class Login extends TitledLogoScreen {
         super.onShow();
 
         loginField.setText(getParameterValue("login", ""));
-        passwordField.clear();
+        passwordField.setText(getParameterValue("password", ""));
     }
 
     public void createSubComponents(TransparentPanel panel) {
-        panel.add(createSubLabel("Зарегистрироваться", () -> getLauncherUI().setScreen(Registration.class)));
-        //panel.add(createSubLabel("Восстановить пароль", () -> getLauncherUI().setScreen(Registration.class)));
+        panel.add(createSubLabel("Забыли пароль?", () -> {
+
+        }));
     }
 }

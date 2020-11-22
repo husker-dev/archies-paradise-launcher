@@ -30,7 +30,6 @@ public abstract class ImageSocialPanel extends SocialPanel{
             }
         };
         image.setFitType(ScalableImage.FitType.FILL_XY);
-        //image.setAnimated(true);
         ComponentUtils.makeMouseEventTransparent(image);
         panel.setMargin(0, 0, 25, 0);
         panel.add(image);
