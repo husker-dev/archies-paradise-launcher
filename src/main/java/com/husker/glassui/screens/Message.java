@@ -3,18 +3,17 @@ package com.husker.glassui.screens;
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
-import com.husker.glassui.components.BlurPanel;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.Screen;
-import com.husker.launcher.utils.UIUtils;
+import com.husker.launcher.ui.utils.UIUtils;
 
 import java.awt.*;
 import java.awt.geom.RoundRectangle2D;
 
-import static com.husker.launcher.utils.UIUtils.ShadowSide.BOTTOM;
+import static com.husker.launcher.ui.utils.UIUtils.ShadowSide.BOTTOM;
 
 public class Message extends CenteredMenuScreen {
 

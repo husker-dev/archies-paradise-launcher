@@ -7,7 +7,8 @@ import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.utils.ConsoleUtils;
 
@@ -60,9 +61,9 @@ public class BackgroundSelection extends SimpleTitledScreen {
                 };
                 images[i - 1].addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
-                        if(pages.getPage() * 6 + I < getLauncher().Resources.Background.length) {
-                            getLauncher().setBackgroundImage(getLauncher().Resources.Background[pages.getPage() * 6 + I]);
-                            getLauncher().getSettings().setBackgroundIndex(pages.getPage() * 6 + I);
+                        if(pages.getPage() * 6 + I < Resources.Background.length) {
+                            getLauncher().setBackgroundImage(Resources.Background[pages.getPage() * 6 + I]);
+                            LauncherSettings.setBackgroundIndex(pages.getPage() * 6 + I);
                             getLauncher().updateUI();
                         }
                     }
@@ -76,8 +77,8 @@ public class BackgroundSelection extends SimpleTitledScreen {
             setLayout(new FlowLayout(CENTER));
             add(pages = new BlurPagePanel(BackgroundSelection.this){{
                 setPreferredWidth(400);
-                int pages = getLauncher().Resources.Background.length / 6;
-                if(getLauncher().Resources.Background.length % 6 != 0)
+                int pages = Resources.Background.length / 6;
+                if(Resources.Background.length % 6 != 0)
                     pages ++;
 
                 setPages(pages);
@@ -98,14 +99,12 @@ public class BackgroundSelection extends SimpleTitledScreen {
         int count = 6;
         int from = 6 * page;
 
-        if(page == getLauncher().Resources.Background.length / 6)
-            count = getLauncher().Resources.Background.length % 6;
-
-        ConsoleUtils.printDebug(getClass(), "Count: " + count + "  From:" + from);
+        if(page == Resources.Background.length / 6)
+            count = Resources.Background.length % 6;
 
         for(int i = from; i < from + 6; i++){
-            if(i < getLauncher().Resources.Background.length - 1)
-                images[i - from].setImage(getLauncher().Resources.Background[i + 1]);
+            if(i < Resources.Background.length - 1)
+                images[i - from].setImage(Resources.Background[i + 1]);
             else
                 images[i - from].setImage(null);
         }

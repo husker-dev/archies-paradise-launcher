@@ -1,33 +1,36 @@
 package com.husker.glassui.screens.main.play;
 
-import com.alee.laf.label.WebLabel;
-import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
 
 import com.husker.glassui.components.BlurScalableImage;
-import com.husker.glassui.components.TagPanel;
-import com.husker.glassui.screens.main.info.ModPanel;
-import com.husker.launcher.components.ProgressBar;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.Resources;
+import com.husker.launcher.api.API;
+import com.husker.launcher.managers.LaunchManager;
+import com.husker.launcher.ui.components.ProgressBar;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.ui.Screen;
+import org.bridj.Pointer;
+import org.bridj.cpp.com.COMRuntime;
+import org.bridj.cpp.com.shell.ITaskbarList3;
+import org.bridj.jawt.JAWTUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 public class PlayPanel extends TransparentPanel {
 
 
     private final Screen screen;
-
+    private BlurScalableImage screenshotImage;
 
     private TransparentPanel playPanel;
     private BlurButton playBtn;
 
     private TransparentPanel loadingPanel;
     private ProgressBar progressBar;
-
-    private int lastState = -1;
 
     public PlayPanel(Screen screen){
         this.screen = screen;
@@ -37,7 +40,23 @@ public class PlayPanel extends TransparentPanel {
 
         add(new TransparentPanel(){{
             setLayout(new BorderLayout());
-            add(new BlurScalableImage(screen));
+            add(screenshotImage = new BlurScalableImage(screen){{
+                setLayout(new OverlayLayout(this));
+                add(new TransparentPanel(){{
+                    setLayout(new BorderLayout());
+                    add(new JPanel(){{
+                        setPreferredWidth(50);
+                        setBackground(Color.BLUE);
+                    }}, BorderLayout.WEST);
+                    add(new JPanel(){{
+                        setPreferredWidth(50);
+                        setBackground(Color.BLUE);
+                    }}, BorderLayout.EAST);
+                }}, 0);
+                add(new TransparentPanel(){{
+
+                }}, 1);
+            }});
         }});
 
         add(new TransparentPanel(){{
@@ -74,7 +93,7 @@ public class PlayPanel extends TransparentPanel {
         if(!playBtn.isEnabled())
             return;
         setProcessVisible(true);
-        screen.getLauncher().API.Client.playOrDownload(args -> {
+        LaunchManager.playOrDownload(screen.getLauncher().User, args -> {
             int id = args.getProcessId();
             double percent = args.getPercent();
 
@@ -82,6 +101,8 @@ public class PlayPanel extends TransparentPanel {
                 screen.getLauncher().setVisible(true);
                 setProcessVisible(false);
                 updateData();
+
+                TaskBar.setProgress(screen.getLauncher(), -1);
             }
             if(id == 0){
                 progressBar.setText("Удаление...");
@@ -97,24 +118,32 @@ public class PlayPanel extends TransparentPanel {
                 int full = (int)(args.getFullSize() / 1000000d);
                 progressBar.setSpeedText(current + "/" + full + " Мб");
                 progressBar.setValueText(new DecimalFormat("#0").format(args.getSpeed()) + " Мб/сек");
+
+                TaskBar.setProgress(screen.getLauncher(), (int)percent);
             }
             if(id == 2){
                 progressBar.setText("Распаковка клиента...");
                 progressBar.setValue(percent);
                 progressBar.setSpeedText("");
                 progressBar.setValueText((int)percent + "%");
+
+                TaskBar.setProgress(screen.getLauncher(), (int)percent);
             }
             if(id == 3){
                 progressBar.setText("Перемещение...");
                 progressBar.setValue(percent);
                 progressBar.setSpeedText("");
                 progressBar.setValueText((int)percent + "%");
+
+                TaskBar.setProgress(screen.getLauncher(), (int)percent);
             }
             if(id == 4){
                 progressBar.setText("Удаление временных файлов...");
                 progressBar.setValue(percent);
                 progressBar.setSpeedText("");
                 progressBar.setValueText((int)percent + "%");
+
+                TaskBar.setProgress(screen.getLauncher(), (int)percent);
             }
             if(id == 5){
                 progressBar.setText("Запуск...");
@@ -145,33 +174,67 @@ public class PlayPanel extends TransparentPanel {
 
     public void updateData(){
         new Thread(() -> {
+            try {
+                screenshotImage.setImage(API.getImage(ApiMethod.create("screenshots.get").set("index", 0)));
+            } catch (API.APIException e) {
+                e.printStackTrace();
+            }
+        }).start();
+        new Thread(() -> {
             playBtn.setText("Загрузка...");
             playBtn.setEnabled(false);
 
-            lastState = screen.getLauncher().API.Client.hasUpdate();
-            if(lastState == screen.getLauncher().API.Client.PLAY) {
-                playBtn.setEnabled(true);
-                playBtn.setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Play.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
-                playBtn.setText("Играть");
-            }
-            if(lastState == screen.getLauncher().API.Client.DOWNLOAD) {
-                playBtn.setEnabled(true);
-                playBtn.setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
-                playBtn.setText("Скачать");
-            }
-            if(lastState == screen.getLauncher().API.Client.UPDATE) {
-                playBtn.setEnabled(true);
-                playBtn.setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
-                playBtn.setText("Обновить");
-            }
-            if(lastState == screen.getLauncher().API.Client.ERROR){
-                playBtn.setEnabled(false);
-                playBtn.setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Dot_Selected.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
-                playBtn.setText("Недоступно");
-            }
 
+            LaunchManager.ClientState lastState = LaunchManager.getClientState();
+            playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR);
+
+            switch (lastState){
+                case PLAY:
+                    playBtn.setIcon(new ImageIcon(Resources.Icon_Play.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setText("Играть");
+                    break;
+                case DOWNLOAD:
+                    playBtn.setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setText("Скачать");
+                    break;
+                case UPDATE:
+                    playBtn.setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setText("Обновить");
+                    break;
+                case ERROR:
+                    playBtn.setIcon(new ImageIcon(Resources.Icon_Dot_Selected.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setText("Недоступно");
+                    break;
+            }
         }).start();
+    }
 
+    public static class TaskBar {
+        static ITaskbarList3 list;
+        static Pointer<?> hwnd;
+        static int lastVal = -1;
+        static {
+            try {
+                list = COMRuntime.newInstance(ITaskbarList3.class);
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
 
+        public static void setProgress(JFrame frame, int progress){
+            if(progress == lastVal)
+                return;
+            lastVal = progress;
+
+            new Thread(() -> {
+                if(hwnd == null)
+                    hwnd = Pointer.pointerToAddress(JAWTUtils.getNativePeerHandle(frame));
+                list.SetProgressValue((Pointer)hwnd, progress, 100);
+                if(progress == -1)
+                    list.SetProgressState((Pointer)hwnd, ITaskbarList3.TbpFlag.TBPF_NOPROGRESS);
+                else
+                    list.SetProgressState((Pointer)hwnd, ITaskbarList3.TbpFlag.TBPF_NORMAL);
+            }).start();
+        }
     }
 }

@@ -8,7 +8,8 @@ import com.husker.launcher.Resources;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.TitledLogoScreen;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.api.API;
+import com.husker.launcher.ui.components.TransparentPanel;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -61,12 +62,11 @@ public class C_3_Code extends TitledLogoScreen {
                 seconds = 60;
 
                 new Thread(() -> {
-                    String email = getParameterValue("email");
-
-                    int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
-
-                    if(result == -1)
+                    try {
+                        getLauncher().User.sendConfirmCode(getParameterValue("email"));
+                    } catch (API.EmailCodeSendingException e) {
                         Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "emailConfirm", getParameters());
+                    }
                 }).start();
             }));
         }});

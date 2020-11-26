@@ -1,10 +1,8 @@
 package com.husker.glassui.components.social;
 
-import com.alee.managers.style.StyleId;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 

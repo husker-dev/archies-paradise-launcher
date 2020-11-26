@@ -2,6 +2,9 @@ package com.husker.launcher.ui;
 
 import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.Launcher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,7 +12,10 @@ import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public abstract class LauncherUI extends JPanel {
+
+    private static final Logger log = LogManager.getLogger(LauncherUI.class);
 
     private final Launcher launcher;
     private final HashMap<String, Screen> screens = new HashMap<>();
@@ -55,7 +61,7 @@ public abstract class LauncherUI extends JPanel {
     }
 
     public void addScreen(String name, Screen screen){
-        ConsoleUtils.printDebug(getClass(), "Initializing screen: " + name);
+        log.info("Initializing screen: " + name);
 
         try {
             screen.setName(name);
@@ -63,10 +69,8 @@ public abstract class LauncherUI extends JPanel {
             screen.onInit();
             screen.doLayout();
             screens.put(name, screen);
-
-            ConsoleUtils.printResult("OK");
         }catch (Exception ex){
-            ConsoleUtils.printResult("ERROR");
+            log.error(ex);
             ex.printStackTrace();
         }
     }
@@ -100,7 +104,7 @@ public abstract class LauncherUI extends JPanel {
 
         nextScreen = name;
         nextScreenParameters = parameters;
-        ConsoleUtils.printDebug(getClass(), "Changing screen to: " + name + "  " + parameters.toString());
+        log.info("Changing screen to: " + name + "  " + parameters.toString());
 
         if(animated)
             getLauncher().beginAnimation();

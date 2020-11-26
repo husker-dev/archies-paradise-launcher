@@ -1,7 +1,10 @@
 package com.husker.glassui.components.social.impl;
 
 import com.husker.glassui.components.social.ImageSocialPanel;
-import com.husker.launcher.managers.social.InstPhotoInfo;
+import com.husker.launcher.Resources;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.social.InstagramPhotoInfo;
+import com.husker.launcher.social.Social;
 import com.husker.launcher.ui.Screen;
 
 public class InstPhotoPanel extends ImageSocialPanel {
@@ -12,11 +15,11 @@ public class InstPhotoPanel extends ImageSocialPanel {
     public InstPhotoPanel(Screen screen, int index){
         super(screen);
         this.index = index;
-        setIcon(getScreen().getLauncher().Resources.Logo_Instagram);
+        setIcon(Resources.Logo_Instagram);
     }
 
     public void update(){
-        InstPhotoInfo info = getScreen().getLauncher().API.Social.getInstPhoto(index);
+        InstagramPhotoInfo info = Social.Instagram.getPhoto(index);
         if(info == null)
             return;
 
@@ -27,7 +30,7 @@ public class InstPhotoPanel extends ImageSocialPanel {
     }
 
     public void onClick() {
-        getScreen().getLauncher().NetManager.openLink(url);
+        NetManager.openLink(url);
     }
 
     public static InstPhotoPanel create(Screen screen, int index){

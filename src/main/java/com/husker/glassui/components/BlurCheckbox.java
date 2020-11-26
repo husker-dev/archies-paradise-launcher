@@ -5,7 +5,7 @@ import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -96,8 +96,8 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
         this.checked = checked;
 
         if(checked)
-            setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Checkbox_On.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
+            setIcon(new ImageIcon(Resources.Icon_Checkbox_On.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
         else
-            setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Checkbox_Off.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
+            setIcon(new ImageIcon(Resources.Icon_Checkbox_Off.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
     }
 }

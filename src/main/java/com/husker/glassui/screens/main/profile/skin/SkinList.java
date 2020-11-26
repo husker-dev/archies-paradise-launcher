@@ -6,11 +6,13 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.SimpleTitledScreen;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.components.skin.SkinViewer;
+import com.husker.launcher.Resources;
+import com.husker.launcher.api.API;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -180,10 +182,10 @@ public class SkinList extends SimpleTitledScreen {
                 return;
             }
             try {
-                BufferedImage image = getScreen().getLauncher().API.Skins.getCategorySkin(folder, name);
+                BufferedImage image = API.Skins.getCategorySkin(folder, name);
                 viewer.setPlayerTexture(image);
             }catch (Exception ex){
-                viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);
+                viewer.setPlayerTexture(Resources.Skin_Steve);
             }
         }
     }

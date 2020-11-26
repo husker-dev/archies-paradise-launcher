@@ -1,14 +1,13 @@
 package com.husker.glassui.components;
 
-import com.alee.laf.text.AbstractTextEditorPainter;
 import com.alee.laf.text.WebTextField;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.RenderUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.RenderUtils;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -17,9 +16,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.geom.RoundRectangle2D;
-import java.lang.reflect.Field;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Consumer;

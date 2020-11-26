@@ -2,12 +2,12 @@ package com.husker.glassui.components;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,8 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
-import static com.husker.launcher.utils.ShapeUtils.Corner.*;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.Corner.*;
 
 public class BlurTabPanel extends TransparentPanel implements BlurComponent {
 

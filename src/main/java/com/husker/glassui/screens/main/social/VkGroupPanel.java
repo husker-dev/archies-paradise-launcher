@@ -1,5 +1,6 @@
 package com.husker.glassui.screens.main.social;
 
+import com.husker.launcher.social.Social;
 import com.husker.launcher.ui.Screen;
 import com.husker.glassui.components.social.impl.VkPostPanel;
 
@@ -15,10 +16,10 @@ public class VkGroupPanel extends SocialTabPanel {
 
     public void onLoad() {
         new Thread(() -> {
-            setLogo(getScreen().getLauncher().API.Social.getVkLogo());
-            setTitle(getScreen().getLauncher().API.Social.getVkTitle());
-            setDescription(getScreen().getLauncher().API.Social.getVkDescription());
-            setLink(getScreen().getLauncher().API.Social.getVkUrl());
+            setLogo(Social.VK.getLogo());
+            setTitle(Social.VK.getTitle());
+            setDescription(Social.VK.getDescription());
+            setLink(Social.VK.getUrl());
         }).start();
     }
 

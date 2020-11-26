@@ -22,12 +22,19 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String INSTAGRAM_NAME = "social.instagram.name";
     private static final String GITHUB_REPO = "social.github.repo";
 
-    private static final int DEFAULT_PORT = 15565;
+    private static final String OWNER_NAME = "owner.name";
+    private static final String OWNER_URL = "owner.url";
+
+    private static final String SUPPORT_NAME = "support.name";
+    private static final String SUPPORT_URL = "support.url";
+
+    private static final String MINECRAFT_IP = "minecraft.ip";
+    private static final String MINECRAFT_PORT = "minecraft.port";
 
     public ServerSettingsFile() {
         super(new File("./server_settings.cfg"));
 
-        setDefault(PORT, DEFAULT_PORT + "");
+        setDefault(PORT, 15565 + "");
         setDefault(EMAIL, "[email]");
         setDefault(EMAIL_PASSWORD, "[password]");
         setDefault(EMAIL_TITLE, "Email title");
@@ -37,6 +44,39 @@ public class ServerSettingsFile extends SettingsFile {
         setDefault(YOUTUBE, "[id]");
         setDefault(INSTAGRAM_NAME, "[name]");
         setDefault(GITHUB_REPO, "[repo]");
+
+        setDefault(OWNER_NAME, "[owner name]");
+        setDefault(OWNER_URL, "[owner url]");
+
+        setDefault(SUPPORT_NAME, "[support name]");
+        setDefault(SUPPORT_URL, "[support url]");
+
+        setDefault(MINECRAFT_IP, "[server ip]");
+        setDefault(MINECRAFT_PORT, "[server port]");
+    }
+
+    public String getMinecraftServerIP(){
+        return get(MINECRAFT_IP);
+    }
+
+    public int getMinecraftServerPort(){
+        return Integer.parseInt(get(MINECRAFT_PORT));
+    }
+
+    public String getOwnerName(){
+        return get(OWNER_NAME);
+    }
+
+    public String getOwnerUrl(){
+        return get(OWNER_URL);
+    }
+
+    public String getSupportName(){
+        return get(SUPPORT_NAME);
+    }
+
+    public String getSupportUrl(){
+        return get(SUPPORT_URL);
     }
 
     public String getEmail(){
@@ -60,11 +100,11 @@ public class ServerSettingsFile extends SettingsFile {
 
     public int getPort(){
         try{
-            Integer.parseInt(get(PORT, DEFAULT_PORT + ""));
+            Integer.parseInt(get(PORT));
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return DEFAULT_PORT;
+        return 15565;
     }
 
     public void setPort(int port){
@@ -75,7 +115,7 @@ public class ServerSettingsFile extends SettingsFile {
         try {
             setPort(Integer.parseInt(port));
         }catch (Exception ex){
-            setPort(DEFAULT_PORT);
+            setPort(15565);
         }
     }
 

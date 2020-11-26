@@ -1,67 +1,63 @@
 package com.husker.launcher.settings;
 
 import com.husker.launcher.Launcher;
-import com.husker.launcher.utils.settings.SettingsFile;
-
-import java.io.File;
 
 public class LauncherSettings extends SettingsFile {
 
-    public LauncherSettings(Launcher launcher) {
-        super(new File(launcher.getSettingsFolder() + "/launcher.cfg"));
+    public static final LauncherSettings INSTANCE = new LauncherSettings();
 
-        setDefault("auto_auth", "true");
-        setDefault("background", "1");
-        setDefault("windowed", "false");
-        setDefault("ram", "256");
+    private static final String AUTO_AUTH = "auto_auth";
+    private static final String BACKGROUND = "background";
+    private static final String WINDOWED = "windowed";
+    private static final String RAM = "ram";
+
+    private LauncherSettings() {
+        super(Launcher.getSettingsFolder() + "/launcher.yaml");
+
+        setDefault(AUTO_AUTH, true);
+        setDefault(BACKGROUND, 1);
+        setDefault(WINDOWED, false);
+        setDefault(RAM, 256);
     }
 
-    public int getBackgroundIndex(){
-        try {
-            return Integer.parseInt(get("background", "1"));
-        }catch (Exception ex){
-            return 1;
-        }
+    public static int getBackgroundIndex(){
+        return INSTANCE.getInt(BACKGROUND);
     }
 
-    public void setBackgroundIndex(int index){
-        set("background", index + "");
+    public static void setBackgroundIndex(int index){
+        INSTANCE.set(BACKGROUND, index);
     }
 
-    public boolean isAutoAuth(){
-        return get("auto_auth", "false").equals("true");
+    public static boolean isAutoAuth(){
+        return INSTANCE.getBoolean(AUTO_AUTH);
     }
 
-    public void setAutoAuth(boolean autoAuth){
-        set("auto_auth", autoAuth + "");
+    public static void setAutoAuth(boolean autoAuth){
+        INSTANCE.set(AUTO_AUTH, autoAuth);
     }
 
-    public boolean isWindowed(){
-        return get("windowed").equals("true");
+    public static boolean isWindowed(){
+        return INSTANCE.getBoolean(WINDOWED);
     }
 
-    public void setWindowed(boolean windowed){
-       set("windowed", windowed + "");
+    public static void setWindowed(boolean windowed){
+        INSTANCE.set(WINDOWED, windowed);
     }
 
-    public int getRAM(){
-        try{
-            return Integer.parseInt(get("ram"));
-        }catch (Exception ex){
-            return 256;
-        }
+    public static int getRAM(){
+        return INSTANCE.getInt(RAM);
     }
 
-    public void setRAM(int ram){
-        set("ram", ram + "");
+    public static void setRAM(int ram){
+        INSTANCE.set(RAM, ram);
     }
 
-    public void setRAM(String ram){
+    public static void setRAM(String ram){
         try{
             Integer.parseInt(ram);
-            set("ram", ram + "");
+            INSTANCE.set("ram", ram);
         }catch (Exception ex){
-            set("ram", "256");
+            INSTANCE.set("ram", 256);
         }
     }
 }

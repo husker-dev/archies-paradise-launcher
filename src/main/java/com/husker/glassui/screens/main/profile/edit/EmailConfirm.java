@@ -2,12 +2,10 @@ package com.husker.glassui.screens.main.profile.edit;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.API;
-import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.api.API;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.screens.Message;
@@ -96,14 +94,13 @@ public class EmailConfirm extends InfoEditPanel{
         resend.setEnabled(false);
 
         new Thread(() -> {
-            String email = getParameterValue(API.EMAIL);
-
-            int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
-
-            if(result == -1)
-                Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "info_email_confirm", getParameters());
-
             seconds = 60;
+
+            try {
+                getLauncher().User.sendConfirmCode(getParameterValue(API.EMAIL));
+            } catch (API.EmailCodeSendingException e) {
+                Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", EmailConfirm.class, getParameters());
+            }
         }).start();
     }
 

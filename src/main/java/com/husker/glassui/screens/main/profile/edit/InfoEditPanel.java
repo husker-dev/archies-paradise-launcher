@@ -2,22 +2,22 @@ package com.husker.glassui.screens.main.profile.edit;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.components.skin.SkinViewer;
+import com.husker.launcher.api.API;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.screens.SimpleCenteredScreen;
-import com.husker.launcher.utils.ShapeUtils;
-import com.husker.launcher.utils.UIUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.UIUtils;
 
 import java.awt.*;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 import static java.awt.FlowLayout.CENTER;
 
 public abstract class InfoEditPanel extends SimpleCenteredScreen {
@@ -163,7 +163,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
     }
 
     public void onShow() {
-        viewer.setPlayerTexture(getLauncher().API.PlayerInfo.getSkin());
+        viewer.setPlayerTexture(getLauncher().User.getSkin());
     }
 }
 

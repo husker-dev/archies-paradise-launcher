@@ -2,13 +2,13 @@ package com.husker.glassui.screens.main.settings;
 
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.*;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 import com.sun.management.OperatingSystemMXBean;
 
 import javax.swing.*;
@@ -17,7 +17,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.husker.launcher.utils.ShapeUtils.*;
+import static com.husker.launcher.ui.utils.ShapeUtils.*;
 import static java.awt.FlowLayout.LEFT;
 
 public class SettingsPanel extends TransparentPanel {
@@ -37,11 +37,8 @@ public class SettingsPanel extends TransparentPanel {
         add(new TransparentPanel(){{
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 8));
-            add(new BlurCheckbox(screen, "Сохранить пароль", screen.getLauncher().getSettings().isAutoAuth()){{
-                setOnAction(() -> {
-                    screen.getLauncher().getSettings().setAutoAuth(isChecked());
-
-                });
+            add(new BlurCheckbox(screen, "Сохранить пароль", LauncherSettings.isAutoAuth()){{
+                setOnAction(() -> LauncherSettings.setAutoAuth(isChecked()));
             }});
 
             add(new TransparentPanel(){{
@@ -59,8 +56,8 @@ public class SettingsPanel extends TransparentPanel {
         add(new TransparentPanel(){{
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 5));
-            add(new BlurCheckbox(screen, "Запускать в окне", screen.getLauncher().getSettings().isWindowed()){{
-                setOnAction(() -> screen.getLauncher().getSettings().setWindowed(isChecked()));
+            add(new BlurCheckbox(screen, "Запускать в окне", LauncherSettings.isWindowed()){{
+                setOnAction(() -> LauncherSettings.setWindowed(isChecked()));
             }});
 
             add(Box.createRigidArea(new Dimension(0, 0)));
@@ -70,7 +67,7 @@ public class SettingsPanel extends TransparentPanel {
             }});
 
             ArrayList<Integer> memories = new ArrayList<>(Arrays.asList(256, 512, 1024, 2048, 4096, 8192));
-            int value = screen.getLauncher().getSettings().getRAM();
+            int value = LauncherSettings.getRAM();
 
             add(ramChooser = new BlurButtonLineChooser(screen){{
                 OperatingSystemMXBean mxbean = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
@@ -94,7 +91,7 @@ public class SettingsPanel extends TransparentPanel {
                             ramCustomValue.setText("256");
                         ramCustomValueType.setSelected(0);
                     }else{
-                        screen.getLauncher().getSettings().setRAM(memories.get(index));
+                        LauncherSettings.setRAM(memories.get(index));
                         ramCustomValue.setVisible(false);
                         ramCustomValueType.setVisible(false);
                     }
@@ -107,11 +104,11 @@ public class SettingsPanel extends TransparentPanel {
                     addTextListener(text -> {
                         try {
                             if (ramCustomValueType.getSelectedIndex() == 0)
-                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
+                                LauncherSettings.setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
                             else
-                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
+                                LauncherSettings.setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
                         }catch (Exception ex){
-                            screen.getLauncher().getSettings().setRAM(256);
+                            LauncherSettings.setRAM(256);
                         }
                     });
                 }});
@@ -122,11 +119,11 @@ public class SettingsPanel extends TransparentPanel {
                     addSelectedListener(index -> {
                         try {
                             if (ramCustomValueType.getSelectedIndex() == 0)
-                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
+                                LauncherSettings.setRAM(ramCustomValue.getText().isEmpty() ? 1024 : Integer.parseInt(ramCustomValue.getText()));
                             else
-                                screen.getLauncher().getSettings().setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
+                                LauncherSettings.setRAM(ramCustomValue.getText().isEmpty() ? 256 : (Integer.parseInt(ramCustomValue.getText()) * 1024));
                         }catch (Exception ex){
-                            screen.getLauncher().getSettings().setRAM(256);
+                            LauncherSettings.setRAM(256);
                         }
                     });
                 }}, BorderLayout.EAST);

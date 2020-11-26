@@ -3,6 +3,7 @@ package com.husker.glassui.screens.registration;
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
 import com.husker.glassui.screens.login.LoginProcess;
+import com.husker.launcher.api.API;
 
 public class RegistrationProgress extends SimpleLoadingScreen {
 
@@ -15,16 +16,17 @@ public class RegistrationProgress extends SimpleLoadingScreen {
         String login = getParameterValue("login");
         String password = getParameterValue("password");
 
-        int register_result = getLauncher().API.Players.register(login, password);
-
-        if(register_result == getLauncher().API.Players.ERROR)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка", Registration.class, getParameters());
-        if(register_result == getLauncher().API.Players.NAME_TAKEN)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Такое имя уже занято...", Registration.class, getParameters());
-        if(register_result == getLauncher().API.Players.BAD_PASSWORD)
-            Message.showMessage(getLauncherUI(), "Проблемка", "Пароль имеет неверный формат!", Registration.class, getParameters());
-        if(register_result == getLauncher().API.Players.SUCCESSFUL_REGISTRATION)
+        try {
+            API.Auth.register(login, password);
             getLauncherUI().setScreen(LoginProcess.class, getParameters());
-
+        } catch (API.APIException e) {
+            Message.showMessage(getLauncherUI(), "Проблемка", "Произошла ошибка (" + e.getMessage() + ")", Registration.class, getParameters());
+        } catch (API.IncorrectLoginFormatException e) {
+            Message.showMessage(getLauncherUI(), "Проблемка", "логин имеет неверный формат!", Registration.class, getParameters());
+        } catch (API.LoginAlreadyExistException e) {
+            Message.showMessage(getLauncherUI(), "Проблемка", "Такое имя уже занято...", Registration.class, getParameters());
+        } catch (API.IncorrectPassswordFormatException e) {
+            Message.showMessage(getLauncherUI(), "Проблемка", "Пароль имеет неверный формат!", Registration.class, getParameters());
+        }
     }
 }

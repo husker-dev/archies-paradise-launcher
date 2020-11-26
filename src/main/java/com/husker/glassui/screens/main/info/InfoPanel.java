@@ -6,13 +6,18 @@ import com.husker.glassui.components.BlurButtonLineChooser;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.TagPanel;
 
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.api.API;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.settings.LauncherConfig;
+import com.husker.launcher.social.Social;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,24 +56,19 @@ public class InfoPanel extends TransparentPanel {
                 setMaximumRows(30);
                 setForeground(GlassUI.Colors.labelText);
                 setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(28f));
-                setText(screen.getLauncher().getConfig().getTitle());
+                setText(LauncherConfig.getTitle());
             }}, BorderLayout.NORTH);
             add(new BlurPanel(screen) {
                 {
-                    String repo = "empty/repo";
-                    try {
-                        repo = getScreen().getLauncher().API.Social.getGitHubRepo();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    String repo = Social.GitHub.getRepository();
 
                     setLayout(new FlowLayout(CENTER));
                     setMargin(20, 20, 0, 20);
                     add(createInfoParameter("Версия", UpdateManager.VERSION));
                     add(createInfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
-                    add(createInfoParameter("Владелец", screen.getLauncher().getConfig().About.Owner.getName(), screen.getLauncher().getConfig().About.Owner.getURL()));
+                    add(createInfoParameter("Владелец", Social.About.getOwnerName(), Social.About.getOwnerUrl()));
                     add(createInfoParameter("GitHub",  repo.replace("/", "/ "), "https://github.com/" + repo));
-                    add(createInfoParameter("Поддержка", screen.getLauncher().getConfig().About.Support.getName(), screen.getLauncher().getConfig().About.Support.getURL()));
+                    add(createInfoParameter("Поддержка", Social.About.getSupportName(), Social.About.getSupportUrl()));
                 }
 
                 public void onBlurApply(BlurParameter parameter, Component component) {
@@ -96,8 +96,8 @@ public class InfoPanel extends TransparentPanel {
 
                 // Info
                 add(new TagPanel(screen, "Информация"){{
-                    addButtonAction(() -> updateData());
-                    setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                    addButtonAction(InfoPanel.this::updateData);
+                    setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                     addContent(GlassUI.createParameterLine("Версия", versionLabel = GlassUI.createParameterLineValueLabel(false)));
                     addContent(GlassUI.createParameterLine("Номер сборки", buildVersionLabel = GlassUI.createParameterLineValueLabel(false)));
                 }});
@@ -162,8 +162,12 @@ public class InfoPanel extends TransparentPanel {
         new Thread(() -> {
             new Thread(serverInfo::updateInfo).start();
 
-            versionLabel.setText(screen.getLauncher().API.Client.getJarVersion());
-            buildVersionLabel.setText(screen.getLauncher().API.Client.getShortClientVersion());
+            try {
+                versionLabel.setText(API.Client.getJarVersion());
+                buildVersionLabel.setText(API.Client.getShortClientVersion());
+            } catch (API.APIException e) {
+                e.printStackTrace();
+            }
 
             for(ModPanel panel : modPanels) {
                 try {
@@ -263,7 +267,7 @@ public class InfoPanel extends TransparentPanel {
 
         MouseAdapter linkAdapter = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                screen.getLauncher().NetManager.openLink(link);
+                NetManager.openLink(link);
             }
         };
 

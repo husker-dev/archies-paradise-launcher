@@ -10,18 +10,12 @@ public class Main {
 
     public static void main(String[] args) {
         ConsoleUtils.configureLogging("launcher");
-        ArrayList<String> argList = new ArrayList<>(Arrays.asList(args));
-        if(argList.contains("-disable-updates"))
-            UpdateManager.enable = false;
-        if(argList.contains("-disable-net"))
-            NetManager.enable = false;
+        UpdateManager.enable = false;
 
-        if(argList.contains("-debug")){
-            UpdateManager.enable = false;
-            NetManager.enable = false;
-        }
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        System.setProperty("swing.aatext", "true");
 
-        new Launcher();
+        new LoadingWindow();
     }
 
 

@@ -12,11 +12,11 @@ import com.husker.glassui.screens.main.MainScreen;
 import com.husker.glassui.screens.main.profile.edit.InfoEdit;
 import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.components.skin.SkinViewer;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 import com.husker.launcher.utils.SkinUtils;
 
 
@@ -25,7 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 import static java.awt.FlowLayout.LEFT;
 
 public class ProfilePanel extends TransparentPanel {
@@ -99,7 +99,7 @@ public class ProfilePanel extends TransparentPanel {
                 add(new BlurButton(screen, "Выйти"){
                     {
                         setMargin(3, 20, 0, 20);
-                        addActionListener(e -> ((GlassUI)screen.getLauncherUI()).logout());
+                        addActionListener(e -> screen.getLauncher().User.logout());
                     }
                     public void onBlurApply(BlurParameter parameter, Component component) {
                         super.onBlurApply(parameter, component);
@@ -121,13 +121,13 @@ public class ProfilePanel extends TransparentPanel {
     }
 
     public void onShow(){
-        name.setText(screen.getLauncher().API.PlayerInfo.getNickname());
-        email.setText(screen.getLauncher().API.PlayerInfo.getEmail());
-        status.setText(screen.getLauncher().API.PlayerInfo.getStatus());
-        id.setText(screen.getLauncher().API.PlayerInfo.getId() + "");
-        skinType.setText(SkinUtils.isMale(screen.getLauncher().API.PlayerInfo.getSkin()) ? "Обычный" : "Тонкий");
-        if(skinViewer.getPlayerTexture() != screen.getLauncher().API.PlayerInfo.getSkin())
-            skinViewer.setPlayerTexture(screen.getLauncher().API.PlayerInfo.getSkin());
+        name.setText(screen.getLauncher().User.getNickname());
+        email.setText(screen.getLauncher().User.getEmail());
+        status.setText(screen.getLauncher().User.getStatus());
+        id.setText(screen.getLauncher().User.getId() + "");
+        skinType.setText(SkinUtils.isMale(screen.getLauncher().User.getSkin()) ? "Обычный" : "Тонкий");
+        if(skinViewer.getPlayerTexture() != screen.getLauncher().User.getSkin())
+            skinViewer.setPlayerTexture(screen.getLauncher().User.getSkin());
     }
 
     public Component createTitleLabel(String text, Runnable action){
@@ -154,14 +154,14 @@ public class ProfilePanel extends TransparentPanel {
         }});
 
         panel.add(new WebLabel(){
-            final ImageIcon defaultIcon = new ImageIcon(screen.getLauncher().Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
-            final ImageIcon hoveredIcon = new ImageIcon(screen.getLauncher().Resources.Icon_Edit_Selected.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
+            final ImageIcon defaultIcon = new ImageIcon(Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
+            final ImageIcon hoveredIcon = new ImageIcon(Resources.Icon_Edit_Selected.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
 
             {
                 setMargin(0, 5, 0, 0);
                 setPreferredHeight(30);
                 setVerticalAlignment(CENTER);
-                setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH)));
+                setIcon(new ImageIcon(Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH)));
 
                 addMouseListener(new MouseAdapter() {
                     public void mouseEntered(MouseEvent mouseEvent) {

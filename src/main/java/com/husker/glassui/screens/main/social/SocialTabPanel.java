@@ -6,17 +6,18 @@ import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.components.social.SocialLoadGrid;
 import com.husker.glassui.components.social.SocialPanel;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.LabelButton;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.LabelButton;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 public abstract class SocialTabPanel extends TransparentPanel {
 
@@ -42,9 +43,9 @@ public abstract class SocialTabPanel extends TransparentPanel {
             setLayout(new BorderLayout());
             setMargin(15, 15, 15, 15);
 
-            add(new LabelButton(screen.getLauncher().Resources.Icon_Reply, screen.getLauncher().Resources.Icon_Reply_Selected, 30, 30){{
+            add(new LabelButton(Resources.Icon_Reply, Resources.Icon_Reply_Selected, 30, 30){{
                 setPreferredSize(50, 50);
-                addActionListener(() -> screen.getLauncher().NetManager.openLink(link));
+                addActionListener(() -> NetManager.openLink(link));
             }}, BorderLayout.EAST);
 
             add(new TransparentPanel(){{

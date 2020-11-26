@@ -12,6 +12,7 @@ public class ConsoleUtils {
 
     private static String lastDebug = null;
 
+    /*
     public static void printDebug(Class<?> clazz, Object text){
         if(lastDebug != null)
             System.out.println();
@@ -24,6 +25,8 @@ public class ConsoleUtils {
 
         lastDebug = null;
     }
+
+     */
 
     public static String repeat(String text, int count){
         StringBuilder builder = new StringBuilder();

@@ -10,8 +10,8 @@ import com.husker.glassui.screens.main.profile.ProfilePanel;
 import com.husker.glassui.screens.main.settings.SettingsPanel;
 import com.husker.glassui.screens.main.social.VkGroupPanel;
 import com.husker.glassui.screens.main.social.YoutubePanel;
-import com.husker.launcher.components.TransparentPanel;
-import javafx.scene.layout.BorderPane;
+import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,12 +48,12 @@ public class MainScreen extends AbstractMainScreen {
 
             menu.add(tabPanel = new BlurTabPanel(this) {{
                 setPreferredHeight(450);
-                addTab("play", "Игра", getIcon(getLauncher().Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
-                addTab("profile", "Профиль", getIcon(getLauncher().Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
-                addTab("news", "Новости", getIcon(getLauncher().Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
-                addTab("videos", "Видео", getIcon(getLauncher().Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
-                addBottomTab("settings", "Настройки", getIcon(getLauncher().Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
-                addBottomTab("info", "Информация", getIcon(getLauncher().Resources.Icon_Info), infoPanel = new InfoPanel(MainScreen.this));
+                addTab("play", "Игра", getIcon(Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
+                addTab("profile", "Профиль", getIcon(Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
+                addTab("news", "Новости", getIcon(Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
+                addTab("videos", "Видео", getIcon(Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
+                addBottomTab("settings", "Настройки", getIcon(Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
+                addBottomTab("info", "Информация", getIcon(Resources.Icon_Info), infoPanel = new InfoPanel(MainScreen.this));
 
                 addTabChangedListener(id -> onShowPanelEvent());
             }});
@@ -74,10 +74,10 @@ public class MainScreen extends AbstractMainScreen {
             tabPanel.removeTab("control");
             tabPanel.removeTab("keys");
             tabPanel.removeTab("people");
-            if(getLauncher().API.PlayerInfo.getStatus().equals("Администратор")){
-                tabPanel.addTab("control", "Управление", getIcon(getLauncher().Resources.Icon_Folder), controlPanel);
-                tabPanel.addBottomTab("keys", "Ссылки", getIcon(getLauncher().Resources.Icon_Code), keysPanel);
-                tabPanel.addBottomTab("people", "Пользователи", getIcon(getLauncher().Resources.Icon_People), peoplePanel);
+            if(getLauncher().User.getStatus().equals("Администратор")){
+                tabPanel.addTab("control", "Управление", getIcon(Resources.Icon_Folder), controlPanel);
+                tabPanel.addBottomTab("keys", "Ссылки", getIcon(Resources.Icon_Code), keysPanel);
+                tabPanel.addBottomTab("people", "Пользователи", getIcon(Resources.Icon_People), peoplePanel);
             }
         }catch (Exception ex){
             ex.printStackTrace();

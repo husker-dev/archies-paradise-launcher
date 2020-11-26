@@ -1,18 +1,18 @@
 package com.husker.glassui.components.social;
 
 import com.husker.glassui.components.BlurScalableImage;
-import com.husker.launcher.components.ScalableImage;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.ScalableImage;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_LEFT;
-import static com.husker.launcher.utils.ShapeUtils.Corner.TOP_RIGHT;
+import static com.husker.launcher.ui.utils.ShapeUtils.Corner.TOP_LEFT;
+import static com.husker.launcher.ui.utils.ShapeUtils.Corner.TOP_RIGHT;
 
 public abstract class ImageSocialPanel extends SocialPanel{
 

@@ -1,7 +1,8 @@
 package com.husker.launcher;
 
-import com.husker.launcher.utils.ConsoleUtils;
-import com.husker.launcher.utils.ImageUtils;
+import com.husker.launcher.ui.utils.ImageUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,11 +17,7 @@ import java.util.ArrayList;
 
 public class Resources {
 
-    public static BufferedImage blurDefaultTexture;
-
-    static {
-        blurDefaultTexture = Resources.getBufferedImage("paper.png");
-    }
+    private static final Logger log = LogManager.getLogger(Resources.class);
 
     public static InputStream get(String file){
         return get(file, true);
@@ -30,11 +27,12 @@ public class Resources {
         String folder = launcherFolder ? "launcher/" : "";
         String path = "/" + folder + file;
 
-        ConsoleUtils.printDebug(Resources.class, "Reading <jar>" + path);
+        log.info("Reading <jar>" + path);
 
         InputStream out = Resources.class.getResourceAsStream(path);
 
-        ConsoleUtils.printResult(out != null ? "OK" : "ERROR");
+        if(out == null)
+            log.error(new NullPointerException("Can't load: " + file));
 
         return out;
     }
@@ -79,51 +77,62 @@ public class Resources {
         }
     }
 
-    public final BufferedImage Logo;
-    public final BufferedImage Icon;
+    public static BufferedImage Logo;
+    public static BufferedImage Icon;
+    public static BufferedImage Loading_Background;
 
-    public final BufferedImage Icon_Info;
-    public final BufferedImage Icon_Play;
-    public final BufferedImage Icon_Profile;
-    public final BufferedImage Icon_Settings;
-    public final BufferedImage Icon_Book;
-    public final BufferedImage Icon_Videos;
-    public final BufferedImage Icon_Image;
-    public final BufferedImage Icon_Frame;
-    public final BufferedImage Icon_Edit;
-    public final BufferedImage Icon_Edit_Selected;
-    public final BufferedImage Icon_Arrow_Left;
-    public final BufferedImage Icon_Arrow_Right;
-    public final BufferedImage Icon_Arrow_Left_Selected;
-    public final BufferedImage Icon_Arrow_Right_Selected;
-    public final BufferedImage Icon_Dot;
-    public final BufferedImage Icon_Dot_Selected;
-    public final BufferedImage Icon_Reply;
-    public final BufferedImage Icon_Reply_Selected;
-    public final BufferedImage Icon_Download;
-    public final BufferedImage Icon_Reload;
-    public final BufferedImage Icon_Reload_Selected;
-    public final BufferedImage Icon_Code;
-    public final BufferedImage Icon_People;
-    public final BufferedImage Icon_Key;
-    public final BufferedImage Icon_Folder;
+    public static BufferedImage Icon_Info;
+    public static BufferedImage Icon_Play;
+    public static BufferedImage Icon_Profile;
+    public static BufferedImage Icon_Settings;
+    public static BufferedImage Icon_Book;
+    public static BufferedImage Icon_Videos;
+    public static BufferedImage Icon_Image;
+    public static BufferedImage Icon_Frame;
+    public static BufferedImage Icon_Edit;
+    public static BufferedImage Icon_Edit_Selected;
+    public static BufferedImage Icon_Arrow_Left;
+    public static BufferedImage Icon_Arrow_Right;
+    public static BufferedImage Icon_Arrow_Left_Selected;
+    public static BufferedImage Icon_Arrow_Right_Selected;
+    public static BufferedImage Icon_Dot;
+    public static BufferedImage Icon_Dot_Selected;
+    public static BufferedImage Icon_Reply;
+    public static BufferedImage Icon_Reply_Selected;
+    public static BufferedImage Icon_Download;
+    public static BufferedImage Icon_Reload;
+    public static BufferedImage Icon_Reload_Selected;
+    public static BufferedImage Icon_Code;
+    public static BufferedImage Icon_People;
+    public static BufferedImage Icon_Key;
+    public static BufferedImage Icon_Folder;
 
-    public final BufferedImage Social_Loading_Logo;
-    public final BufferedImage Logo_Youtube;
-    public final BufferedImage Logo_VK;
-    public final BufferedImage Logo_Instagram;
+    public static BufferedImage Social_Loading_Logo;
+    public static BufferedImage Logo_Youtube;
+    public static BufferedImage Logo_VK;
+    public static BufferedImage Logo_Instagram;
 
-    public final BufferedImage Loading_Background;
+    public static BufferedImage Skin_Steve;
 
-    public final BufferedImage Skin_Steve;
+    public static BufferedImage[] Background;
 
-    public final BufferedImage[] Background;
+    public static BufferedImage Icon_Checkbox_On;
+    public static BufferedImage Icon_Checkbox_Off;
 
-    public final BufferedImage Icon_Checkbox_On;
-    public final BufferedImage Icon_Checkbox_Off;
+    public static BufferedImage blurDefaultTexture;
 
-    public Resources(Launcher launcher){
-        Logo = getBufferedImage(launcher.getConfig().Launcher.getLogo());
+
+    public static void loadBase(){
+        if(Logo == null)
+            Logo = getBufferedImage("logo.png");
+        if(Icon == null)
+            Icon = getBufferedImage("icon.png");
+        if(Loading_Background == null)
+            Loading_Background = getBufferedImage("loading_background.png");
+    }
+
+    public static void load(){
+        loadBase();
 
         BufferedImage custom = null;
         try{
@@ -142,8 +151,6 @@ public class Resources {
         Background[0] = custom;
         for(int i = 0; i < bgs.size(); i++)
             Background[i + 1] = bgs.get(i);
-
-        Icon = getBufferedImage(launcher.getConfig().Launcher.getIcon());
 
         Icon_Info = getBufferedImage("info_icon.png");
         Icon_Play = getBufferedImage("play_icon.png");
@@ -176,11 +183,12 @@ public class Resources {
         Logo_VK = getBufferedImage("vk_logo.png");
         Logo_Instagram = getBufferedImage("instagram_logo.png");
 
-        Loading_Background = getBufferedImage("loading_background.png");
-
         Skin_Steve = getBufferedImage("steve.png");
 
         Icon_Checkbox_On = getBufferedImage("checkbox_on.png");
         Icon_Checkbox_Off = getBufferedImage("checkbox_off.png");
+
+        blurDefaultTexture = Resources.getBufferedImage("paper.png");
     }
+
 }

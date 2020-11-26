@@ -2,6 +2,7 @@ package com.husker.glassui.screens.confirm;
 
 import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
+import com.husker.launcher.api.API;
 
 public class C_2_SendingCode extends SimpleLoadingScreen {
 
@@ -11,12 +12,11 @@ public class C_2_SendingCode extends SimpleLoadingScreen {
     }
 
     public void process() {
-        String email = getParameterValue("email");
-
-        int result = getLauncher().API.PlayerInfo.sendConfirmCode(email);
-        if(result == 0)
+        try {
+            getLauncher().User.sendConfirmCode(getParameterValue("email"));
             getLauncherUI().setScreen(C_3_Code.class, getParameters());
-        if(result == -1)
+        } catch (API.EmailCodeSendingException e) {
             Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", C_1_Email.class, getParameters());
+        }
     }
 }

@@ -5,9 +5,9 @@ import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.components.TagPanel;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.ApiMethod;
-import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.Resources;
+import com.husker.launcher.social.Social;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
 import javax.swing.*;
@@ -29,7 +29,7 @@ public class KeysPanel extends TransparentPanel {
 
             add(new TagPanel(screen, "YouTube"){{
                 addButtonAction(KeysPanel.this::updateYouTubeInfo);
-                setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
                 addContent(new TransparentPanel(){{
                     setMargin(0, 20, 0, 0);
@@ -43,7 +43,7 @@ public class KeysPanel extends TransparentPanel {
 
             add(new TagPanel(screen, "VK"){{
                 addButtonAction(KeysPanel.this::updateVkInfo);
-                setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
                 addContent(new TransparentPanel(){{
                     setMargin(0, 20, 0, 0);
@@ -57,7 +57,7 @@ public class KeysPanel extends TransparentPanel {
 
             add(new TagPanel(screen, "Instagram"){{
                 addButtonAction(KeysPanel.this::updateInstagramInfo);
-                setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
                 addContent(new TransparentPanel(){{
                     setMargin(0, 20, 0, 0);
@@ -71,7 +71,7 @@ public class KeysPanel extends TransparentPanel {
 
             add(new TagPanel(screen, "GitHub"){{
                 addButtonAction(KeysPanel.this::updateGitHubInfo);
-                setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+                setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
                 addContent(new TransparentPanel(){{
                     setMargin(0, 20, 0, 0);
@@ -88,35 +88,35 @@ public class KeysPanel extends TransparentPanel {
     }
 
     public void updateYouTubeInfo(){
-        yt_id.setText(screen.getLauncher().API.Social.getYouTubeId());
+        yt_id.setText(Social.YouTube.getId());
     }
 
     public void updateVkInfo(){
-        vk_id.setText(screen.getLauncher().API.Social.getVkId());
+        vk_id.setText(Social.VK.getId());
     }
 
     public void updateInstagramInfo(){
-        inst_id.setText(screen.getLauncher().API.Social.getInstagramId());
+        inst_id.setText(Social.Instagram.getId());
     }
 
     public void updateGitHubInfo(){
-        github_id.setText(screen.getLauncher().API.Social.getGitHubRepo());
+        github_id.setText(Social.GitHub.getRepository());
     }
 
     public void sendYouTubeInfo(){
-        screen.getLauncher().API.Social.setYouTubeId(yt_id.getText());
+        Social.YouTube.setId(yt_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendVkInfo(){
-        screen.getLauncher().API.Social.setVkId(vk_id.getText());
+        Social.VK.setId(vk_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendInstagramInfo(){
-        screen.getLauncher().API.Social.setInstagramId(inst_id.getText());
+        Social.Instagram.setId(inst_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendGitHubInfo(){
-        screen.getLauncher().API.Social.setGitHubRepo(github_id.getText());
+        Social.GitHub.setRepository(github_id.getText(), screen.getLauncher().User.getToken());
     }
 
     private TransparentPanel createParameter(String text, JComponent component){

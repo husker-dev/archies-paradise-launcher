@@ -1,7 +1,6 @@
 package com.husker.launcher.settings;
 
 import com.husker.launcher.Launcher;
-import com.husker.launcher.utils.settings.SettingsFile;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -9,19 +8,14 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 
 public class UserInfoFile extends SettingsFile {
 
-    private final Launcher launcher;
-
-    public UserInfoFile(Launcher launcher) {
-        super(new File(launcher.getSettingsFolder() + "/user.cfg"));
-        this.launcher = launcher;
+    public UserInfoFile() {
+        super(Launcher.getSettingsFolder() + "/user.yaml");
     }
 
     public String getLogin(){
@@ -52,12 +46,6 @@ public class UserInfoFile extends SettingsFile {
         return login != null && password != null && !login.equals("null") && !password.equals("null");
     }
 
-    public void update(){
-        if(launcher.getSettings().isAutoAuth()){
-
-        }
-    }
-
     private String encrypt(String text) {
         return encrypt(text, getKey());
     }
@@ -67,9 +55,8 @@ public class UserInfoFile extends SettingsFile {
     }
 
     public static String decrypt(String strToDecrypt, String secret) {
-        try
-        {
-            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        try {
+            byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
@@ -87,11 +74,9 @@ public class UserInfoFile extends SettingsFile {
         return null;
     }
 
-    public static String encrypt(String strToEncrypt, String secret)
-    {
-        try
-        {
-            byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    public static String encrypt(String strToEncrypt, String secret) {
+        try {
+            byte[] iv = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             IvParameterSpec ivspec = new IvParameterSpec(iv);
 
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");

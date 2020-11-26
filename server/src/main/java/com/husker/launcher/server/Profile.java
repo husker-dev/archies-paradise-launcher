@@ -42,31 +42,26 @@ public class Profile {
 
     public SettingsFile data;
 
-    public static int create(String login, String password){
-        try {
-            if(!FormatUtils.isCorrectName(login))
-                return 1;
-            if(ProfileUtils.isNicknameExist(login))
-                return 2;
-            if(!FormatUtils.isCorrectPassword(password))
-                return 3;
+    public static int create(String login, String password) throws IOException {
+        if(!FormatUtils.isCorrectName(login))
+            return 1;
+        if(ProfileUtils.isNicknameExist(login))
+            return 2;
+        if(!FormatUtils.isCorrectPassword(password))
+            return 3;
 
-            int id = ProfileUtils.getUserCount() + 1;
-            Files.createDirectories(Paths.get(profilesFolder + "/" + id));
-            Files.write(Paths.get(profilesFolder + "/" + id + "/" + dataFile), new ArrayList<>(Arrays.asList(
-                    LOGIN + ":" + login,
-                    PASSWORD + ":" + DigestUtils.md2Hex(password),
-                    SKIN_URL + ":null",
-                    STATUS + ":Гость",
-                    EMAIL + ":null")));
-            Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + ipFile));
-            Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + keysFile));
-            Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + mailCodesFile));
-            return 0;
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return -1;
+        int id = ProfileUtils.getUserCount() + 1;
+        Files.createDirectories(Paths.get(profilesFolder + "/" + id));
+        Files.write(Paths.get(profilesFolder + "/" + id + "/" + dataFile), new ArrayList<>(Arrays.asList(
+                LOGIN + ":" + login,
+                PASSWORD + ":" + DigestUtils.md2Hex(password),
+                SKIN_URL + ":null",
+                STATUS + ":Гость",
+                EMAIL + ":null")));
+        Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + ipFile));
+        Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + keysFile));
+        Files.createFile(Paths.get(profilesFolder + "/" + id + "/" + mailCodesFile));
+        return 0;
     }
 
     public static Profile getByName(String name){
@@ -144,19 +139,12 @@ public class Profile {
     public HashMap<String, String> getData(String... parameters){
         HashMap<String, String> out_data = new HashMap<>();
 
-        List<String> availableData = Arrays.asList(ID, HAS_SKIN, SKIN_URL, LOGIN, EMAIL, STATUS);
-
-        if(parameters.length == 0)
-            parameters = availableData.toArray(new String[0]);
+        List<String> availableData = Arrays.asList(ID, LOGIN, EMAIL, STATUS);
 
         for(String parameter : parameters) {
             if (availableData.contains(parameter)) {
                 if (parameter.equals(ID))
                     out_data.put(parameter, id + "");
-                else if (parameter.equals(HAS_SKIN))
-                    out_data.put(parameter, Files.exists(Paths.get(getFolder() + "/" + skinFile)) ? "1" : "0");
-                else if (parameter.equals(PASSWORD))
-                    out_data.put(parameter, data.get(PASSWORD));
                 else
                     out_data.put(parameter, data.get(parameter));
             }
@@ -179,18 +167,13 @@ public class Profile {
         return null;
     }
 
-    public int sendEmailCode(String email){
+    public int sendEmailCode(String email) throws IOException {
         String code = ProfileUtils.generateMailCode();
 
-        try {
-            BufferedWriter output = new BufferedWriter(new FileWriter(getFolder() + "/" + mailCodesFile, true));
-            output.write(System.currentTimeMillis() + "," + email + "," + code + "\n");
-            output.flush();
-            output.close();
-        }catch (Exception ex){
-            ex.printStackTrace();
-            return -1;
-        }
+        BufferedWriter output = new BufferedWriter(new FileWriter(getFolder() + "/" + mailCodesFile, true));
+        output.write(System.currentTimeMillis() + "," + email + "," + code + "\n");
+        output.flush();
+        output.close();
 
         return ServerMain.MailManager.send(email, ServerMain.Settings.getEmailTitle(), ServerMain.Settings.getEmailText().replace("[code]", code)) ? 0 : 1;
     }

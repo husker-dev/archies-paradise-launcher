@@ -1,18 +1,20 @@
 package com.husker.launcher.ui.blur;
 
-import com.husker.launcher.utils.ConsoleUtils;
-import com.husker.launcher.utils.ImageUtils;
+import com.husker.launcher.ui.utils.ImageUtils;
 import com.husker.launcher.Launcher;
-import com.husker.launcher.blur.GaussianBlur;
-import com.husker.launcher.utils.RenderUtils;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.blur.impl.GaussianBlur;
+import com.husker.launcher.ui.utils.RenderUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.awt.image.VolatileImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static com.husker.launcher.ui.blur.BlurParameter.ShadowType.*;
 
@@ -106,21 +108,26 @@ public class BlurPainter {
 
                 if (translatedShape != null && translatedShape.getBounds().width > 0 && translatedShape.getBounds().height > 0 && parameter.getBlurFactor() > 0) {
 
-                    BufferedImage image = new BufferedImage(translatedShape.getBounds().width, translatedShape.getBounds().height + (parameter.getBlurFactor() * 2), BufferedImage.TYPE_INT_ARGB);
+                    BufferedImage image = new BufferedImage(translatedShape.getBounds().width, translatedShape.getBounds().height, BufferedImage.TYPE_INT_ARGB);
 
                     // Draw background image
                     Graphics2D image_g2d = image.createGraphics();
                     image_g2d.translate(-shape.getBounds().x, -shape.getBounds().y);
                     launcher.getBackgroundScalableImage().paint(image_g2d);
 
-                    // Increase image size to cut shape
-                    BufferedImage shapeSized = new BufferedImage(translatedShape.getBounds().width, translatedShape.getBounds().height, BufferedImage.TYPE_INT_ARGB);
+                    int radius = parameter.getBlurFactor();
+                    double scale = .1;
+
+                    image = ImageUtils.toBufferedImage(image.getScaledInstance((int)(image.getWidth() * scale), (int)(image.getHeight() * scale), Image.SCALE_FAST));
 
                     // Apply gaussian blur
-                    shapeSized.createGraphics().drawImage(GaussianBlur.fastBlur(image, parameter.getBlurFactor()), translatedShape.getBounds().x, translatedShape.getBounds().y, null);
+                    image = getBlurFilter(radius, 0).filter(image, null);
+                    image = getBlurFilter(0, radius).filter(image, null);
+
+                    image = ImageUtils.toBufferedImage(image.getScaledInstance(translatedShape.getBounds().width, translatedShape.getBounds().height, Image.SCALE_FAST));
 
                     // Cropping by shape
-                    image = ImageUtils.getSubImage(shapeSized, translatedShape.getBounds());
+                    image = ImageUtils.getSubImage(image, translatedShape.getBounds());
 
                     // Render on 'blurred'
                     if (image != null) {
@@ -327,6 +334,20 @@ public class BlurPainter {
 
     public BlurSegment getBlurSegment(){
         return segment;
+    }
+
+
+    public static ConvolveFilter getBlurFilter(int horizontalRadius, int verticalRadius) {
+        int width = horizontalRadius * 2 + 1;
+        int height = verticalRadius * 2 + 1;
+
+        float weight = 1.0f / (width * height);
+        float[] data = new float[width * height];
+
+        Arrays.fill(data, weight);
+
+        Kernel kernel = new Kernel(width, height, data);
+        return new ConvolveFilter(kernel);
     }
 }
 

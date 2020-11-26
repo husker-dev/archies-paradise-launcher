@@ -41,6 +41,15 @@ dependencies {
 
     implementation 'org.json:json:+'
     implementation 'org.jdom:jdom2:2.0.6'
+    implementation 'org.yaml:snakeyaml:+'
+
+    implementation 'org.apache.logging.log4j:log4j-api:+'
+    implementation 'org.apache.logging.log4j:log4j-core:+'
+
     implementation 'commons-codec:commons-codec:1.15'
+
+    implementation 'com.nativelibs4java:bridj:+'
+    implementation 'net.java.dev.jna:jna:+'
+    implementation 'net.java.dev.jna:jna-platform:+'
 
 }

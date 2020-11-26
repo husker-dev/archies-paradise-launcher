@@ -1,16 +1,16 @@
 package com.husker.glassui.components;
 
-import com.husker.launcher.components.ScalableImage;
+import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 
 public class BlurScalableImage extends ScalableImage implements BlurComponent {

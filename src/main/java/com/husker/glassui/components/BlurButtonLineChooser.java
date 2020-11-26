@@ -2,12 +2,12 @@ package com.husker.glassui.components;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 
 import javax.swing.SwingUtilities;
@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-import static com.husker.launcher.utils.ShapeUtils.Corner.*;
+import static com.husker.launcher.ui.utils.ShapeUtils.Corner.*;
 
-// TODO replace to TransparentPanel
 public class BlurButtonLineChooser extends TransparentPanel implements BlurComponent{
 
     private final Screen screen;
@@ -119,7 +118,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
             }
         });
         label.setText(text);
-        label.setMargin(0, 12, 0, 12);
+        label.setPadding(0, 12, 0, 12);
         add(label, new GridBagConstraints() {{
             this.weightx = 1;
             this.fill = 1;

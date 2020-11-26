@@ -6,7 +6,7 @@ import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;

@@ -3,7 +3,7 @@ package com.husker.glassui.screens.confirm;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.utils.FormatUtils;
 import com.husker.glassui.screens.TitledLogoScreen;
 
@@ -36,7 +36,7 @@ public class C_1_Email extends TitledLogoScreen {
             }});
         });
         nextButton.setEnabled(false);
-        panel.add(createButton("Назад", () -> ((GlassUI)getLauncherUI()).logout()));
+        panel.add(createButton("Назад", () -> getLauncher().User.logout()));
         panel.add(nextButton);
     }
 

@@ -4,9 +4,8 @@ import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.API;
-import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.api.API;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 
@@ -68,17 +67,13 @@ public class ModPanel extends BlurPanel {
     }
 
     public void updateInfo(){
-        API.Client.ModInfo info = screen.getLauncher().API.Client.getModInfo(index, true);
-        if(info != null) {
-            name.setText(info.getName());
-
-            new Thread(() -> {
-                if (info.hasIcon())
-                    icon.setImage(screen.getLauncher().API.Client.getModIcon(info.getIndex()));
-                else
-                    icon.setImage(null);
-            }).start();
-        }else{
+        try {
+            API.Client.ModInfo info = API.Client.getModInfo(index, true);
+            if(info != null) {
+                name.setText(info.getName());
+                icon.setImage(info.hasIcon() ? API.Client.getModIcon(info.getIndex()) : null);
+            }
+        } catch (API.APIException e) {
             name.setText("");
             icon.setImage(null);
         }

@@ -4,13 +4,16 @@ import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.blur.BlurSegment;
-import com.husker.launcher.utils.ConsoleUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
 public abstract class Screen extends JPanel {
+
+    private static final Logger log = LogManager.getLogger(Screen.class);
 
     private LauncherUI launcherUI;
     private final ArrayList<BlurPainter> blurPainters = new ArrayList<>();
@@ -41,7 +44,7 @@ public abstract class Screen extends JPanel {
         if(toRemove != null)
             blurPainters.remove(toRemove);
 
-        ConsoleUtils.printDebug(getClass(), "Blur segment was removed");
+        log.info("Blur segment was removed");
     }
 
     public void removeBlurSegment(BlurParameter parameter){

@@ -5,16 +5,17 @@ import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 import java.util.TimerTask;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 public abstract class AbstractMainScreen extends Screen {
 
@@ -31,7 +32,7 @@ public abstract class AbstractMainScreen extends Screen {
             {
                 setPreferredSize(400, 170);
                 setLayout(new BorderLayout());
-                add(new BlurScalableImage(AbstractMainScreen.this, getLauncher().Resources.Logo){
+                add(new BlurScalableImage(AbstractMainScreen.this, Resources.Logo){
                     {
                         setAnimated(true);
                         setFitType(FitType.FILL_Y);
@@ -58,7 +59,7 @@ public abstract class AbstractMainScreen extends Screen {
 
                             new java.util.Timer().schedule(new TimerTask() {
                                 public void run() {
-                                    getLauncher().NetManager.updateStatusLabel(statusLabel);
+                                    NetManager.updateStatusLabel(statusLabel);
                                 }
                             }, 0, 500);
 

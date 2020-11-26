@@ -8,19 +8,19 @@ import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.api.API;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.components.skin.SkinViewer;
-import com.husker.launcher.utils.ComponentUtils;
+import com.husker.launcher.ui.components.skin.SkinViewer;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 
 
@@ -254,9 +254,9 @@ public class SkinCategories extends SimpleTitledScreen {
             }
 
             try {
-                viewer.setPlayerTexture(getScreen().getLauncher().API.Skins.getCategoryPreview(name));
+                viewer.setPlayerTexture(API.Skins.getCategoryPreview(name));
             }catch (Exception ex){
-                viewer.setPlayerTexture(getScreen().getLauncher().Resources.Skin_Steve);
+                viewer.setPlayerTexture(Resources.Skin_Steve);
             }
         }
     }

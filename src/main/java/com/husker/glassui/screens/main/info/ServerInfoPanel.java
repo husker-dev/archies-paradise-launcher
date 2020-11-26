@@ -4,15 +4,17 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.api.API;
+import com.husker.launcher.settings.LauncherConfig;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.*;
+import com.husker.launcher.ui.utils.UIUtils;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 
@@ -71,14 +73,15 @@ public class ServerInfoPanel extends BlurPanel {
             status.setForeground(yellow);
             ping.setText("...");
 
-            JSONObject object = NetManager.MinecraftServer.info(getScreen().getLauncher().getConfig().Net.Minecraft.getIp(), getScreen().getLauncher().getConfig().Net.Minecraft.getPort());
+            API.Minecraft.ServerInfo info = API.Minecraft.getServerInfo();
+            JSONObject object = NetManager.MinecraftServer.info(info.getIP(), info.getPort());
 
             status.setText("Онлайн");
             status.setForeground(green);
             players.setText(object.getJSONObject("players").getInt("online") + "");
             maxPlayers.setText(object.getJSONObject("players").getInt("max") + "");
             ping.setText(object.getLong("ping")  + " мс");
-        } catch (IOException e) {
+        } catch (IOException | API.APIException e) {
             status.setForeground(red);
             status.setText("Оффлайн");
             players.setText("");

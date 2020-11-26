@@ -1,9 +1,12 @@
 package com.husker.launcher.managers;
 
-import com.husker.launcher.Launcher;
+import com.husker.launcher.social.Social;
 import com.husker.launcher.utils.IOUtils;
-import com.husker.launcher.utils.settings.SettingsFile;
 import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.net.Get;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,92 +15,83 @@ import java.util.function.Consumer;
 
 public class UpdateManager {
 
-    public static final String VERSION = "0.0.1";
-    private static final String[] filesToSave = new String[]{"client"};
-
+    private static final Logger log = LogManager.getLogger(UpdateManager.class);
     public static boolean enable = true;
 
-    public String updateFolder = "./launcher_update";
-    public String zipName = "archive";
+    public static final String VERSION = "0.0.1";
+    private static final String UpdateFolder = "./launcher_update";
 
-    public SettingsFile config = new SettingsFile("update.cfg");
+    private static final String[] filesToSave = new String[]{"client"};
 
-    private String html = null;
+    private static JSONObject LatestReleaseInfo = null;
 
-    private final Launcher launcher;
-
-    public UpdateManager(Launcher launcher){
-        this.launcher = launcher;
-        ConsoleUtils.printDebug(getClass(), "Current launcher version: " + VERSION);
-        IOUtils.delete(updateFolder);
+    static{
+        log.info("Current launcher version: " + VERSION);
+        IOUtils.delete(UpdateFolder);
     }
 
-    public String getLatestVersion() throws UpdateException{
-        checkHTML();
-
-        try {
-            return html.split("<li class=\"d-block mb-1\">")[1].split("class=\"css-truncate-target\"")[1].split("\">")[1].split("</span>")[0];
-        }catch (Exception ex){
-            throw new UpdateException(UpdateException.Stage.VERSION_GET, 0, new Exception("Failed to get html from url: " + config.get("github")));
-        }
-    }
-
-    private void checkHTML() throws UpdateException{
-        if(html == null) {
+    private static void checkHTML() throws UpdateException{
+        if(LatestReleaseInfo == null) {
             try {
-                html = launcher.NetManager.getURLContent(config.get("github") + "/releases/latest");
+                Get get = new Get("https://api.github.com/repos/" + Social.GitHub.getRepository() + "/releases/latest");
+                LatestReleaseInfo = new JSONObject(get.getHtmlContent());
+                if(LatestReleaseInfo.has("message") && LatestReleaseInfo.getString("message").equals("Not Found"))
+                    throw new IOException("Can't find any releases");
             }catch (IOException e) {
-                throw new UpdateException(UpdateException.Stage.VERSION_GET, 0, new Exception("Failed to get html from url: " + config.get("github")));
+                throw new UpdateException(UpdateException.Stage.VERSION_GET, 0, new Exception("Failed while getting release info: " + e.getMessage()));
             }
         }
     }
 
-    public boolean hasUpdate() throws UpdateException{
+    public static String getLatestVersion() throws UpdateException{
+        checkHTML();
+        return LatestReleaseInfo.getString("tag_name");
+    }
+
+    public static boolean hasUpdate() throws UpdateException{
         if(!enable)
             return false;
         return !VERSION.equals(getLatestVersion());
     }
 
-    public String getDownloadLink() throws UpdateException{
+    public static String getDownloadLink() throws UpdateException{
         checkHTML();
+        return LatestReleaseInfo.getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
+    }
 
+    public static void processUpdating(UpdateProcessor processor){
         try {
-            return "https://github.com/" + html.split("d-flex flex-justify-between flex-items-center py-1 py-md-2 Box-body px-2")[1].split("href=\"")[1].split("\"")[0];
+            IOUtils.delete(UpdateFolder, processor::onRemoveOld);
+            Files.createDirectories(Paths.get(UpdateFolder));
+
+            IOUtils.receiveFile(getDownloadLink(), UpdateFolder + "/update_archive.zip", processor::onDownloading);
+
+            IOUtils.unzip(UpdateFolder + "/update_archive.zip", UpdateFolder, processor::onUnzipping);
+            IOUtils.delete(UpdateFolder + "/update_archive.zip", processor::onZipRemoving);
+
+            IOUtils.moveDirectoryContent(IOUtils.fileList(UpdateFolder)[0].getAbsolutePath(), UpdateFolder, processor::onUnpack);
+
+            processor.onReboot();
+            applyUpdate();
         }catch (Exception ex){
-            throw new UpdateException(UpdateException.Stage.VERSION_GET, 0, new Exception("Failed to get html from url: " + config.get("github")));
+            ex.printStackTrace();
         }
     }
 
-    public void downloadUpdate(Consumer<IOUtils.FileReceivingArguments> progress) throws UpdateException{
+    public interface UpdateProcessor{
+        void onRemoveOld(double percent);
+        void onDownloading(IOUtils.FileReceivingArguments arguments);
+        void onUnzipping(IOUtils.ZipArguments arguments);
+        void onZipRemoving(double percent);
+        void onUnpack(double percent);
+        void onReboot();
+    }
+
+    private static void applyUpdate() throws UpdateException{
+        if(!Files.exists(Paths.get(UpdateFolder + "/updater.jar")))
+            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException(UpdateFolder + "/updater.jar doesn't exist"));
         try {
-            IOUtils.delete(updateFolder);
-            Files.createDirectories(Paths.get(updateFolder));
-
-            IOUtils.receiveFile(getDownloadLink(), updateFolder + "/" + zipName + ".zip", progress);
-        }catch (IOException e) {
-            e.printStackTrace();
-            throw new UpdateException(UpdateException.Stage.DOWNLOAD, 1, e);
-        }
-    }
-
-    public void unzipUpdate(Consumer<IOUtils.ZipArguments> progress) throws UpdateException{
-        try{
-            IOUtils.unzip(updateFolder + "/" + zipName + ".zip", updateFolder, progress);
-            IOUtils.delete(updateFolder + "/" + zipName + ".zip");
-        }catch (Exception ex){
-            throw new UpdateException(UpdateException.Stage.UNZIP, 2, ex);
-        }
-    }
-
-    public void unpackUpdateFolder(Consumer<Double> progress){
-        IOUtils.moveDirectoryContent(IOUtils.fileList(updateFolder)[0].getAbsolutePath(), updateFolder, progress);
-    }
-
-    public void rebootToApplyUpdate() throws UpdateException{
-        if(!Files.exists(Paths.get(updateFolder + "/updater.jar")))
-            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException(updateFolder + "/updater.jar doesn't exist"));
-        try {
-            Runtime.getRuntime().exec("java -jar " + updateFolder + "/updater.jar --path=\"" + new File(".").getAbsolutePath() + "\" --save=\"" + String.join(",", filesToSave) + "\"");
+            Runtime.getRuntime().exec("java -jar " + UpdateFolder + "/updater.jar --path=\"" + new File(".").getAbsolutePath() + "\" --save=\"" + String.join(",", filesToSave) + "\"");
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -120,6 +114,7 @@ public class UpdateManager {
         private final int code;
 
         public UpdateException(Stage stage, int code, Exception exception) {
+            super(exception.getMessage());
             this.exception = exception;
             this.stage = stage;
             this.code = code;
@@ -136,13 +131,5 @@ public class UpdateManager {
         public int getCode() {
             return code;
         }
-    }
-
-    boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null)
-            for (File file : allContents)
-                deleteDirectory(file);
-        return directoryToBeDeleted.delete();
     }
 }

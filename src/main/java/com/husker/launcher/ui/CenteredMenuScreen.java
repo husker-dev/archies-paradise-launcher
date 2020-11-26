@@ -1,10 +1,7 @@
 package com.husker.launcher.ui;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.panel.WebPanel;
-import com.alee.managers.style.StyleId;
-import com.husker.glassui.components.BlurPanel;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;

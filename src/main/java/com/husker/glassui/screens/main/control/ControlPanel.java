@@ -8,9 +8,8 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.TagPanel;
-import com.husker.glassui.screens.main.keys.KeysPanel;
-import com.husker.launcher.components.LabelButton;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 
@@ -69,7 +68,7 @@ public class ControlPanel extends TransparentPanel {
             addButtonAction(() -> {
 
             });
-            setButtonIcons(screen.getLauncher().Resources.Icon_Reload, screen.getLauncher().Resources.Icon_Reload_Selected);
+            setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
             getContent().setMargin(5, 20, 0, 0);
             addContent(new TransparentPanel(){{
                 setLayout(new BorderLayout());
@@ -127,7 +126,7 @@ public class ControlPanel extends TransparentPanel {
             setLayout(new BorderLayout());
 
             WebLabel label = GlassUI.createSimpleLabel("v0.1");
-            label.setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Checkbox_On.getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
+            label.setIcon(new ImageIcon(Resources.Icon_Checkbox_On.getScaledInstance(30, 30, Image.SCALE_SMOOTH)));
 
             add(label);
         }

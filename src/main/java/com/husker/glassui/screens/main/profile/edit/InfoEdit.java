@@ -1,13 +1,11 @@
 package com.husker.glassui.screens.main.profile.edit;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.managers.style.StyleId;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.API;
-import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.api.API;
 import com.husker.launcher.utils.FormatUtils;
 
 import javax.swing.*;
@@ -57,11 +55,11 @@ public class InfoEdit extends InfoEditPanel {
             setEnabled(false);
             setPreferredWidth(120);
             addActionListener(e -> {
-                if(!email.getText().equals(getLauncher().API.PlayerInfo.getEmail())){
+                if(!email.getText().equals(getLauncher().User.getEmail())){
                     getLauncherUI().setScreen(SendingCode.class, new Parameters(){{
                         put(API.PASSWORD, password.getText());
                         put(API.EMAIL, email.getText());
-                        if(!getLauncher().API.PlayerInfo.getNickname().equals(nickname.getText()))
+                        if(!getLauncher().User.getNickname().equals(nickname.getText()))
                             put(API.LOGIN, nickname.getText());
                     }});
                 }else{
@@ -83,8 +81,8 @@ public class InfoEdit extends InfoEditPanel {
     public void onShow() {
         super.onShow();
 
-        nickname.setText(getParameterValue("login", getLauncher().API.PlayerInfo.getNickname()));
-        email.setText(getParameterValue("email", getLauncher().API.PlayerInfo.getEmail()));
+        nickname.setText(getParameterValue("login", getLauncher().User.getNickname()));
+        email.setText(getParameterValue("email", getLauncher().User.getEmail()));
 
         password.clear();
     }

@@ -4,6 +4,7 @@ import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.SimpleLoadingScreen;
 import com.husker.glassui.screens.login.Login;
 import com.husker.glassui.screens.login.LoginProcess;
+import com.husker.launcher.api.API;
 
 public class C_4_ConfirmingCode extends SimpleLoadingScreen {
 
@@ -18,14 +19,21 @@ public class C_4_ConfirmingCode extends SimpleLoadingScreen {
         String email = getParameterValue("email");
         String code = getParameterValue("code");
 
-        int result = getLauncher().API.PlayerInfo.confirmMail(email, code);
-        if(result == 0)
-            Message.showMessage(getLauncherUI(), "Уведомление", "Аккаунт был создан!", LoginProcess.class, new Parameters(){{
-                put("login", login);
-                put("password", password);
-            }});
-        if(result == -1) {
-            Message.showMessage(getLauncherUI(), "Ошибка", "Код не подходит", C_3_Code.class, new Parameters(){{
+        try {
+            if(getLauncher().User.confirmMail(email, code)){
+                Message.showMessage(getLauncherUI(), "Уведомление", "Приятной игры!", LoginProcess.class, new Parameters(){{
+                    put("login", login);
+                    put("password", password);
+                }});
+            }else{
+                Message.showMessage(getLauncherUI(), "Ошибка", "Код не подходит", C_3_Code.class, new Parameters(){{
+                    put("login", login);
+                    put("password", password);
+                    put("email", email);
+                }});
+            }
+        } catch (API.EmailIsNotSpecifiedException e) {
+            Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка подтверждения кода!", C_3_Code.class, new Parameters(){{
                 put("login", login);
                 put("password", password);
                 put("email", email);

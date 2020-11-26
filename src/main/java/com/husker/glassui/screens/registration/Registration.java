@@ -4,7 +4,7 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.screens.login.Login;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.utils.FormatUtils;
 import com.husker.glassui.screens.TitledLogoScreen;
 

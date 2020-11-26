@@ -3,8 +3,8 @@ package com.husker.glassui.components;
 import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.components.LabelButton;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.LabelButton;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
 import javax.swing.*;

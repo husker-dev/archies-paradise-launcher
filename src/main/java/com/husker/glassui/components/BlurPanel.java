@@ -1,14 +1,14 @@
 package com.husker.glassui.components;
 
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 
-import static com.husker.launcher.utils.ShapeUtils.*;
+import static com.husker.launcher.ui.utils.ShapeUtils.*;
 
 public class BlurPanel extends TransparentPanel implements BlurComponent{
 

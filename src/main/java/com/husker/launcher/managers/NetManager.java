@@ -1,62 +1,44 @@
 package com.husker.launcher.managers;
 
-import com.husker.launcher.managers.social.InstPhotoInfo;
-import com.husker.launcher.managers.social.VkPostInfo;
-import com.husker.launcher.managers.social.YoutubeVideoInfo;
-import com.husker.launcher.Launcher;
-import com.husker.launcher.utils.ConsoleUtils;
-import com.husker.launcher.utils.IOUtils;
-import com.husker.launcher.utils.MinecraftStarter;
-import com.husker.net.Get;
-import com.husker.net.UrlBuilder;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.json.JSONArray;
+import com.husker.launcher.api.API;
+import com.husker.launcher.settings.LauncherConfig;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Timer;
 
 public class NetManager {
 
-    public static boolean enable = true;
+    private static ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
 
-    public static final int DEFAULT_AUTH_SERVER_PORT = 15565;
-
-
-
-    public ArrayList<NetManager.ServerStatus> statusList = new ArrayList<>();
-    private final Launcher launcher;
-
-    public NetManager(Launcher launcher){
-        this.launcher = launcher;
-        new Thread(() -> {
-            try {
-                if(enable) {
-                    while(true) {
-                        if (launcher != null) {
-                            statusList = new ArrayList<>(getServerOnlineStatus());
-                            Thread.sleep(launcher.getConfig().Net.Minecraft.getTimeout() + launcher.getConfig().Net.Internet.getTimeout() + launcher.getConfig().Net.Auth.getTimeout() + 3000);
-                        } else
-                            Thread.sleep(200);
-                    }
-                }
-            } catch (InterruptedException e) {
+    static {
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                statusList = new ArrayList<>(getServerOnlineStatus());
             }
-        }).start();
+        }, 0, 12000);
     }
 
-    public void updateStatusLabel(JLabel label){
+    public static boolean isInternetOnline(){
+        return statusList.contains(ServerStatus.INTERNET_ONLINE);
+    }
+
+    public static boolean isAuthOnline(){
+        return statusList.contains(ServerStatus.AUTH_ONLINE);
+    }
+
+    public static boolean isMinecraftOnline(){
+        return statusList.contains(ServerStatus.MINECRAFT_SERVER_ONLINE);
+    }
+
+    public static void updateStatusLabel(JLabel label){
         if(label == null)
             return;
 
@@ -64,64 +46,58 @@ public class NetManager {
         Color yellow = new Color(140, 140, 0);
         Color green = new Color(0, 160, 0);
 
-        if(statusList.contains(NetManager.ServerStatus.INTERNET_OFFLINE)){
+        if(!isInternetOnline()){
             label.setText("Нет интернета");
             label.setForeground(yellow);
-        }else if(statusList.contains(NetManager.ServerStatus.AUTH_ONLINE) && statusList.contains(NetManager.ServerStatus.MINECRAFT_SERVER_ONLINE)){
+            return;
+        }
+        if(isAuthOnline() && isMinecraftOnline()){
             label.setText("Онлайн");
             label.setForeground(green);
-        } else if(!statusList.contains(NetManager.ServerStatus.AUTH_ONLINE) && statusList.contains(NetManager.ServerStatus.MINECRAFT_SERVER_ONLINE)){
+            return;
+        }
+        if(!isAuthOnline() && isMinecraftOnline()){
             label.setText("Авторизация недоступна");
             label.setForeground(yellow);
-        }else if(statusList.contains(NetManager.ServerStatus.AUTH_ONLINE) && !statusList.contains(NetManager.ServerStatus.MINECRAFT_SERVER_ONLINE)){
+            return;
+        }
+        if(isAuthOnline()){
             label.setText("Доступна авторизация");
             label.setForeground(yellow);
-        }else{
-            label.setText("Офлайн");
-            label.setForeground(red);
+            return;
         }
+        label.setText("Офлайн");
+        label.setForeground(red);
     }
 
     public enum ServerStatus{
-        INTERNET_OFFLINE,
         INTERNET_ONLINE,
-        AUTH_OFFLINE,
         AUTH_ONLINE,
-        MINECRAFT_SERVER_OFFLINE,
         MINECRAFT_SERVER_ONLINE,
     }
 
-    public List<ServerStatus> getServerOnlineStatus(){
+    public static List<ServerStatus> getServerOnlineStatus(){
         ArrayList<ServerStatus> status = new ArrayList<>();
         try {
-            if(ping(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort(), launcher.getConfig().Net.Auth.getTimeout()))
+            if(ping(LauncherConfig.getAuthIp(), LauncherConfig.getAuthPort(), 3000))
                 status.add(ServerStatus.AUTH_ONLINE);
-            else
-                status.add(ServerStatus.AUTH_OFFLINE);
-        }catch (Exception ex){
-            status.add(ServerStatus.AUTH_OFFLINE);
+        }catch (Exception ignored){
         }
         try{
-            if(ping(launcher.getConfig().Net.Auth.getIp(), launcher.getConfig().Net.Auth.getPort(), launcher.getConfig().Net.Auth.getTimeout()))
+            API.Minecraft.ServerInfo info = API.Minecraft.getServerInfo();
+            if(ping(info.getIP(), info.getPort(), 3000))
                 status.add(ServerStatus.MINECRAFT_SERVER_ONLINE);
-            else
-                status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
-        }catch (Exception ex){
-            ex.printStackTrace();
-            status.add(ServerStatus.MINECRAFT_SERVER_OFFLINE);
+        }catch (Exception ignored){
         }
         try{
-            if(InetAddress.getByName(launcher.getConfig().Net.Internet.getIp()).isReachable(launcher.getConfig().Net.Internet.getTimeout()))
+            if(InetAddress.getByName("google.com").isReachable(3000))
                 status.add(ServerStatus.INTERNET_ONLINE);
-            else
-                status.add(ServerStatus.INTERNET_OFFLINE);
-        }catch (Exception ex){
-            status.add(ServerStatus.INTERNET_OFFLINE);
+        }catch (Exception ignored){
         }
         return status;
     }
 
-    public boolean ping(String ip, int port, int timeout){
+    public static boolean ping(String ip, int port, int timeout){
         boolean out = false;
         try{
             Socket client = new Socket();
@@ -133,7 +109,7 @@ public class NetManager {
         return out;
     }
 
-    public void openLink(String url){
+    public static void openLink(String url){
         if(Desktop.isDesktopSupported()){
             try {
                 Desktop.getDesktop().browse(new URI(url));
@@ -144,15 +120,6 @@ public class NetManager {
             } catch (Exception ignored) {
             }
         }
-    }
-
-    public String getURLContent(String url) throws IOException {
-        if(url == null)
-            return null;
-
-        Get get = new Get(url);
-        get.execute();
-        return get.getHtmlContent();
     }
 
     public static class MinecraftServer{
@@ -175,7 +142,7 @@ public class NetManager {
             output.writeByte(0x00); //packet id for ping
 
             // S->C : Response
-            int size = readVarInt(input);
+            readVarInt(input);
             int packetId = readVarInt(input);
 
             if (packetId == -1)

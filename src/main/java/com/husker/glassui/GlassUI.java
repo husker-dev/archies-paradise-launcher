@@ -15,20 +15,21 @@ import com.husker.glassui.screens.main.*;
 import com.husker.glassui.screens.main.profile.edit.*;
 import com.husker.glassui.screens.registration.*;
 import com.husker.launcher.Launcher;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.API;
+import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.api.API;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.LauncherUI;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.screens.main.profile.edit.InfoApplying;
 import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 public class GlassUI extends LauncherUI {
 
@@ -91,12 +92,14 @@ public class GlassUI extends LauncherUI {
 
         addScreen(InfoEdit.class, InfoApplying.class, EmailConfirm.class, SendingCode.class);
 
+        getLauncher().User.addLogoutListener(() -> {
+            setScreen(Login.class, new Screen.Parameters("login", getLauncher().User.getNickname()));
+        });
 
-
-        if(getLauncher().getSettings().isAutoAuth() && getLauncher().getUserConfig().hasAccount()){
+        if(LauncherSettings.isAutoAuth() && getLauncher().User.containSaved()){
             setScreen(LoginProcess.class, new Screen.Parameters(){{
-                put(API.LOGIN, getLauncher().getUserConfig().getLogin());
-                put(API.PASSWORD, getLauncher().getUserConfig().getPassword());
+                put(API.LOGIN, getLauncher().User.File.getLogin());
+                put(API.PASSWORD, getLauncher().User.File.getPassword());
             }});
         }else
             setScreen(MainScreen.class);
@@ -218,12 +221,5 @@ public class GlassUI extends LauncherUI {
                 }
             }
         };
-    }
-
-    public void logout(){
-        String login = getLauncher().API.PlayerInfo.getNickname();
-        getLauncher().API.PlayerInfo.logout();
-        getLauncher().getUserConfig().reset();
-        setScreen(Login.class, new Screen.Parameters("login", login));
     }
 }

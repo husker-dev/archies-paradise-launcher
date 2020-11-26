@@ -1,21 +1,16 @@
 package com.husker.glassui.screens;
 
 import com.alee.laf.label.WebLabel;
-import com.alee.managers.style.StyleId;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.ui.Screen;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
-import com.husker.launcher.utils.ComponentUtils;
-import com.husker.launcher.utils.ShapeUtils;
-import com.husker.launcher.utils.UIUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 import static java.awt.FlowLayout.CENTER;
 
 public abstract class SimpleTitledScreen extends SimpleCenteredScreen {

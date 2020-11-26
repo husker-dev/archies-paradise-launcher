@@ -2,27 +2,26 @@ package com.husker.glassui.components.social.impl;
 
 import com.alee.extended.label.WebStyledLabel;
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
-import com.alee.utils.swing.extensions.SizeMethods;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.ScalableImage;
-import com.husker.launcher.components.TransparentPanel;
-import com.husker.launcher.managers.social.VkPostInfo;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.social.Social;
+import com.husker.launcher.ui.components.TransparentPanel;
+import com.husker.launcher.social.VKPostInfo;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.components.social.ImageSocialPanel;
-import com.husker.launcher.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
 
-import static com.husker.launcher.utils.ShapeUtils.ALL_CORNERS;
+import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 
 public class VkPostPanel extends ImageSocialPanel {
 
-    private VkPostInfo postInfo;
+    private VKPostInfo postInfo;
     private final int index;
     private WebStyledLabel tag;
 
@@ -30,16 +29,16 @@ public class VkPostPanel extends ImageSocialPanel {
         super(screen);
         this.index = index;
 
-        setIcon(getScreen().getLauncher().Resources.Logo_VK);
+        setIcon(Resources.Logo_VK);
     }
 
     public void update() {
-        postInfo = getScreen().getLauncher().API.Social.getPost(index);
+        postInfo = Social.VK.getPost(index);
 
         setTitle(postInfo.getText());
 
-        if(postInfo instanceof VkPostInfo.Snippet) {
-            VkPostInfo.Snippet snippet = (VkPostInfo.Snippet) postInfo;
+        if(postInfo instanceof VKPostInfo.Snippet) {
+            VKPostInfo.Snippet snippet = (VKPostInfo.Snippet) postInfo;
 
             add(new TransparentPanel(){{
                 setLayout(new VerticalFlowLayout());
@@ -62,7 +61,7 @@ public class VkPostPanel extends ImageSocialPanel {
                 }});
             }}, 1);
         }
-        if(postInfo instanceof VkPostInfo.Video) {
+        if(postInfo instanceof VKPostInfo.Video) {
             add(new TransparentPanel(){{
                 setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 0));
                 setMargin(5, 5, 20, 5);
@@ -75,7 +74,7 @@ public class VkPostPanel extends ImageSocialPanel {
                     setPreferredHeight(20);
                     setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(11f));
                     getScreen().addBlurSegment("VkPostPanel.Video.Tag", parameter1 -> onBlurApply(parameter1, tag));
-                    setIcon(new ImageIcon(getScreen().getLauncher().Resources.Icon_Play.getScaledInstance(14, 14, Image.SCALE_SMOOTH)));
+                    setIcon(new ImageIcon(Resources.Icon_Play.getScaledInstance(14, 14, Image.SCALE_SMOOTH)));
                 }});
             }}, 1);
         }
@@ -98,7 +97,7 @@ public class VkPostPanel extends ImageSocialPanel {
 
     public void onClick() {
         if(postInfo != null)
-            getScreen().getLauncher().NetManager.openLink(postInfo.getUrl());
+            NetManager.openLink(postInfo.getUrl());
     }
 
     public static VkPostPanel create(Screen screen, int index){

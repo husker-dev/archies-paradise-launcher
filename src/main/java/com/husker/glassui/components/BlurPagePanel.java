@@ -2,7 +2,8 @@ package com.husker.glassui.components;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 
@@ -24,14 +25,14 @@ public class BlurPagePanel extends BlurPanel {
 
     private final ArrayList<Consumer<Integer>> listeners = new ArrayList<>();
 
-    private final Icon leftDefault = createIcon(21, getScreen().getLauncher().Resources.Icon_Arrow_Left);
-    private final Icon leftSelected = createIcon(21, getScreen().getLauncher().Resources.Icon_Arrow_Left_Selected);
+    private final Icon leftDefault = createIcon(21, Resources.Icon_Arrow_Left);
+    private final Icon leftSelected = createIcon(21, Resources.Icon_Arrow_Left_Selected);
 
-    private final Icon rightDefault = createIcon(21, getScreen().getLauncher().Resources.Icon_Arrow_Right);
-    private final Icon rightSelected = createIcon(21, getScreen().getLauncher().Resources.Icon_Arrow_Right_Selected);
+    private final Icon rightDefault = createIcon(21, Resources.Icon_Arrow_Right);
+    private final Icon rightSelected = createIcon(21, Resources.Icon_Arrow_Right_Selected);
 
-    private final Icon dotDefault = createIcon(13, getScreen().getLauncher().Resources.Icon_Dot);
-    private final Icon dotSelected = createIcon(13, getScreen().getLauncher().Resources.Icon_Dot_Selected);
+    private final Icon dotDefault = createIcon(13, Resources.Icon_Dot);
+    private final Icon dotSelected = createIcon(13, Resources.Icon_Dot_Selected);
 
     public BlurPagePanel(Screen screen){
         super(screen, true);

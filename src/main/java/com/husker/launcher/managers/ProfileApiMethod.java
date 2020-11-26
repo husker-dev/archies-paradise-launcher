@@ -1,6 +1,9 @@
 package com.husker.launcher.managers;
 
-public class ProfileApiMethod extends ApiMethod{
+import com.husker.launcher.api.API;
+import com.husker.launcher.api.ApiMethod;
+
+public class ProfileApiMethod extends ApiMethod {
 
     public static ProfileApiMethod create(String methodName, String accessKey){
         return new ProfileApiMethod(methodName, accessKey);

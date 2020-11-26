@@ -4,14 +4,14 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.components.BlurButton;
-import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.managers.UpdateManager;
-import com.husker.launcher.components.ScalableImage;
+import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.glassui.GlassUI;
-import com.husker.launcher.utils.UIUtils;
+import com.husker.launcher.ui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.husker.launcher.utils.UIUtils.ShadowSide.BOTTOM;
-import static com.husker.launcher.utils.UIUtils.ShadowSide.TOP;
+import static com.husker.launcher.ui.utils.UIUtils.ShadowSide.BOTTOM;
+import static com.husker.launcher.ui.utils.UIUtils.ShadowSide.TOP;
 
 public abstract class TitledLogoScreen extends CenteredMenuScreen {
 
@@ -46,7 +46,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
 
         new Timer().schedule(new TimerTask() {
             public void run() {
-                getLauncher().NetManager.updateStatusLabel(statusLabel);
+                NetManager.updateStatusLabel(statusLabel);
             }
         }, 0, 500);
 
@@ -103,7 +103,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
             }}, BorderLayout.EAST);
         }});
 
-        addToMenu(new ScalableImage(getLauncher().Resources.Logo){{
+        addToMenu(new ScalableImage(Resources.Logo){{
             setPreferredSize(new Dimension(getCenteredPanel().getWidth(), logoSize));
             setFitType(FitType.FILL_Y);
         }});

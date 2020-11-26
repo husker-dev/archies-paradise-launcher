@@ -1,17 +1,16 @@
 package com.husker.glassui.screens.main;
 
 import com.alee.laf.label.WebLabel;
-import com.alee.laf.panel.WebPanel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
-import com.husker.launcher.components.TransparentPanel;
+import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,7 @@ public class UpdatePanel extends BlurPanel {
         setLayout(new BorderLayout());
 
         add(new WebLabel(){{
-            setIcon(new ImageIcon(screen.getLauncher().Resources.Icon_Download.getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
+            setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
             setMargin(0, 10, 0, 10);
         }}, BorderLayout.WEST);
 

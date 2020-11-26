@@ -26,17 +26,11 @@ public class SkinApply extends SimpleLoadingScreen {
                 if(image.getWidth() > 64 || image.getHeight() > 64)
                     throw new RuntimeException();
 
-                int result = getLauncher().API.PlayerInfo.setSkin(image);
-                if(result == -1)
-                    throw new RuntimeException();
+                getLauncher().User.setSkin(image);
             }
-            if(getParameters().containsKey("folder") && getParameters().containsKey("name")) {
-                int result = getLauncher().API.PlayerInfo.setSkin(getParameterValue("folder"), getParameterValue("name"));
-                if(result == -1)
-                    throw new RuntimeException();
-            }
+            if(getParameters().containsKey("folder") && getParameters().containsKey("name"))
+                getLauncher().User.setSkin(getParameterValue("folder"), getParameterValue("name"));
 
-            getLauncher().API.PlayerInfo.updateData();
             getLauncherUI().setScreen(MainScreen.class);
         }catch (Exception ex){
             ex.printStackTrace();
