@@ -6,11 +6,11 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.screens.SimpleTitledScreen;
+import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.Resources;
 import com.husker.launcher.settings.LauncherSettings;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
-import com.husker.launcher.utils.ConsoleUtils;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -112,8 +112,8 @@ public class BackgroundSelection extends SimpleTitledScreen {
 
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(this, "Назад"){{
-            addActionListener(e -> getLauncherUI().setScreen("main"));
-            setMargin(0, 25, 0, 25);
+            addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
+            setPadding(25, 25);
         }});
     }
 }

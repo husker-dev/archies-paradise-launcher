@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -28,10 +29,6 @@ public class IOUtils {
 
     public static void unzip(String zipPath, String to) throws IOException {
         unzip(zipPath, to, percent -> {});
-    }
-
-    public static void receiveFile(Socket socket, String to) throws IOException {
-        receiveFile(socket, to, percent -> {});
     }
 
     public static void delete(String path, Consumer<Double> progress){
@@ -166,17 +163,25 @@ public class IOUtils {
         }
     }
 
-    public static void receiveFile(Socket socket, String to, Consumer<FileReceivingArguments> progress) throws IOException {
-        InputStream is = socket.getInputStream();
+    public static void receiveFile(InputStream is, long size, String to) throws IOException {
+        receiveFile(is, size, to, args -> {});
+    }
 
-        long size = Long.parseLong(new BufferedReader(new InputStreamReader(socket.getInputStream())).readLine());
+    public static void receiveFile(InputStream is, long size, String to, Consumer<FileReceivingArguments> progress) throws IOException {
         long currentSize = 0;
         long start = System.currentTimeMillis();
 
         FileOutputStream fileOutputStream = new FileOutputStream(to);
         byte[] dataBuffer = new byte[1024];
         int len;
-        while ((len = is.read(dataBuffer, 0, 1024)) != -1) {
+        while ((len = is.read(dataBuffer, 0, dataBuffer.length)) != -1) {
+            String firstThree = (char)dataBuffer[0] + (char)dataBuffer[1] + (char)dataBuffer[2] + "";
+            if(firstThree.equals("---"))
+
+
+            for (byte b : dataBuffer)
+                System.out.print((char) b);
+            System.out.println();
             fileOutputStream.write(dataBuffer, 0, len);
 
             currentSize += len;
@@ -195,7 +200,7 @@ public class IOUtils {
         if(!Files.exists(Paths.get(to)))
             Files.createDirectories(Paths.get(to));
 
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipPath));
+        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(new File(zipPath)));
         ZipEntry entry = zipIn.getNextEntry();
 
         long size = (long)(new File(zipPath).length() * 1.67d);

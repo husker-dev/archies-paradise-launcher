@@ -54,8 +54,8 @@ public class SkinList extends SimpleTitledScreen {
 
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(this, "Назад"){{
-            addActionListener(e -> getLauncherUI().setScreen("skin_folders_loading", new Parameters("notReset", "1")));
-            setMargin(3, 40, 0, 40);
+            addActionListener(e -> getLauncherUI().setScreen(SkinCategoriesLoading.class, new Parameters("notReset", "1")));
+            setPadding(40, 40);
         }});
     }
 
@@ -126,7 +126,7 @@ public class SkinList extends SimpleTitledScreen {
                 }
 
                 public void mousePressed(MouseEvent mouseEvent) {
-                    screen.getLauncherUI().setScreen("skin_apply", new Parameters("folder", folder, "name", name));
+                    screen.getLauncherUI().setScreen(SkinApply.class, new Parameters("folder", folder, "name", name));
                 }
             });
 

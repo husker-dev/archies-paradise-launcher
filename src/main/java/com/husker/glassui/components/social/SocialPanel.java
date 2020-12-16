@@ -135,7 +135,7 @@ public abstract class SocialPanel extends BlurPanel {
             else
                 parameter.setAdditionColor(GlassUI.Colors.buttonDefault);
 
-            parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), titleLabel, 15, 15, ALL_CORNERS));
+            parameter.setShape(ShapeUtils.createRoundRectangle(titleLabel, 15, 15, ALL_CORNERS));
 
             if(!isInner())
                 parameter.setShadowClip(UIUtils.keepShadow(parameter, 15, UIUtils.ShadowSide.TOP));

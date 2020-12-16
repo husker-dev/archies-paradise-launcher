@@ -3,8 +3,8 @@ package com.husker.launcher.ui.components.skin;
 import com.husker.launcher.utils.SkinUtils;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

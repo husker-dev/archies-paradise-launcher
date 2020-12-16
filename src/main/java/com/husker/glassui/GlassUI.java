@@ -7,6 +7,7 @@ import com.husker.glassui.screens.confirm.C_1_Email;
 import com.husker.glassui.screens.confirm.C_2_SendingCode;
 import com.husker.glassui.screens.confirm.C_3_Code;
 import com.husker.glassui.screens.confirm.C_4_ConfirmingCode;
+import com.husker.glassui.screens.main.control.ClientLoading;
 import com.husker.glassui.screens.main.profile.skin.*;
 import com.husker.glassui.screens.main.settings.*;
 import com.husker.glassui.screens.*;
@@ -52,6 +53,8 @@ public class GlassUI extends LauncherUI {
 
         public static final Color labelText = new Color(50, 50, 50);
         public static final Color labelLightText = new Color(80, 80, 80);
+
+        public static final Color selectedColor = new Color(154, 178, 206);
     }
 
 
@@ -68,29 +71,20 @@ public class GlassUI extends LauncherUI {
         // Login
         addScreen(Login.class, LoginProcess.class);
 
-
-
         // Registration
         addScreen(Registration.class, RegistrationProgress.class);
 
         // Confirmation
-        addScreen(
-                C_1_Email.class,
-                C_2_SendingCode.class,
-                C_3_Code.class,
-                C_4_ConfirmingCode.class);
+        addScreen(C_1_Email.class, C_2_SendingCode.class, C_3_Code.class, C_4_ConfirmingCode.class);
 
         // Main
-        addScreen("main", new MainScreen());
-        addScreen("backgroundSelection", new BackgroundSelection());
-
-        addScreen("skin_folders_loading", new SkinCategoriesLoading());
-        addScreen("skin_folders", new SkinCategories());
-        addScreen("skin_list_loading", new SkinListLoading());
-        addScreen("skin_list", new SkinList());
-        addScreen("skin_apply", new SkinApply());
-
+        addScreen(MainScreen.class);
+        addScreen(BackgroundSelection.class);
+        addScreen(ClientLoading.class);
         addScreen(InfoEdit.class, InfoApplying.class, EmailConfirm.class, SendingCode.class);
+
+        // Skins
+        addScreen(SkinCategoriesLoading.class, SkinCategories.class, SkinListLoading.class, SkinList.class, SkinApply.class);
 
         getLauncher().User.addLogoutListener(() -> {
             setScreen(Login.class, new Screen.Parameters("login", getLauncher().User.getNickname()));
@@ -102,7 +96,7 @@ public class GlassUI extends LauncherUI {
                 put(API.PASSWORD, getLauncher().User.File.getPassword());
             }});
         }else
-            setScreen(MainScreen.class);
+            setScreen(Login.class);
     }
 
     public Dimension getDefaultSize() {
@@ -171,7 +165,7 @@ public class GlassUI extends LauncherUI {
                 if(BlurComponent.isReturnOnInvisible(parameter, this))
                     return;
 
-                parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 10, 10, ALL_CORNERS));
+                parameter.setShape(ShapeUtils.createRoundRectangle(this, 10, 10, ALL_CORNERS));
                 GlassUI.applyTag(parameter);
             });
         }};

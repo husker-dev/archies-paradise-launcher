@@ -81,7 +81,7 @@ public class ServerInfoPanel extends BlurPanel {
             players.setText(object.getJSONObject("players").getInt("online") + "");
             maxPlayers.setText(object.getJSONObject("players").getInt("max") + "");
             ping.setText(object.getLong("ping")  + " мс");
-        } catch (IOException | API.APIException e) {
+        } catch (IOException | API.InternalAPIException e) {
             status.setForeground(red);
             status.setText("Оффлайн");
             players.setText("");
@@ -111,7 +111,7 @@ public class ServerInfoPanel extends BlurPanel {
     }
 
     public WebLabel createParameterLabel(){
-        return createParameterLabel("");
+        return createParameterLabel(" ");
     }
 
     public WebLabel createParameterLabel(String text){

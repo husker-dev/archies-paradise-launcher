@@ -14,14 +14,15 @@ import java.awt.*;
 
 public class ModPanel extends BlurPanel {
 
-    private final Screen screen;
     private final int index;
     private BlurScalableImage icon;
     private WebLabel name;
 
-    public ModPanel(Screen screen, int index){
+    private final String clientId;
+
+    public ModPanel(Screen screen, String clientId, int index){
         super(screen, false);
-        this.screen = screen;
+        this.clientId = clientId;
         this.index = index;
 
         setLayout(new OverlayLayout(this));
@@ -35,6 +36,7 @@ public class ModPanel extends BlurPanel {
                 add(icon = new BlurScalableImage(screen){
                     {
                         setFitType(FitType.FIT_XY);
+                        setAnimated(true);
                     }
                     public void onBlurApply(BlurParameter parameter, Component component) {
                         super.onBlurApply(parameter, component);
@@ -42,7 +44,7 @@ public class ModPanel extends BlurPanel {
                             return;
                         if(component == this){
                             parameter.setShadowSize(0);
-                            parameter.setTextureAlpha(1f);
+
                         }
                     }
                 });
@@ -68,12 +70,12 @@ public class ModPanel extends BlurPanel {
 
     public void updateInfo(){
         try {
-            API.Client.ModInfo info = API.Client.getModInfo(index, true);
+            API.Client.ModInfo info = API.Client.getModInfo(clientId, index, true);
             if(info != null) {
                 name.setText(info.getName());
-                icon.setImage(info.hasIcon() ? API.Client.getModIcon(info.getIndex()) : null);
+                icon.setImage(info.hasIcon() ? API.Client.getModIcon(clientId, info.getIndex()) : null);
             }
-        } catch (API.APIException e) {
+        } catch (API.InternalAPIException | API.UnknownClientException e) {
             name.setText("");
             icon.setImage(null);
         }

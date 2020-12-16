@@ -27,7 +27,7 @@ public abstract class SimpleLoadingScreen extends CenteredMenuScreen {
             parameter.setShadowClip(UIUtils.keepShadow(parameter, BOTTOM));
         });
 
-        addToMenu(title = GlassUI.createTitleLabel("Вход"));
+        addToMenu(title = GlassUI.createTitleLabel("Заголовок"));
         title.setMargin(6, 0, 0, 0);
         addIndent(30);
         addToMenu(text = GlassUI.createSimpleLabel("Проверка соединения...", true));

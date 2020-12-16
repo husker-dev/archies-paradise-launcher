@@ -51,6 +51,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                     setLayout(new VerticalFlowLayout(0, 0));
 
                     setMargin(10, 0, 0, 0);
+
                     add(viewer = new SkinViewer(Resources.getBufferedImage("steve.png")){{
                         setRotationEnabled(false);
                         setCamY(28);

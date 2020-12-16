@@ -55,7 +55,7 @@ public class ProfilePanel extends TransparentPanel {
                         return;
                     if(component == this) {
                         parameter.setShadowType(BlurParameter.ShadowType.INNER);
-                        parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), component, 15, 15, ALL_CORNERS));
+                        parameter.setShape(ShapeUtils.createRoundRectangle(component, 15, 15, ALL_CORNERS));
                     }
                 }
             });
@@ -91,14 +91,14 @@ public class ProfilePanel extends TransparentPanel {
                 setMargin(0, 10, 0, 0);
                 setLayout(new BorderLayout(10, 0));
                 add(new BlurButton(screen, "Сменить пароль"){{
-                    setMargin(3, 20, 0, 20);
+                    setPadding(20, 20);
                     addActionListener(e -> {
                         Message.showMessage(screen.getLauncherUI(), "Проблемка", "Пока что изменить пароль нельзя(", MainScreen.class);
                     });
                 }});
                 add(new BlurButton(screen, "Выйти"){
                     {
-                        setMargin(3, 20, 0, 20);
+                        setPadding(20, 20);
                         addActionListener(e -> screen.getLauncher().User.logout());
                     }
                     public void onBlurApply(BlurParameter parameter, Component component) {
@@ -121,13 +121,16 @@ public class ProfilePanel extends TransparentPanel {
     }
 
     public void onShow(){
-        name.setText(screen.getLauncher().User.getNickname());
-        email.setText(screen.getLauncher().User.getEmail());
-        status.setText(screen.getLauncher().User.getStatus());
-        id.setText(screen.getLauncher().User.getId() + "");
-        skinType.setText(SkinUtils.isMale(screen.getLauncher().User.getSkin()) ? "Обычный" : "Тонкий");
-        if(skinViewer.getPlayerTexture() != screen.getLauncher().User.getSkin())
-            skinViewer.setPlayerTexture(screen.getLauncher().User.getSkin());
+        new Thread(() -> {
+            name.setText(screen.getLauncher().User.getNickname());
+            email.setText(screen.getLauncher().User.getEmail());
+            status.setText(screen.getLauncher().User.getStatus());
+            id.setText(screen.getLauncher().User.getId() + "");
+            skinType.setText(SkinUtils.isMale(screen.getLauncher().User.getSkin()) ? "Обычный" : "Тонкий");
+
+            if(skinViewer.getPlayerTexture() != screen.getLauncher().User.getSkin())
+                skinViewer.setPlayerTexture(screen.getLauncher().User.getSkin());
+        }).start();
     }
 
     public Component createTitleLabel(String text, Runnable action){
@@ -148,7 +151,7 @@ public class ProfilePanel extends TransparentPanel {
 
                 GlassUI.applyTopLayer(parameter);
                 parameter.setAdditionColor(GlassUI.Colors.third);
-                parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 10, 10, ALL_CORNERS));
+                parameter.setShape(ShapeUtils.createRoundRectangle(this, 10, 10, ALL_CORNERS));
                 parameter.setShadowSize(4);
             });
         }});

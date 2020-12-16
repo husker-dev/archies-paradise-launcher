@@ -1,0 +1,22 @@
+port: 15565
+mail:
+  password: vzhqvepladttbmqu
+  text: Dear {name}, here is your code {code}
+  login: redfancoestar@gmail.com
+  title: Email title
+social:
+  youtube: UCAOEGtCBZUmctchRTkQ201A
+  github: husker-dev/minecraft-launcher
+  vk: archie.enotik
+  instagram: archietheraccoon
+owner:
+  name: ArcheTheRacoon
+  url: https://youtube.com/channel/UCAOEGtCBZUmctchRTkQ201A
+support:
+  name: Discord
+  url: support url
+minecraft:
+  port: 25565
+  ip: 127.0.0.1
+launcher:
+  version: '0.1'

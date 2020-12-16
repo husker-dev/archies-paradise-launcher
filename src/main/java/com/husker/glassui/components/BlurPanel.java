@@ -38,7 +38,7 @@ public class BlurPanel extends TransparentPanel implements BlurComponent{
             else
                 GlassUI.applyBottomLayer(parameter);
 
-            parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 25, 25, ALL_CORNERS));
+            parameter.setShape(ShapeUtils.createRoundRectangle(this, 25, 25, ALL_CORNERS));
         }
     }
 

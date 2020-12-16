@@ -34,7 +34,7 @@ public abstract class AbstractMainScreen extends Screen {
                 setLayout(new BorderLayout());
                 add(new BlurScalableImage(AbstractMainScreen.this, Resources.Logo){
                     {
-                        setAnimated(true);
+
                         setFitType(FitType.FILL_Y);
                     }
 

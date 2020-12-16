@@ -2,16 +2,14 @@ package com.husker.launcher.managers;
 
 import com.husker.launcher.social.Social;
 import com.husker.launcher.utils.IOUtils;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.net.Get;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
 
 public class UpdateManager {
 

@@ -43,6 +43,8 @@ public class LoadingWindow extends JFrame {
 
     private ProgressBar progressBar;
 
+    private int launcherStatus = 0;
+
 
     public LoadingWindow(){
         super("Launcher loading");
@@ -199,7 +201,7 @@ public class LoadingWindow extends JFrame {
 
                 g2d.setClip(getWindowShape());
                 RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(hideLocation.x, hideLocation.y, hideLabel.getWidth() + closeLabel.getWidth(), hideLabel.getHeight() - 1, 10, 10, ShapeUtils.Corner.BOTTOM_LEFT), new Color(0, 0, 0, 60), 10);
-                RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(LoadingWindow.this, statusPanel, 0, 0), new Color(0, 0, 0, 60), 10);
+                RenderUtils.drawOuterShade(g2d, ShapeUtils.createRoundRectangle(statusPanel, 0, 0), new Color(0, 0, 0, 60), 10);
 
                 g2d.setClip(null);
                 RenderUtils.drawOuterShade(g2d, getWindowShape(), new Color(0, 0, 0, 50), shadow);
@@ -223,7 +225,11 @@ public class LoadingWindow extends JFrame {
 
         new Thread(() -> {
             try {
-                launcher = new Launcher();
+                launcher = new Launcher(() -> {
+                    launcherStatus++;
+                    if(updated)
+                        setStatusText("Запуск...", 100d / 3 * launcherStatus);
+                });
                 launcherStarted = true;
             }catch (Exception ex){
                 ex.printStackTrace();
@@ -258,7 +264,7 @@ public class LoadingWindow extends JFrame {
                         }
                     });
                 }else {
-                    setStatusText("Запуск...", 90);
+                    setStatusText("Запуск...", 25);
                     updated = true;
                 }
             }catch (UpdateManager.UpdateException ex){

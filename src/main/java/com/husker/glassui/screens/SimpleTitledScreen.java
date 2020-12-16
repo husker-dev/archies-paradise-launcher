@@ -5,7 +5,9 @@ import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
+import com.husker.launcher.ui.utils.UIUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,9 +44,18 @@ public abstract class SimpleTitledScreen extends SimpleCenteredScreen {
                     add(createTitlePanel());
                 }}, BorderLayout.NORTH);
 
-                add(new BlurPanel(SimpleTitledScreen.this, true){{
-                    onMenuInit(this);
-                }});
+                add(new BlurPanel(SimpleTitledScreen.this, true){
+                    {
+                        onMenuInit(this);
+                    }
+
+                    public void onBlurApply(BlurParameter parameter, Component component) {
+                        super.onBlurApply(parameter, component);
+                        if(returnOnInvisible(parameter, component))
+                            return;
+                        parameter.setShadowClip(UIUtils.keepShadow(parameter, 10, UIUtils.ShadowSide.TOP, UIUtils.ShadowSide.BOTTOM));
+                    }
+                });
 
                 add(new TransparentPanel(){{
                     setLayout(new FlowLayout(CENTER, 0, 0));

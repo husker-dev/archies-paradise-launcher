@@ -61,7 +61,7 @@ public abstract class SocialTabPanel extends TransparentPanel {
                         if(returnOnInvisible(parameter, component))
                             return;
                         if(component == this){
-                            parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), component, getWidth(), getHeight(), ALL_CORNERS));
+                            parameter.setShape(ShapeUtils.createRoundRectangle(component, getWidth(), getHeight(), ALL_CORNERS));
                             parameter.setShadowSize(0);
                         }
                     }

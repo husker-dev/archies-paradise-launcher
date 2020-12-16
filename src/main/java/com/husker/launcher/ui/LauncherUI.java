@@ -1,14 +1,15 @@
 package com.husker.launcher.ui;
 
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.launcher.Launcher;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +19,7 @@ public abstract class LauncherUI extends JPanel {
     private static final Logger log = LogManager.getLogger(LauncherUI.class);
 
     private final Launcher launcher;
-    private final HashMap<String, Screen> screens = new HashMap<>();
+    private final Map<String, Screen> screens = new HashMap<>();
     private String currentScreen;
 
     private String nextScreen;
@@ -51,6 +52,7 @@ public abstract class LauncherUI extends JPanel {
         }
     }
 
+
     public void addScreen(Screen... screens){
         for(Screen screen : screens)
             addScreen(screen);
@@ -69,6 +71,7 @@ public abstract class LauncherUI extends JPanel {
             screen.onInit();
             screen.doLayout();
             screens.put(name, screen);
+            log.info("Loaded screen: " + name);
         }catch (Exception ex){
             log.error(ex);
             ex.printStackTrace();
@@ -77,7 +80,7 @@ public abstract class LauncherUI extends JPanel {
 
     public String getScreen(Class<? extends Screen> screenClass){
         for(Map.Entry<String, Screen> entry : screens.entrySet())
-            if (entry.getValue().getClass() == screenClass)
+            if (entry.getValue().getClass().getCanonicalName().equals(screenClass.getCanonicalName()))
                 return entry.getKey();
         return null;
     }

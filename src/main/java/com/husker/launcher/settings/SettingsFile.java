@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,8 +44,11 @@ public class SettingsFile {
 
             String text = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
             text = text.replace("\t", "  ");
-            map = yaml.load(new ByteArrayInputStream(text.getBytes()));
-
+            try {
+                map = yaml.load(text);
+            }catch (Exception ignored){ }
+            if(map == null)
+                map = new LinkedHashMap<>();
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -56,7 +60,7 @@ public class SettingsFile {
                 return;
             if(!Files.exists(Paths.get(path)))
                 Files.createFile(Paths.get(path));
-            yaml.dump(map, new FileWriter(new File(path)));
+            yaml.dump(map, new OutputStreamWriter(new FileOutputStream(new File(path)), StandardCharsets.UTF_8));
         }catch (Exception ex){
             ex.printStackTrace();
         }

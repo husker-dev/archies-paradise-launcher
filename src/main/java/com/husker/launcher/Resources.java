@@ -1,8 +1,8 @@
 package com.husker.launcher;
 
 import com.husker.launcher.ui.utils.ImageUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -106,6 +106,10 @@ public class Resources {
     public static BufferedImage Icon_People;
     public static BufferedImage Icon_Key;
     public static BufferedImage Icon_Folder;
+    public static BufferedImage Icon_Fullscreen;
+    public static BufferedImage Icon_Dot_Light;
+    public static BufferedImage Icon_VR;
+    public static BufferedImage Icon_VR_Disabled;
 
     public static BufferedImage Social_Loading_Logo;
     public static BufferedImage Logo_Youtube;
@@ -177,6 +181,10 @@ public class Resources {
         Icon_People = getBufferedImage("people_icon.png");
         Icon_Key = getBufferedImage("key_icon.png");
         Icon_Folder = getBufferedImage("folder_icon.png");
+        Icon_Fullscreen = getBufferedImage("fullscreen.png");
+        Icon_Dot_Light = getBufferedImage("dot_light.png");
+        Icon_VR = getBufferedImage("vr_icon.png");
+        Icon_VR_Disabled = getBufferedImage("vr_icon_disabled.png");
 
         Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
         Logo_Youtube = getBufferedImage("youtube_logo.png");

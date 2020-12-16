@@ -43,15 +43,18 @@ public class SocialLoadGrid extends TransparentPanel {
 
     public void updatePanels(){
         for(SocialPanel panel : getSocialPanels()) {
-            panel.update();
-            new Thread(() -> {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                screen.getLauncher().updateUI();
-            }).start();
+            try {
+                panel.update();
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {}
+                    screen.getLauncher().updateUI();
+                }).start();
+            }catch (Exception ex){
+                ex.printStackTrace();
+            }
+
         }
 
 

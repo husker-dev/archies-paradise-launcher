@@ -140,14 +140,14 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
 
         addIndent(0);
 
-        addToMenu(new TransparentPanel(){{
+        TransparentPanel sub = new TransparentPanel(){{
             setLayout(new VerticalFlowLayout(FlowLayout.CENTER, 0, 0));
             setMargin(5, 40, 0, 40);
-            //setPreferredHeight(23);
-
             createSubComponents(this);
-
-        }});
+        }};
+        if(sub.getComponentCount() == 0)
+            sub.add(createSubLabel(" ", () -> {}));
+        addToMenu(sub);
     }
 
     public abstract void createMenu(TransparentPanel panel);

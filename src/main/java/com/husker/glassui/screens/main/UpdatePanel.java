@@ -4,8 +4,12 @@ import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
+import com.husker.launcher.api.API;
+import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,11 +18,17 @@ import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class UpdatePanel extends BlurPanel {
 
-    private WebLabel[] labels = new WebLabel[2];
+    private static final Logger log = LogManager.getLogger(UpdatePanel.class);
+
+    private final WebLabel[] labels = new WebLabel[2];
 
     public UpdatePanel(Screen screen){
         super(screen, true);
@@ -61,12 +71,26 @@ public class UpdatePanel extends BlurPanel {
             }
             public void mouseClicked(MouseEvent mouseEvent) {
                 try {
-                    Process proc = Runtime.getRuntime().exec("java -jar " + (new File(".").getAbsolutePath() + "launcher.jar"));
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, "Ошибка!", "Ошибка запуска приложения!", JOptionPane.ERROR_MESSAGE);
+                    String path = System.getProperty("user.dir") + "/launcher.jar";
+                    if(!Files.exists(Paths.get(path)))
+                        throw new NullPointerException("File doesn't exist");
+                    Runtime.getRuntime().exec("java -jar \"" + path + "\"");
+                    System.exit(0);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "Ошибка запуска приложения!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 }
-
             }
         });
+
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                try {
+                    setVisible(API.Launcher.getCurrentVersion().equals(UpdateManager.VERSION));
+                } catch (API.InternalAPIException e) {
+                    e.printStackTrace();
+                    setVisible(false);
+                }
+            }
+        }, 0, 10000);
     }
 }

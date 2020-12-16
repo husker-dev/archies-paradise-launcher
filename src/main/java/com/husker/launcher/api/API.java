@@ -1,83 +1,121 @@
 package com.husker.launcher.api;
 
 import com.alee.utils.general.Pair;
-import com.husker.launcher.Launcher;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.settings.LauncherConfig;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.net.Get;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class API {
 
     private static final Logger log = LogManager.getLogger(API.class);
 
-    public static final String RESULT = "result";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
     public static final String EMAIL_CODE = "email_code";
-    public static final String ENCRYPTED = "encrypted";
     public static final String STATUS = "status";
-    public static final String SKIN_URL = "skin_url";
     public static final String PASSWORD = "password";
     public static final String CURRENT_PASSWORD = "current_password";
-    public static final String HAS_SKIN = "has_skin";
     public static final String ID = "id";
 
-    public static class APIException extends Exception{
-        public APIException(String message){
+    public static class APIException extends RuntimeException{
+        private final int code;
+        public APIException(String message, int code){
             super(message);
+            this.code = code;
+        }
+
+        public int getCode(){
+            return code;
         }
     }
 
-    private static InputStream getInputStream(String url) throws APIException {
+    public static class InternalAPIException extends Exception{
+        private final int code;
+        public InternalAPIException(String message, int code){
+            super(message);
+            this.code = code;
+        }
+
+        public int getCode(){
+            return code;
+        }
+    }
+
+    private static InputStream getInputStream(String url, Integer... knownResponse) throws APIException, InternalAPIException {
         try {
             Get get = new Get(url);
             get.execute();
             if (get.getHeader("Content-Type").contains("application/json")) {
                 JSONObject jsonObject = new JSONObject(get.getHtmlContent());
-                if (jsonObject.has("error_code") && jsonObject.getInt("error_code") < 0)
-                    throw new APIException(jsonObject.getString("error"));
+                int code = jsonObject.has("code") ? jsonObject.getInt("code") : 0;
+
+                if (code < 0)
+                    throw new InternalAPIException(jsonObject.getString("message"), code);
+                else if(code > 0) {
+                    if(knownResponse.length == 0 || Arrays.asList(knownResponse).contains(code))
+                        throw new APIException(jsonObject.getString("message"), code);
+                    else
+                        throw new InternalAPIException("Unknown server response", -404);
+                }
                 return new ByteArrayInputStream(jsonObject.toString().getBytes(StandardCharsets.UTF_8));
             }
             return get.getInputStream();
         }catch (IOException ioe){
-            throw new APIException(ioe.getMessage());
+            throw new InternalAPIException(ioe.getMessage(), -404);
         }
     }
 
-    public static BufferedImage getImage(ApiMethod method) throws APIException {
+    public static BufferedImage getImage(ApiMethod method, Integer... knownResponse) throws APIException, InternalAPIException {
         try {
-            return ImageIO.read(getInputStream(getMethodUrl(method)));
+            return ImageIO.read(getInputStream(getMethodUrl(method), knownResponse));
         }catch (IOException ioe){
-            throw new APIException(ioe.getMessage());
+            throw new InternalAPIException(ioe.getMessage(), -404);
         }
     }
 
-    public static BufferedImage getImage(String methodName) throws APIException {
-        return getImage(ApiMethod.create(methodName));
+    public static BufferedImage getImage(String methodName, Integer... knownResponse) throws APIException, InternalAPIException {
+        return getImage(ApiMethod.create(methodName), knownResponse);
     }
 
-    public static JSONObject getJSON(ApiMethod method) throws APIException {
-        String text = new BufferedReader(new InputStreamReader(getInputStream(getMethodUrl(method)), StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+    public static JSONObject getJSON(ApiMethod method, Integer... knownResponse) throws APIException, InternalAPIException {
+        String text = new BufferedReader(new InputStreamReader(getInputStream(getMethodUrl(method), knownResponse), StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
         return new JSONObject(text);
     }
 
-    public static JSONObject getJSON(String methodName) throws APIException {
-        return getJSON(ApiMethod.create(methodName));
+    public static JSONObject getJSON(String methodName, Integer... knownResponse) throws APIException, InternalAPIException {
+        return getJSON(ApiMethod.create(methodName), knownResponse);
     }
 
     public static String getMethodUrl(ApiMethod apiMethod){
@@ -95,7 +133,7 @@ public class API {
 
     public static class Minecraft {
 
-        public static ServerInfo getServerInfo() throws APIException {
+        public static ServerInfo getServerInfo() throws InternalAPIException {
             JSONObject jsonObject = getJSON(ApiMethod.create("minecraft.getServerInfo"));
             return new ServerInfo(jsonObject.getString("ip"), jsonObject.getInt("port"));
         }
@@ -118,109 +156,178 @@ public class API {
         }
     }
 
+    public static class Launcher{
+        public static String getCurrentVersion() throws InternalAPIException {
+            return API.getJSON("launcher.getVersion").getString("version");
+        }
+    }
+
     public static class Skins {
 
-        public static String[] getCategories() throws APIException {
+        public static String[] getCategories() throws InternalAPIException {
             return toStringArray(API.getJSON("skins.getCategories").getJSONArray("categories"));
         }
 
-        public static String[] getCategorySkins(String category) throws APIException {
-            return toStringArray(API.getJSON(ApiMethod.create("skins.getCategorySkins").set("category", category)).getJSONArray("skins"));
+        public static String[] getCategorySkins(String category) throws InternalAPIException, CategoryNotFoundException {
+            try {
+                return toStringArray(API.getJSON(ApiMethod.create("skins.getCategorySkins").set("category", category), 1).getJSONArray("skins"));
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new CategoryNotFoundException(category);
+            }
+            return null;
         }
 
-        public static BufferedImage getCategorySkin(String category, String name) throws APIException {
-            return API.getImage(ApiMethod.create("skins.getCategorySkin").set("category", category).set("name", name));
+        public static BufferedImage getCategorySkin(String category, String name) throws InternalAPIException, CategoryNotFoundException {
+            try {
+                return API.getImage(ApiMethod.create("skins.getCategorySkin").set("category", category).set("name", name), 1);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new CategoryNotFoundException(category);
+            }
+            return null;
         }
 
-        public static BufferedImage getCategoryPreview(String category) throws APIException {
-            return API.getImage(ApiMethod.create("skins.getCategoryPreview").set("category", category));
+        public static BufferedImage getCategoryPreview(String category) throws InternalAPIException, CategoryNotFoundException {
+            try {
+                return API.getImage(ApiMethod.create("skins.getCategoryPreview").set("category", category), 1);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new CategoryNotFoundException(category);
+            }
+            return null;
         }
     }
 
     public static class Auth {
 
-        public static String getAccessToken(String login, String password) throws APIException, WrongAuthDataException {
-            JSONObject request = getJSON(ApiMethod.create("auth.getAccessToken").set(LOGIN, login).set(PASSWORD, password));
-            if(!request.has(ACCESS_TOKEN))
-                throw new WrongAuthDataException();
-            return request.getString(ACCESS_TOKEN);
+        public static String getAccessToken(String login, String password) throws InternalAPIException, WrongAuthDataException {
+            try{
+                return getJSON(ApiMethod.create("auth.getAccessToken").set(LOGIN, login).set(PASSWORD, password), 1).getString(ACCESS_TOKEN);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new WrongAuthDataException();
+            }
+            return null;
         }
 
-        public static void register(String login, String password) throws APIException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectPassswordFormatException {
-            switch (getJSON(ApiMethod.create("auth.create").set(LOGIN, login).set(PASSWORD, password)).getInt(RESULT)){
-                case 0: return;
-                case 1: throw new IncorrectLoginFormatException();
-                case 2: throw new LoginAlreadyExistException();
-                case 3: throw new IncorrectPassswordFormatException();
-                default: throw new APIException("Unknown response");
+        public static void register(String login, String password) throws InternalAPIException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectPasswordFormatException {
+            try{
+                getJSON(ApiMethod.create("auth.create").set(LOGIN, login).set(PASSWORD, password), 1, 2, 3);
+            }catch (APIException e){
+                switch (e.getCode()){
+                    case 1: throw new IncorrectLoginFormatException();
+                    case 2: throw new LoginAlreadyExistException();
+                    case 3: throw new IncorrectPasswordFormatException();
+                }
             }
         }
     }
 
     public static class Profile {
 
-        public static void bindIP(String token) throws APIException {
-            getJSON(ProfileApiMethod.create("profile.bindIP", token));
+        public static void bindIP(String token) throws InternalAPIException, WrongAccessTokenException{
+            try {
+                getJSON(ProfileApiMethod.create("profile.bindIP", token), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
         }
 
-        public static BufferedImage getSkin(String token) throws APIException {
-            return getImage(ProfileApiMethod.create("profile.getSkin", token));
+        public static BufferedImage getSkin(String token) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getImage(ProfileApiMethod.create("profile.getSkin", token), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
         }
 
-        public static void setSkin(String token, BufferedImage skin) throws APIException, SkinTooLargeException {
-            JSONObject jsonObject = getJSON(ProfileApiMethod.create("profile.setSkin", token).set("skin", toBase64(skin)));
-            if(jsonObject.has("error_code") && jsonObject.getInt("error_code") == 3)
-                throw new SkinTooLargeException();
+        public static void setSkin(String token, BufferedImage skin) throws InternalAPIException, SkinTooLargeException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setSkin", token).set("skin", toBase64(skin)),  3, 25);
+            }catch (APIException e){
+                if(e.getCode() == 3)
+                    throw new SkinTooLargeException();
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
         }
 
-        public static void setSkin(String token, String category, String name) throws APIException, CategoryNotFoundException, SkinNameNotFoundException {
-            JSONObject jsonObject = getJSON(ProfileApiMethod.create("profile.setSkin", token).set("category", category).set("name", name));
-            if(jsonObject.has("error_code")){
-                switch (jsonObject.getInt("error_code")){
+        public static void setSkin(String token, String category, String name) throws InternalAPIException, CategoryNotFoundException, SkinNameNotFoundException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setSkin", token).set("category", category).set("name", name),  1, 2, 25);
+            }catch (APIException e){
+                switch (e.getCode()){
                     case 1: throw new CategoryNotFoundException(category);
                     case 2: throw new SkinNameNotFoundException(category, name);
-                    default: throw new APIException("Unknown response");
+                    case 25: throw new WrongAccessTokenException();
                 }
             }
         }
 
-        public static boolean confirmEmail(String token, String email, String emailCode) throws APIException, EmailIsNotSpecifiedException {
-            JSONObject jsonObject = getJSON(ProfileApiMethod.create("profile.confirmEmail", token).set(EMAIL, email).set(EMAIL_CODE, emailCode));
-            if(jsonObject.has("error_code") && jsonObject.getInt("error_code") == 1)
-                throw new EmailIsNotSpecifiedException();
-            return jsonObject.getBoolean("confirmed");
+        public static void confirmEmail(String token, String email, String emailCode) throws InternalAPIException, WrongAccessTokenException, EmailIsNotSpecifiedException, IncorrectEmailCodeException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.confirmEmail", token).set(EMAIL, email).set(EMAIL_CODE, emailCode), 1, 2, 25);
+            }catch (APIException e){
+                switch (e.getCode()){
+                    case 1: throw new EmailIsNotSpecifiedException();
+                    case 2: throw new IncorrectEmailCodeException();
+                    case 25: throw new WrongAccessTokenException();
+                }
+            }
         }
 
-        public static boolean isEmailConfirmed(String token) throws APIException {
-            return getJSON(ProfileApiMethod.create("profile.isEmailConfirmed", token)).getBoolean("confirmed");
+        public static boolean isEmailConfirmed(String token) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getJSON(ProfileApiMethod.create("profile.isEmailConfirmed", token), 25).getBoolean("confirmed");
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return false;
         }
 
-        public static void sendEmailCode(String token, String email) throws APIException, EmailCodeSendingException {
-            int result = getJSON(ProfileApiMethod.create("profile.sendEmailCode", token).set(EMAIL, email)).getInt(RESULT);
-            if(result == 1)
-                throw new EmailCodeSendingException();
+        public static void sendEmailCode(String token, String email) throws InternalAPIException, EmailCodeSendingException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.sendEmailCode", token).set(EMAIL, email), 1, 25);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new EmailCodeSendingException();
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
         }
 
-        public static HashMap<String, String> getData(String token, String... fields) throws APIException {
-            HashMap<String, String> data = new HashMap<>();
+        public static HashMap<String, String> getData(String token, String... fields) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                HashMap<String, String> data = new HashMap<>();
 
-            JSONObject jsonObject = getJSON(ProfileApiMethod.create("profile.getData", token).set("fields", String.join(",", fields)));
-            jsonObject.getJSONObject("data").toMap().forEach((name, value) -> data.put(name, value.toString()));
+                JSONObject jsonObject = getJSON(ProfileApiMethod.create("profile.getData", token).set("fields", String.join(",", fields)), 25);
+                jsonObject.getJSONObject("data").toMap().forEach((name, value) -> data.put(name, value.toString()));
 
-            return data;
+                return data;
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
         }
 
-        public static void setData(String token, HashMap<String, String> data, String currentPassword, String emailCode) throws APIException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectCurrentPasswordException, IncorrectEmailCodeException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectEmailFormatException, IncorrectPassswordFormatException {
-            ProfileApiMethod method = ProfileApiMethod.create("profile.setSkin", token);
-            if(currentPassword != null)
-                method.set(CURRENT_PASSWORD, currentPassword);
-            if(emailCode != null)
-                method.set(EMAIL_CODE, emailCode);
-            data.forEach(method::set);
+        public static void setData(String token, HashMap<String, String> data, String currentPassword, String emailCode) throws InternalAPIException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectCurrentPasswordException, IncorrectEmailCodeException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectEmailFormatException, IncorrectPasswordFormatException, WrongAccessTokenException {
+            try {
+                ProfileApiMethod method = ProfileApiMethod.create("profile.setData", token);
+                if (currentPassword != null)
+                    method.set(CURRENT_PASSWORD, currentPassword);
+                if (emailCode != null)
+                    method.set(EMAIL_CODE, emailCode);
+                data.forEach(method::set);
 
-            JSONObject jsonObject = getJSON(method);
-            if(jsonObject.has("error_code")){
-                switch (jsonObject.getInt("error_code")){
+                getJSON(method, 1, 2, 3, 4, 5, 6, 7, 8, 25);
+            }catch (APIException ex){
+                switch (ex.getCode()) {
                     case 1: throw new CurrentPasswordRequiredException();
                     case 2: throw new EmailCodeRequiredException();
                     case 3: throw new IncorrectCurrentPasswordException();
@@ -228,48 +335,101 @@ public class API {
                     case 5: throw new IncorrectLoginFormatException();
                     case 6: throw new LoginAlreadyExistException();
                     case 7: throw new IncorrectEmailFormatException();
-                    case 8: throw new IncorrectPassswordFormatException();
-                    default: throw new APIException(jsonObject.getString("error"));
+                    case 8: throw new IncorrectPasswordFormatException();
+                    case 25: throw new WrongAccessTokenException();
                 }
             }
-            if(!jsonObject.has("result") || jsonObject.getInt("result") != 1)
-                throw new APIException("Unknown api response");
         }
     }
 
 
     public static class Client{
 
-        public static JSONObject getSizeInfo() throws APIException {
-            return getJSON(ApiMethod.create("client.getSizeInfo"));
+        public static void update(File file, String id, String title, Consumer<Integer> stage) throws IOException {
+            stage.accept(0);
+
+            try (CloseableHttpClient client = HttpClients.createDefault()) {
+                HttpPost post = new HttpPost(getMethodUrl(ApiMethod.create("clients.update").set("id", id).set("name", title)));
+                HttpEntity entity = MultipartEntityBuilder.create().addPart("file", new FileBody(file, ContentType.create("application/zip"), null)).build();
+                post.setEntity(entity);
+                client.execute(post);
+            }
+
+            stage.accept(1);
+
         }
 
-        public static Pair<Boolean, Boolean> checkSum(String mods, String client) throws APIException {
-            JSONObject object = getJSON(ApiMethod.create("client.checkSum").set("mods", mods).set("client", client));
-            return new Pair<>(object.getBoolean("equal_mods"), object.getBoolean("equal_client"));
-        }
-
-        public static String getClientVersion() throws APIException {
-            return getJSON(ApiMethod.create("client.getFilesInfo")).getString("build");
-        }
-
-        public static String getShortClientVersion() throws APIException {
-            return getJSON(ApiMethod.create("client.getFilesInfo")).getString("build_id");
-        }
-
-        public static String getJarVersion() throws APIException {
-            return getJSON(ApiMethod.create("client.getFilesInfo")).getString("version");
-        }
-
-        public static ModInfo getModInfo(int index, boolean hasIcons) throws APIException{
-            JSONArray info = getJSON(ApiMethod.create("client.getModInfo").set("index", index).set("require_icon", hasIcons)).getJSONArray("mods");
-            if(info.length() == 1)
-                return new ModInfo(info.getJSONObject(0));
+        public static JSONObject getSizeInfo(String clientId) throws InternalAPIException, UnknownClientException {
+            try {
+                return getJSON(ApiMethod.create("clients.getSizeInfo").set("id", clientId), 1);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
             return null;
         }
 
-        public static BufferedImage getModIcon(int index) throws APIException {
-            return getImage(ApiMethod.create("client.getModIcon").set("index", index));
+        public static Pair<Boolean, Boolean> checksum(String clientId, String mods, String versions) throws InternalAPIException, UnknownClientException {
+            try {
+                JSONObject object = getJSON(ApiMethod.create("clients.checksum").set("id", clientId).set("mods", mods).set("versions", versions));
+                return new Pair<>(object.getBoolean("equal_mods"), object.getBoolean("equal_versions"));
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return null;
+        }
+
+        public static String getClientVersion(String clientId) throws InternalAPIException, UnknownClientException {
+            try {
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId), 1).getString("build");
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return null;
+        }
+
+        public static int getShortClientVersion(String clientId) throws InternalAPIException, UnknownClientException {
+            try {
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId)).getInt("build_id");
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return -1;
+        }
+
+        public static String getJarVersion(String clientId) throws InternalAPIException, UnknownClientException {
+            try {
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId)).getString("version");
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return null;
+        }
+
+        public static ModInfo getModInfo(String clientId, int index, boolean hasIcons) throws InternalAPIException, UnknownClientException {
+            try {
+                JSONArray info = getJSON(ApiMethod.create("clients.getModInfo").set("id", clientId).set("index", index).set("require_icon", hasIcons), 1).getJSONArray("mods");
+                if(info.length() == 1)
+                    return new ModInfo(info.getJSONObject(0));
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return null;
+        }
+
+        public static BufferedImage getModIcon(String clientId, int index) throws InternalAPIException, UnknownClientException {
+            try {
+                return getImage(ApiMethod.create("clients.getModIcon").set("id", clientId).set("index", index));
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return null;
         }
 
         public static class ModInfo{
@@ -343,8 +503,8 @@ public class API {
         }
     }
 
-    public static class IncorrectPassswordFormatException extends Exception{
-        public IncorrectPassswordFormatException(){
+    public static class IncorrectPasswordFormatException extends Exception{
+        public IncorrectPasswordFormatException(){
             super("Incorrect password format");
         }
     }
@@ -412,6 +572,18 @@ public class API {
     public static class EmailIsNotSpecifiedException extends Exception{
         public EmailIsNotSpecifiedException(){
             super("Email is not specified");
+        }
+    }
+
+    public static class WrongAccessTokenException extends Exception{
+        public WrongAccessTokenException(){
+            super("Wrong access token");
+        }
+    }
+
+    public static class UnknownClientException extends Exception{
+        public UnknownClientException(){
+            super("Unknown client part");
         }
     }
 }

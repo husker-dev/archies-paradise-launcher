@@ -91,7 +91,7 @@ public class VkPostPanel extends ImageSocialPanel {
             parameter.setBlurFactor(0);
             parameter.setShadowSize(5);
             parameter.setAdditionColor(GlassUI.Colors.first);
-            parameter.setShape(ShapeUtils.createRoundRectangle(getScreen().getLauncher(), tag, 15, 15, ALL_CORNERS));
+            parameter.setShape(ShapeUtils.createRoundRectangle(tag, 15, 15, ALL_CORNERS));
         }
     }
 

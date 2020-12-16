@@ -46,12 +46,11 @@ public class SettingsPanel extends TransparentPanel {
 
                 add(new BlurButton(screen, "Изменить фон"){{
                     setForeground(GlassUI.Colors.labelText);
-                    setMargin(0, 15, 0, 15);
+                    setPadding(15, 15);
                     addActionListener(e -> screen.getLauncherUI().setScreen(BackgroundSelection.class));
                 }});
             }});
         }});
-        //add(Box.createRigidArea(new Dimension(0, 5)));
         add(createLabel("Игра"));
         add(new TransparentPanel(){{
             setMargin(0, 40, 0, 40);
@@ -66,7 +65,8 @@ public class SettingsPanel extends TransparentPanel {
                 setFont(Resources.Fonts.ChronicaPro_ExtraBold);
             }});
 
-            ArrayList<Integer> memories = new ArrayList<>(Arrays.asList(256, 512, 1024, 2048, 4096, 8192));
+            int gb = 1024;
+            ArrayList<Integer> memories = new ArrayList<>(Arrays.asList(gb, 2 * gb, 4 * gb, 5 * gb, 7 * gb, 10 * gb));
             int value = LauncherSettings.getRAM();
 
             add(ramChooser = new BlurButtonLineChooser(screen){{
@@ -175,7 +175,7 @@ public class SettingsPanel extends TransparentPanel {
                 GlassUI.applyTopLayer(parameter);
                 parameter.setAdditionColor(GlassUI.Colors.third);
                 if (isDisplayable()) {
-                    parameter.setShape(ShapeUtils.createRoundRectangle(screen.getLauncher(), this, 10, 10, ALL_CORNERS));
+                    parameter.setShape(ShapeUtils.createRoundRectangle(this, 10, 10, ALL_CORNERS));
                     parameter.setShadowSize(4);
                 }
             });

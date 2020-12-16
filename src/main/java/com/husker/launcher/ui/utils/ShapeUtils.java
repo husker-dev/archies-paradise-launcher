@@ -20,8 +20,8 @@ public class ShapeUtils {
 
     public static Corner[] ALL_CORNERS = new Corner[]{Corner.TOP_LEFT, Corner.TOP_RIGHT, Corner.BOTTOM_LEFT, Corner.BOTTOM_RIGHT};
 
-    public static Shape createRoundRectangle(JFrame frame, Component component, double roundW, double roundH, Corner... corners){
-        Point location = ComponentUtils.getComponentLocationOnScreen(frame, component);
+    public static Shape createRoundRectangle(Component component, double roundW, double roundH, Corner... corners){
+        Point location = ComponentUtils.getComponentLocationOnScreen((JFrame) SwingUtilities.getRoot(component), component);
 
         return createRoundRectangle(location.x, location.y, component.getWidth(), component.getHeight(), roundW, roundH, corners);
     }

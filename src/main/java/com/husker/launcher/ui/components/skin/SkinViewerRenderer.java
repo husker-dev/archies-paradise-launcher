@@ -1,7 +1,6 @@
 package com.husker.launcher.ui.components.skin;
 
 import com.alee.managers.animation.easing.Cubic;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;

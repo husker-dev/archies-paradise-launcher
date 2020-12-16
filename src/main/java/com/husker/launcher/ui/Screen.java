@@ -4,8 +4,8 @@ import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.blur.BlurSegment;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;

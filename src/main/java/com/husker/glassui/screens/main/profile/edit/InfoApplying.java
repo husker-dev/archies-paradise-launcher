@@ -5,7 +5,6 @@ import com.husker.glassui.screens.SimpleLoadingScreen;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.api.API;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.husker.launcher.api.API.*;
@@ -32,6 +31,7 @@ public class InfoApplying extends SimpleLoadingScreen {
 
         try {
             getLauncher().User.setData(currentPassword, emailCode, changedParameters);
+            getLauncherUI().setScreen(MainScreen.class);
         } catch (IncorrectCurrentPasswordException e) {
             showErrorMessage("Неверный текущий пароль!");
         } catch (LoginAlreadyExistException e) {
@@ -44,7 +44,7 @@ public class InfoApplying extends SimpleLoadingScreen {
             showErrorMessage("Требуется ввести текущий пароль!");
         } catch (EmailCodeRequiredException e) {
             showErrorMessage("Требуется ввести код подтверждения!");
-        } catch (IncorrectPassswordFormatException e) {
+        } catch (IncorrectPasswordFormatException e) {
             showErrorMessage("Недопустимый формат пароля!");
         } catch (IncorrectLoginFormatException e) {
             showErrorMessage("Недопустимый формат логина!");

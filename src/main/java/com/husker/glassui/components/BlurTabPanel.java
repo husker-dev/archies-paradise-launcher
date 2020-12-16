@@ -269,7 +269,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
                 shape = new Area(ShapeUtils.createRoundRectangle(location.x, location.y, component.getWidth(), component.getHeight() + 25, 25, 25, TOP_LEFT, TOP_RIGHT));
             else
                 shape = new Area(ShapeUtils.createRoundRectangle(location.x, location.y - 25, component.getWidth(), component.getHeight() + 25, 25, 25, BOTTOM_LEFT, BOTTOM_RIGHT));
-            shape.subtract(new Area(getContentShape()));
+            //shape.subtract(new Area(getContentShape()));
 
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(shape);
@@ -282,12 +282,11 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             GlassUI.applyTopLayer(parameter);
             parameter.setShape(getContentShape());
             parameter.setShadowClip(getShadowClip());
-            return;
         }
     }
 
     protected Shape getContentShape(){
-        return ShapeUtils.createRoundRectangle(getScreen().getLauncher(), contentPanel.getFirstComponent(), 25, 25, ALL_CORNERS);
+        return ShapeUtils.createRoundRectangle(contentPanel.getFirstComponent(), 25, 25, ALL_CORNERS);
     }
 
     protected Shape getShadowClip(){

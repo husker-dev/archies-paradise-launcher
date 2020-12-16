@@ -4,6 +4,7 @@ import com.husker.launcher.Resources;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 public class BlurParameter {
 
@@ -133,5 +134,29 @@ public class BlurParameter {
 
     public BlurSegment getBlurSegment() {
         return parent;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BlurParameter that = (BlurParameter) o;
+        return blurFactor == that.blurFactor &&
+                useTexture == that.useTexture &&
+                Float.compare(that.textureAlpha, textureAlpha) == 0 &&
+                shadowSize == that.shadowSize &&
+                visible == that.visible &&
+                Objects.equals(shape, that.shape) &&
+                Objects.equals(texture, that.texture) &&
+                Objects.equals(additionColor, that.additionColor) &&
+                Objects.equals(shadowColor, that.shadowColor) &&
+                shadowType == that.shadowType &&
+                Objects.equals(shadowClip, that.shadowClip) &&
+                Objects.equals(clip, that.clip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shape, blurFactor, useTexture, texture, textureAlpha, additionColor, shadowColor, shadowType, shadowSize, shadowClip, clip, visible);
     }
 }

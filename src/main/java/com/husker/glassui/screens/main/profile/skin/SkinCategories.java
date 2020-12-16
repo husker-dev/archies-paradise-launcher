@@ -7,14 +7,17 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.screens.SimpleTitledScreen;
+import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
+import com.husker.launcher.discord.Discord;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.utils.ComponentUtils;
+import li.flor.nativejfilechooser.NativeJFileChooser;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -59,8 +62,8 @@ public class SkinCategories extends SimpleTitledScreen {
     public void onButtonsInit(TransparentPanel panel) {
         panel.setLayout(new GridBagLayout());
         panel.add(new BlurButton(this, "Назад"){{
-            addActionListener(e -> getLauncherUI().setScreen("main"));
-            setMargin(3, 40, 0, 40);
+            addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
+            setPadding(40, 40);
         }}, new GridBagConstraints(){{
             this.gridx = 0;
             this.weightx = 1;
@@ -69,9 +72,7 @@ public class SkinCategories extends SimpleTitledScreen {
         panel.add(new BlurButton(this, "Открыть..."){{
             addActionListener(e -> {
                 try{
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-                    JFileChooser chooser = new JFileChooser(){{
+                    JFileChooser chooser = new NativeJFileChooser(){{
                         setDialogTitle("Выбор скина");
                         setFileFilter(new FileFilter() {
                             public String getDescription() {
@@ -85,14 +86,12 @@ public class SkinCategories extends SimpleTitledScreen {
                     }};
 
                     if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-                        getLauncherUI().setScreen("skin_apply", new Parameters("path", chooser.getSelectedFile().getAbsolutePath()));
-
-                    WebLookAndFeel.install();
+                        getLauncherUI().setScreen(SkinApply.class, new Parameters("path", chooser.getSelectedFile().getAbsolutePath()));
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
             });
-            setMargin(3, 30, 0, 30);
+            setPadding(30, 30);
         }}, new GridBagConstraints(){{
             this.gridx = 1;
             this.weightx = 1;
@@ -101,6 +100,7 @@ public class SkinCategories extends SimpleTitledScreen {
 
     public void onShow(){
         super.onShow();
+        Discord.setState(Discord.Texts.InSkins);
 
         float pages = getParameterValue("folders").split(",").length / (float)pageElements;
         if(pages == (int)pages)
@@ -168,7 +168,7 @@ public class SkinCategories extends SimpleTitledScreen {
                 }
 
                 public void mousePressed(MouseEvent mouseEvent) {
-                    screen.getLauncherUI().setScreen("skin_list_loading", new Parameters("folder", nameLabel.getText()));
+                    screen.getLauncherUI().setScreen(SkinListLoading.class, new Parameters("folder", nameLabel.getText()));
                 }
             });
 

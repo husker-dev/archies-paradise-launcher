@@ -1,8 +1,5 @@
 package com.husker.launcher.server.settings;
 
-import com.husker.launcher.server.utils.settings.SettingsFile;
-
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -15,12 +12,10 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String EMAIL_TITLE = "mail.title";
     private static final String EMAIL_TEXT = "mail.text";
 
-    private static final String DELAY = "social.delay";
-
-    private static final String VK_GROUP = "social.vk.group_id";
-    private static final String YOUTUBE = "social.youtube.channel_id";
-    private static final String INSTAGRAM_NAME = "social.instagram.name";
-    private static final String GITHUB_REPO = "social.github.repo";
+    private static final String VK_GROUP = "social.vk";
+    private static final String YOUTUBE_ID = "social.youtube";
+    private static final String INSTAGRAM_NAME = "social.instagram";
+    private static final String GITHUB_REPO = "social.github";
 
     private static final String OWNER_NAME = "owner.name";
     private static final String OWNER_URL = "owner.url";
@@ -31,28 +26,32 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String MINECRAFT_IP = "minecraft.ip";
     private static final String MINECRAFT_PORT = "minecraft.port";
 
+    private static final String LAUNCHER_VERSION = "launcher.version";
+
     public ServerSettingsFile() {
-        super(new File("./server_settings.cfg"));
+        super("./server_settings.yaml");
 
-        setDefault(PORT, 15565 + "");
-        setDefault(EMAIL, "[email]");
-        setDefault(EMAIL_PASSWORD, "[password]");
+        setDefault(PORT, 15565);
+        setDefault(LAUNCHER_VERSION, "0.1");
+
+        setDefault(EMAIL, "example@mail.com");
+        setDefault(EMAIL_PASSWORD, "password");
         setDefault(EMAIL_TITLE, "Email title");
-        setDefault(EMAIL_TEXT, "Here is your code [code]");
+        setDefault(EMAIL_TEXT, "Dear {name}, here is your code {code}");
 
-        setDefault(VK_GROUP, "[id]");
-        setDefault(YOUTUBE, "[id]");
-        setDefault(INSTAGRAM_NAME, "[name]");
-        setDefault(GITHUB_REPO, "[repo]");
+        setDefault(VK_GROUP, "id");
+        setDefault(YOUTUBE_ID, "id");
+        setDefault(INSTAGRAM_NAME, "name");
+        setDefault(GITHUB_REPO, "repo");
 
-        setDefault(OWNER_NAME, "[owner name]");
-        setDefault(OWNER_URL, "[owner url]");
+        setDefault(OWNER_NAME, "owner name");
+        setDefault(OWNER_URL, "owner url");
 
-        setDefault(SUPPORT_NAME, "[support name]");
-        setDefault(SUPPORT_URL, "[support url]");
+        setDefault(SUPPORT_NAME, "support name");
+        setDefault(SUPPORT_URL, "support url");
 
-        setDefault(MINECRAFT_IP, "[server ip]");
-        setDefault(MINECRAFT_PORT, "[server port]");
+        setDefault(MINECRAFT_IP, "127.0.0.1");
+        setDefault(MINECRAFT_PORT, 25565);
     }
 
     public String getMinecraftServerIP(){
@@ -60,7 +59,7 @@ public class ServerSettingsFile extends SettingsFile {
     }
 
     public int getMinecraftServerPort(){
-        return Integer.parseInt(get(MINECRAFT_PORT));
+        return getInt(MINECRAFT_PORT);
     }
 
     public String getOwnerName(){
@@ -100,7 +99,7 @@ public class ServerSettingsFile extends SettingsFile {
 
     public int getPort(){
         try{
-            Integer.parseInt(get(PORT));
+            getInt(PORT);
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -108,7 +107,7 @@ public class ServerSettingsFile extends SettingsFile {
     }
 
     public void setPort(int port){
-        set(PORT, port + "");
+        set(PORT, port);
     }
 
     public void setPort(String port){
@@ -128,11 +127,11 @@ public class ServerSettingsFile extends SettingsFile {
     }
 
     public String getYouTubeId(){
-        return get(YOUTUBE);
+        return get(YOUTUBE_ID);
     }
 
     public void setYouTubeId(String key){
-        set(YOUTUBE, key);
+        set(YOUTUBE_ID, key);
     }
 
     public String getInstagramId(){
@@ -155,11 +154,11 @@ public class ServerSettingsFile extends SettingsFile {
         return get(EMAIL_TEXT);
     }
 
-    public int getSocialDelay(){
-        try {
-            return Integer.parseInt(get(DELAY, "10"));
-        }catch (Exception ex){
-            return 10;
-        }
+    public void setLauncherVersion(String version){
+        set(LAUNCHER_VERSION, version);
+    }
+
+    public String getLauncherVersion(){
+        return get(LAUNCHER_VERSION);
     }
 }

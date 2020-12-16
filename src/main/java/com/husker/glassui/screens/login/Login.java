@@ -5,6 +5,7 @@ import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.screens.TitledLogoScreen;
 import com.husker.glassui.screens.registration.Registration;
+import com.husker.launcher.discord.Discord;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.utils.FormatUtils;
 
@@ -56,7 +57,7 @@ public class Login extends TitledLogoScreen {
 
     public void onShow(){
         super.onShow();
-
+        Discord.setState(Discord.Texts.InLogin);
         loginField.setText(getParameterValue("login", ""));
         passwordField.setText(getParameterValue("password", ""));
     }

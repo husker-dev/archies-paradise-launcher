@@ -99,6 +99,7 @@ public class ScalableImage extends JComponent {
         RoundRectangle2D.Double componentShape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), round, round);
 
         RenderUtils.enableAntialiasing(g2d);
+
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g2d.setPaint(new TexturePaint(image, imageShape.getBounds()));
         g2d.setClip(imageShape.getBounds());

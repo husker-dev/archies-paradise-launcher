@@ -2,8 +2,9 @@
 /.gradle/
 /build/
 /build/classes/java/main/
-/client/
+/clients/
 /players/
-/server_client/
+/received_clients_tmp/
+/loaded_clients/
 /out/
 /logs/

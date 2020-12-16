@@ -38,6 +38,8 @@ public class C_4_ConfirmingCode extends SimpleLoadingScreen {
                 put("password", password);
                 put("email", email);
             }});
+        } catch (API.IncorrectEmailCodeException e) {
+            e.printStackTrace();
         }
     }
 }

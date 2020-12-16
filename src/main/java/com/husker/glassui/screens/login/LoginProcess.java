@@ -33,7 +33,7 @@ public class LoginProcess extends SimpleLoadingScreen {
                 }});
         } catch (API.WrongAuthDataException e) {
             Message.showMessage(getLauncherUI(), "Ошибка", "Неправильный логин или пароль", Login.class, new Parameters("login", login));
-        } catch (API.APIException e) {
+        } catch (API.InternalAPIException e) {
             Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка входа! (" + e.getMessage() + ")", Login.class, new Parameters("login", login, "password", password));
         }
     }

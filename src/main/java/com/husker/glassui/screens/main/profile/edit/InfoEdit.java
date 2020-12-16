@@ -4,6 +4,7 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
+import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.api.API;
 import com.husker.launcher.utils.FormatUtils;
@@ -49,7 +50,7 @@ public class InfoEdit extends InfoEditPanel {
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(InfoEdit.this, "Назад"){{
             setPreferredWidth(120);
-            addActionListener(e -> getLauncherUI().setScreen("main"));
+            addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
         }});
         panel.add(apply = new BlurButton(InfoEdit.this, "Применить"){{
             setEnabled(false);

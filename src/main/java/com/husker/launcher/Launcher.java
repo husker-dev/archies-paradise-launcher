@@ -1,7 +1,6 @@
 package com.husker.launcher;
 
 import com.alee.laf.WebLookAndFeel;
-import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.components.ScalableImage;
 
 import com.husker.launcher.ui.components.TransparentPanel;
@@ -9,9 +8,8 @@ import com.husker.launcher.settings.*;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.LauncherUI;
-import com.husker.launcher.utils.ConsoleUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +17,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Launcher extends JFrame {
 
@@ -35,98 +36,124 @@ public class Launcher extends JFrame {
 
     public final User User = new User();
 
+    private final HashMap<String, Thread> initializations = new HashMap<>();
+
     public Launcher(){
-        log.info("Loading resources...");
-        Resources.load();
+        this(() -> {});
+    }
 
-        log.info("Installing the WebLaF library");
-        WebLookAndFeel.install();
-        Toolkit.getDefaultToolkit().setDynamicLayout(true);
-        System.setProperty("sun.awt.noerasebackground", "true");
-
-
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                new Thread(() -> {
-                    log.info("Closed");
-                    System.exit(0);
-                }).start();
-            }
+    public Launcher(Runnable loadingListener){
+        initThread("resources", () -> {
+            log.info("Loading resources...");
+            Resources.load();
+            loadingListener.run();
         });
 
-        currentUIName = LauncherConfig.INSTANCE.get("ui");
-        if(currentUIName == null)
-            currentUIName = GlassUI.class.getCanonicalName();
-        try {
-            Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
-            currentUI = c.getConstructor(Launcher.class).newInstance(this);
-        }catch (Exception ex){
-            ex.printStackTrace();
-            currentUI = new GlassUI(this);
-        }
+        initThread("ui", () -> {
+            log.info("Installing the WebLaF library");
+            WebLookAndFeel.install();
+            loadingListener.run();
+            Toolkit.getDefaultToolkit().setDynamicLayout(true);
 
-        setContentPane(new TransparentPanel(){{
-            setLayout(new OverlayLayout(this));
+            setTitle(LauncherConfig.getTitle());
+            setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+            setMinimumSize(new Dimension(1070, 690));
 
-            // For animation
-            add(animationPanel = new TransparentPanel(){
-                {
-                    setLayout(new BorderLayout());
-                    add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
-                    setVisible(false);
-                }
+            waitThread("resources");
 
-                public void paint(Graphics g) {
-                    Graphics2D g2d = (Graphics2D)g;
-                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentAlpha / 255f));
-
-                    super.paint(g2d);
+            addWindowListener(new WindowAdapter() {
+                public void windowClosing(WindowEvent e) {
+                    new Thread(() -> {
+                        log.info("Closed");
+                        System.exit(0);
+                    }).start();
                 }
             });
 
-            // UI
-            add(new TransparentPanel(){{
-                setLayout(new BorderLayout());
-                add(currentUI);
-            }});
+            currentUIName = LauncherConfig.INSTANCE.get("ui");
+            if(currentUIName == null)
+                currentUIName = GlassUI.class.getCanonicalName();
+            try {
+                Class<? extends LauncherUI> c = (Class<? extends LauncherUI>) Class.forName(currentUIName);
+                currentUI = c.getConstructor(Launcher.class).newInstance(this);
+            }catch (Exception ex){
+                ex.printStackTrace();
+                currentUI = new GlassUI(this);
+            }
 
-            // Blur, Shadow, etc...
-            add(new JPanel(){
-                {
-                    setOpaque(false);
-                    setBackground(new Color(0, 0, 0, 0));
-                    setLayout(new BorderLayout());
-                }
-                public void paint(Graphics g) {
-                    if(currentUI != null && currentUI.getScreen() != null){
-                        Graphics2D g2d = (Graphics2D)g;
-                        for(BlurPainter painter : currentUI.getScreen().getBlurPainters()) {
-                            if(painter != null)
-                                painter.paint(g2d);
-                        }
+            setContentPane(new TransparentPanel(){{
+                setLayout(new OverlayLayout(this));
+
+                // For animation
+                add(animationPanel = new TransparentPanel(){
+                    {
+                        setLayout(new BorderLayout());
+                        add(animationBackgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
+                        setVisible(false);
                     }
 
-                    super.paint(g);
-                }
-            });
+                    public void paint(Graphics g) {
+                        Graphics2D g2d = (Graphics2D)g;
+                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, currentAlpha / 255f));
 
-            // Background
-            add(new JPanel(){{
-                setLayout(new BorderLayout());
-                add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
+                        super.paint(g2d);
+                    }
+                });
+
+                // UI
+                add(new TransparentPanel(){{
+                    setLayout(new BorderLayout());
+                    add(currentUI);
+                }});
+
+                // Blur, Shadow, etc...
+                add(new JPanel(){
+                    {
+                        setOpaque(false);
+                        setBackground(new Color(0, 0, 0, 0));
+                        setLayout(new BorderLayout());
+                    }
+                    public void paint(Graphics g) {
+                        if(currentUI != null && currentUI.getScreen() != null){
+                            Graphics2D g2d = (Graphics2D)g;
+                            for(BlurPainter painter : currentUI.getScreen().getBlurPainters()) {
+                                if(painter != null)
+                                    painter.paint(g2d);
+                            }
+                        }
+
+                        super.paint(g);
+                    }
+                });
+
+                // Background
+                add(new JPanel(){{
+                    setLayout(new BorderLayout());
+                    add(backgroundImage = new ScalableImage(getBackgroundFromSettings(), ScalableImage.FitType.FILL_XY));
+                }});
             }});
-        }});
 
-        setTitle(LauncherConfig.getTitle());
-        setIconImage(Resources.Icon);
+            setIconImage(Resources.Icon);
+            setSize(currentUI.getDefaultSize());
+            setLocationRelativeTo(null);
 
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        setSize(currentUI.getDefaultSize());
-        setLocationRelativeTo(null);
+            loadingListener.run();
+            currentUI.onInit();
+            if(currentUI.isAnimated())
+                currentAlpha = 255;
 
-        currentUI.onInit();
-        if(currentUI.isAnimated())
-            currentAlpha = 255;
+        });
+
+        waiter:
+        while (true) {
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException ignored) {}
+            for (Thread thread : initializations.values())
+                if (thread.isAlive())
+                    continue waiter;
+            break;
+        }
     }
 
     public void setBackgroundImage(BufferedImage image){
@@ -135,9 +162,8 @@ public class Launcher extends JFrame {
     }
 
     public BufferedImage getBackgroundFromSettings(){
-        if(LauncherSettings.getBackgroundIndex() == 0 && Resources.Background[0] == null)
+        if((LauncherSettings.getBackgroundIndex() == 0 && Resources.Background[0] == null) || LauncherSettings.getBackgroundIndex() > Resources.Background.length)
             LauncherSettings.setBackgroundIndex(1);
-
         return Resources.Background[LauncherSettings.getBackgroundIndex()];
     }
 
@@ -225,6 +251,20 @@ public class Launcher extends JFrame {
     public void updateUI(){
         getContentPane().revalidate();
         getContentPane().repaint();
+    }
+
+    private void initThread(String name, Runnable runnable){
+        Thread thread = new Thread(runnable);
+        initializations.put(name, thread);
+        thread.start();
+    }
+
+    private void waitThread(String name){
+        try {
+            initializations.get(name).join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

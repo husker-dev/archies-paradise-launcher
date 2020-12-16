@@ -2,14 +2,16 @@ package com.husker.glassui.screens.main.play;
 
 import com.husker.glassui.components.BlurButton;
 
-import com.husker.glassui.components.BlurScalableImage;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
+import com.husker.launcher.discord.Discord;
 import com.husker.launcher.managers.LaunchManager;
+import com.husker.launcher.settings.LauncherSettings;
 import com.husker.launcher.ui.components.ProgressBar;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.ui.Screen;
+import com.husker.launcher.ui.utils.ImageUtils;
 import org.bridj.Pointer;
 import org.bridj.cpp.com.COMRuntime;
 import org.bridj.cpp.com.shell.ITaskbarList3;
@@ -17,14 +19,17 @@ import org.bridj.jawt.JAWTUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 
 public class PlayPanel extends TransparentPanel {
 
 
     private final Screen screen;
-    private BlurScalableImage screenshotImage;
+    private final ScreenshotsPanel screenshots;
 
     private TransparentPanel playPanel;
     private BlurButton playBtn;
@@ -32,32 +37,21 @@ public class PlayPanel extends TransparentPanel {
     private TransparentPanel loadingPanel;
     private ProgressBar progressBar;
 
+    private final static String[] clients = {
+            "vr",
+            "non_vr"
+    };
+    private boolean vr = false;
+    private BlurButton clientBtn;
+    int btnSize = 40;
+
     public PlayPanel(Screen screen){
         this.screen = screen;
 
         setLayout(new BorderLayout());
         setMargin(10, 10, 0, 10);
 
-        add(new TransparentPanel(){{
-            setLayout(new BorderLayout());
-            add(screenshotImage = new BlurScalableImage(screen){{
-                setLayout(new OverlayLayout(this));
-                add(new TransparentPanel(){{
-                    setLayout(new BorderLayout());
-                    add(new JPanel(){{
-                        setPreferredWidth(50);
-                        setBackground(Color.BLUE);
-                    }}, BorderLayout.WEST);
-                    add(new JPanel(){{
-                        setPreferredWidth(50);
-                        setBackground(Color.BLUE);
-                    }}, BorderLayout.EAST);
-                }}, 0);
-                add(new TransparentPanel(){{
-
-                }}, 1);
-            }});
-        }});
+        add(screenshots = new ScreenshotsPanel(screen));
 
         add(new TransparentPanel(){{
             setLayout(new OverlayLayout(this));
@@ -65,14 +59,22 @@ public class PlayPanel extends TransparentPanel {
 
             // Button
             add(playPanel = new TransparentPanel(){{
-                setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+                setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
                 setMargin(5, 0, 5, 0);
 
+                add(new TransparentPanel(){{
+                    setPreferredSize(btnSize, btnSize);
+                }});
                 add(playBtn = new BlurButton(screen, "Загрузка..."){{
-                    setPreferredHeight(40);
-                    setMargin(0, 90, 0, 90);
+                    setPreferredHeight(btnSize);
+                    setPreferredWidth(250);
+                    //setPadding(90, 90);
                     setEnabled(false);
                     addActionListener(e -> onPlayClick());
+                }});
+                add(clientBtn = new BlurButton(screen, ""){{
+                    setPreferredHeight(btnSize);
+                    addActionListener(e -> setClient(!vr));
                 }});
             }});
 
@@ -85,7 +87,12 @@ public class PlayPanel extends TransparentPanel {
             }});
             setMargin(5, 0, 0, 0);
         }}, BorderLayout.SOUTH);
+
         setProcessVisible(false);
+        if(Arrays.asList(clients).contains(LauncherSettings.getClientType()))
+            setClient(LauncherSettings.getClientType().equals("vr"));
+        else
+            setClient(false);
     }
 
     public void onPlayClick(){
@@ -93,11 +100,12 @@ public class PlayPanel extends TransparentPanel {
         if(!playBtn.isEnabled())
             return;
         setProcessVisible(true);
-        LaunchManager.playOrDownload(screen.getLauncher().User, args -> {
+        LaunchManager.playOrDownload(clients[vr ? 0:1], screen.getLauncher().User, args -> {
             int id = args.getProcessId();
             double percent = args.getPercent();
 
             if(id == -1 || id == -2) {
+                Discord.setState(Discord.Texts.InMainMenu);
                 screen.getLauncher().setVisible(true);
                 setProcessVisible(false);
                 updateData();
@@ -147,11 +155,12 @@ public class PlayPanel extends TransparentPanel {
             }
             if(id == 5){
                 progressBar.setText("Запуск...");
-                progressBar.setValue(0);
+                progressBar.setValue(100);
                 progressBar.setSpeedText("");
                 progressBar.setValueText("");
             }
             if(id == 6){
+                Discord.setState(Discord.Texts.InGame);
                 progressBar.setText("Запущено");
                 progressBar.setValue(100);
                 progressBar.setSpeedText("");
@@ -161,9 +170,21 @@ public class PlayPanel extends TransparentPanel {
         });
     }
 
+    public void setClient(boolean vr){
+        this.vr = vr;
+        LauncherSettings.setClientType(clients[vr ? 0:1]);
+        double scale = 0.8;
+        if(vr)
+            clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
+        else
+            clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR_Disabled, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
+        updateData();
+    }
+
     public void setProcessVisible(boolean visible){
         playPanel.setVisible(!visible);
         playBtn.setVisible(!visible);
+        clientBtn.setVisible(!visible);
         loadingPanel.setVisible(visible);
         progressBar.setVisible(visible);
     }
@@ -175,8 +196,17 @@ public class PlayPanel extends TransparentPanel {
     public void updateData(){
         new Thread(() -> {
             try {
-                screenshotImage.setImage(API.getImage(ApiMethod.create("screenshots.get").set("index", 0)));
-            } catch (API.APIException e) {
+                int count = API.getJSON(ApiMethod.create("screenshots.getCount")).getInt("count");
+                String[] urls = new String[count];
+                String[] urls_preview = new String[count];
+                String[] urls_full = new String[count];
+                for(int i = 0; i < count; i++) {
+                    urls[i] = API.getMethodUrl(ApiMethod.create("screenshots.get").set("index", i));
+                    urls_preview[i] = API.getMethodUrl(ApiMethod.create("screenshots.get").set("index", i).set("size", "small"));
+                    urls_full[i] = API.getMethodUrl(ApiMethod.create("screenshots.get").set("index", i).set("size", "large"));
+                }
+                screenshots.setUrls(urls, urls_preview, urls_full);
+            } catch (API.InternalAPIException e) {
                 e.printStackTrace();
             }
         }).start();
@@ -184,8 +214,7 @@ public class PlayPanel extends TransparentPanel {
             playBtn.setText("Загрузка...");
             playBtn.setEnabled(false);
 
-
-            LaunchManager.ClientState lastState = LaunchManager.getClientState();
+            LaunchManager.ClientState lastState = LaunchManager.getClientState(clients[vr ? 0:1]);
             playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR);
 
             switch (lastState){

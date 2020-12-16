@@ -121,6 +121,8 @@ public class BlurTextField extends WebTextField implements BlurComponent{
 
     public static class CustomCaret extends DefaultCaret {
 
+        public static final int FPS = 60;
+
         double current_x = 0;
         double current_width = 0;
         double x = 0;
@@ -133,16 +135,20 @@ public class BlurTextField extends WebTextField implements BlurComponent{
         public CustomCaret(JFrame frame){
             this.frame = frame;
 
-
-
             new Timer().schedule(new TimerTask() {
 
                 int old_from = 0;
                 int old_to = 0;
 
+                long lastTime = System.currentTimeMillis();
+
                 public void run() {
+                    long currentTime = System.currentTimeMillis();
+                    long delta = currentTime - lastTime;
+                    lastTime = currentTime;
+
                     try {
-                        double speed = 4;
+                        double speed = 3;
 
                         current_width += (width - current_width) / speed;
                         current_x += (x - current_x) / speed;
@@ -150,19 +156,24 @@ public class BlurTextField extends WebTextField implements BlurComponent{
                         int from = getComponent().getSelectionStart();
                         int to = getComponent().getSelectionEnd();
 
-                        if(from == to && old_from != old_to)
+                        if(from == to && old_from != old_to) {
                             onSelectedChanged(from, to, old_from, old_to);
+                            if(getComponent() != null)
+                                getComponent().repaint();
+                        }
 
-                        if (from != to && (old_from != from || old_to != to))
+                        if (from != to && (old_from != from || old_to != to)) {
                             onSelectedChanged(from, to, old_from, old_to);
+                            if(getComponent() != null)
+                                getComponent().repaint();
+                        }
 
                         old_from = from;
                         old_to = to;
 
-                    }catch (Exception ignored){
-                    }
+                    }catch (Exception ignored){ }
                 }
-            }, 0, 10);
+            }, 0, (int)(1000.0 / FPS));
         }
 
         private final Highlighter.HighlightPainter painter = (g, offs0, offs1, bounds, c) -> {
@@ -173,7 +184,7 @@ public class BlurTextField extends WebTextField implements BlurComponent{
                 Rectangle p1 = c.getUI().modelToView(c, offs1);
                 Rectangle r = p0.union(p1);
 
-                g.setColor(isFocused ? c.getSelectionColor() : new Color(100, 100, 100, 0));
+                g.setColor(isFocused ? GlassUI.Colors.selectedColor : new Color(100, 100, 100, 0));
 
                 RenderUtils.enableAntialiasing(g2d);
                 int offset = 1;

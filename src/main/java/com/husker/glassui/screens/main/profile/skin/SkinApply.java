@@ -34,7 +34,7 @@ public class SkinApply extends SimpleLoadingScreen {
             getLauncherUI().setScreen(MainScreen.class);
         }catch (Exception ex){
             ex.printStackTrace();
-            Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось загрузить скин", "main");
+            Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось загрузить скин", MainScreen.class);
         }
     }
 }

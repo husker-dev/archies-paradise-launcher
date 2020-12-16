@@ -15,10 +15,14 @@ import java.awt.image.Kernel;
 import java.awt.image.VolatileImage;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static com.husker.launcher.ui.blur.BlurParameter.ShadowType.*;
 
 public class BlurPainter {
+
+    private static BufferedImage bg;
+    private static BufferedImage blurredBg;
 
     private final BlurSegment segment;
     private final Launcher launcher;
@@ -62,6 +66,17 @@ public class BlurPainter {
         parameter = new BlurParameter(segment);
         segment.get(parameter);
 
+        if(bg != launcher.getBackgroundImage()){
+            bg = launcher.getBackgroundImage();
+
+            float newWidth = 800;
+            float newHeight = newWidth / bg.getWidth() * bg.getHeight();
+
+            blurredBg = ImageUtils.getScaledInstance(bg, (int)newWidth, (int)newHeight, BufferedImage.SCALE_FAST);
+            blurredBg = getBlurFilter(25, 0).filter(blurredBg, null);
+            blurredBg = getBlurFilter(0, 25).filter(blurredBg, null);
+        }
+
         boolean changed = false;
 
         boolean blur_changed = false;
@@ -74,8 +89,6 @@ public class BlurPainter {
 
         if(!changed && lastParameters != null && lastParameters.getShadowClip() != null && parameter.getShadowClip() != null && !equalShapes(lastParameters.getShadowClip(), parameter.getShadowClip()))
             changed = true;
-
-        long start = System.currentTimeMillis();
 
         if(parameter.isVisible()) {
 
@@ -107,24 +120,31 @@ public class BlurPainter {
                     lastBackground = launcher.getBackgroundImage();
 
                 if (translatedShape != null && translatedShape.getBounds().width > 0 && translatedShape.getBounds().height > 0 && parameter.getBlurFactor() > 0) {
-
                     BufferedImage image = new BufferedImage(translatedShape.getBounds().width, translatedShape.getBounds().height, BufferedImage.TYPE_INT_ARGB);
 
-                    // Draw background image
+                    int radius = parameter.getBlurFactor();
                     Graphics2D image_g2d = image.createGraphics();
                     image_g2d.translate(-shape.getBounds().x, -shape.getBounds().y);
-                    launcher.getBackgroundScalableImage().paint(image_g2d);
 
-                    int radius = parameter.getBlurFactor();
-                    double scale = .1;
+                    if (radius == 25) {
+                        launcher.getBackgroundScalableImage().setImage(blurredBg);
+                        launcher.getBackgroundScalableImage().paint(image_g2d);
+                        launcher.getBackgroundScalableImage().setImage(bg);
+                    }else {
+                        double scale = 0.2;
 
-                    image = ImageUtils.toBufferedImage(image.getScaledInstance((int)(image.getWidth() * scale), (int)(image.getHeight() * scale), Image.SCALE_FAST));
+                        // Draw background image
+                        image_g2d.translate(-shape.getBounds().x, -shape.getBounds().y);
+                        launcher.getBackgroundScalableImage().paint(image_g2d);
 
-                    // Apply gaussian blur
-                    image = getBlurFilter(radius, 0).filter(image, null);
-                    image = getBlurFilter(0, radius).filter(image, null);
+                        image = ImageUtils.toBufferedImage(image.getScaledInstance((int) (image.getWidth() * scale), (int) (image.getHeight() * scale), Image.SCALE_FAST));
 
-                    image = ImageUtils.toBufferedImage(image.getScaledInstance(translatedShape.getBounds().width, translatedShape.getBounds().height, Image.SCALE_FAST));
+                        // Apply gaussian blur
+                        image = getBlurFilter(radius, 0).filter(image, null);
+                        image = getBlurFilter(0, radius).filter(image, null);
+
+                        image = ImageUtils.toBufferedImage(image.getScaledInstance(translatedShape.getBounds().width, translatedShape.getBounds().height, Image.SCALE_FAST));
+                    }
 
                     // Cropping by shape
                     image = ImageUtils.getSubImage(image, translatedShape.getBounds());
@@ -159,7 +179,7 @@ public class BlurPainter {
                 texture_changed = true;
 
                 if (translatedShape != null && translatedShape.getBounds().width > 0 && translatedShape.getBounds().height > 0) {
-                    Area toRender = new Area(new Rectangle(0, 0, launcher.getActualWidth() - 1, launcher.getActualHeight() - 1));
+                    Area toRender = new Area(new Rectangle(0, 0, launcher.getActualWidth(), launcher.getActualHeight()));
                     toRender.intersect(new Area(translatedShape));
 
                     texture = ImageUtils.createVolatileImage(launcher, translatedShape.getBounds().width, translatedShape.getBounds().height);
@@ -188,9 +208,14 @@ public class BlurPainter {
                 if (translatedShape != null && translatedShape.getBounds().width > 0 && translatedShape.getBounds().height > 0) {
                     additionColor = ImageUtils.createVolatileImage(launcher, translatedShape.getBounds().width, translatedShape.getBounds().height);
                     Graphics2D g2d = additionColor.createGraphics();
-                    RenderUtils.enableAntialiasing(g2d);
                     g2d.setColor(parameter.getAdditionColor());
+
+                    //RenderUtils.disableAntialiasing(g2d);
+                    //g2d.fill(translatedShape);
+
+                    RenderUtils.enableAntialiasing(g2d);
                     g2d.fill(translatedShape);
+
                     g2d.dispose();
                 } else
                     additionColor = null;
@@ -350,16 +375,5 @@ public class BlurPainter {
         return new ConvolveFilter(kernel);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 

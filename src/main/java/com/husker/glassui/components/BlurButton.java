@@ -23,6 +23,10 @@ public class BlurButton extends WebButton implements BlurComponent{
     private Color color = GlassUI.Colors.buttonDefault;
     private boolean disposed = false;
 
+    public BlurButton(Screen screen){
+        this(screen, "");
+    }
+
     public BlurButton(Screen screen, String text){
         super(StyleId.buttonUndecorated, text);
         this.screen = screen;
@@ -47,7 +51,12 @@ public class BlurButton extends WebButton implements BlurComponent{
         setFont(Resources.Fonts.ChronicaPro_ExtraBold);
         setPreferredHeight(30);
         setForeground(GlassUI.Colors.labelText);
-        setMargin(3, 15, 0, 15);
+        setPadding(3, 15, 0, 15);
+        setMargin(0);
+    }
+
+    public void setPadding(int left, int right){
+        setPadding(getPadding().top, left, getPadding().bottom, right);
     }
 
     public void setColor(Color color){

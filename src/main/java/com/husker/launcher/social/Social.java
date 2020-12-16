@@ -3,9 +3,7 @@ package com.husker.launcher.social;
 import com.husker.launcher.api.API;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.managers.ProfileApiMethod;
-import com.husker.launcher.utils.ConsoleUtils;
 import com.husker.net.Get;
-import com.husker.net.HttpUrlBuilder;
 import com.husker.net.HttpsUrlBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -13,13 +11,13 @@ import org.json.JSONObject;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 public class Social {
+
+    static {
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+    }
 
     public static class About {
 
@@ -54,7 +52,7 @@ public class Social {
                 JSONObject jsonObject = API.getJSON(ProfileApiMethod.create("about.getOwnerInfo"));
                 ownerName = jsonObject.getString("name");
                 ownerUrl = jsonObject.getString("url");
-            } catch (API.APIException e) {
+            } catch (API.InternalAPIException e) {
                 e.printStackTrace();
             }
         }
@@ -64,7 +62,7 @@ public class Social {
                 JSONObject jsonObject = API.getJSON(ProfileApiMethod.create("about.getSupportInfo"));
                 supportName = jsonObject.getString("name");
                 supportUrl = jsonObject.getString("url");
-            } catch (API.APIException e) {
+            } catch (API.InternalAPIException e) {
                 e.printStackTrace();
             }
         }
@@ -84,12 +82,12 @@ public class Social {
         }
 
         public static String getRepository(){
-            if(id == null) {
-                try {
-                    id = API.getJSON(ApiMethod.create("github.getInfo")).getString("repo");
-                } catch (Exception ignored) {}
+            try {
+                return API.getJSON(ApiMethod.create("github.getInfo")).getString("repo");
+            } catch (API.InternalAPIException e) {
+                e.printStackTrace();
             }
-            return id;
+            return null;
         }
     }
 
@@ -122,31 +120,34 @@ public class Social {
         }
 
         private static void loadInstagram(){
-            try {
-                if(photos.size() > 0)
-                    return;
+            while(true) {
+                try {
+                    if (photos.size() > 0)
+                        return;
 
-                String id = getId();
+                    String id = getId();
 
-                Get inst = new Get(new HttpsUrlBuilder("instagram.com/" + id));
-                inst.execute();
-                String content = inst.getHtmlContent();
-                JSONObject object = new JSONObject(content.split("window._sharedData =")[1].split("</script>")[0]);
+                    Get inst = new Get(new HttpsUrlBuilder("instagram.com/" + id));
+                    inst.execute();
+                    String content = inst.getHtmlContent();
+                    JSONObject object = new JSONObject(content.split("window._sharedData =")[1].split("</script>")[0]);
 
-                JSONArray images = object.getJSONObject("entry_data").getJSONArray("ProfilePage")
-                        .getJSONObject(0).getJSONObject("graphql").getJSONObject("user").getJSONObject("edge_owner_to_timeline_media").getJSONArray("edges");
+                    JSONArray images = object.getJSONObject("entry_data").getJSONArray("ProfilePage")
+                            .getJSONObject(0).getJSONObject("graphql").getJSONObject("user").getJSONObject("edge_owner_to_timeline_media").getJSONArray("edges");
 
-                for(int i = 0; i < 4; i++){
-                    JSONObject image = images.getJSONObject(i).getJSONObject("node");
+                    for (int i = 0; i < 4; i++) {
+                        JSONObject image = images.getJSONObject(i).getJSONObject("node");
 
-                    String url = "https://instagram.com/p/" + image.getString("shortcode");
-                    String text = image.getJSONObject("edge_media_to_caption").getJSONArray("edges").getJSONObject(0).getJSONObject("node").getString("text");
-                    String previewUrl = image.getString("display_url");
+                        String url = "https://instagram.com/p/" + image.getString("shortcode");
+                        String text = image.getJSONObject("edge_media_to_caption").getJSONArray("edges").getJSONObject(0).getJSONObject("node").getString("text");
+                        String previewUrl = image.getString("display_url");
 
-                    photos.add(new InstagramPhotoInfo(i, text, previewUrl, url));
+                        photos.add(new InstagramPhotoInfo(i, text, previewUrl, url));
+                    }
+                    break;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-            }catch (Exception ex){
-                ex.printStackTrace();
             }
         }
     }
@@ -204,7 +205,7 @@ public class Social {
         }
 
         private static void load(){
-            for(int r = 0; r < 5; r++) {
+            while(true) {
                 try {
                     if (videos.size() > 0)
                         return;
@@ -212,7 +213,12 @@ public class Social {
                     String id = getId();
 
                     Get get = new Get(new HttpsUrlBuilder("youtube.com/channel/" + id));
-                    JSONObject content = new JSONObject(get.getHtmlContent().split("window\\[\"ytInitialData\"] =")[1].split("</script>")[0]);
+                    String html = get.getHtmlContent();
+                    if(html.contains("var ytInitialData = "))
+                        html = html.split("var ytInitialData = ")[1];
+                    else if (html.contains("window\\[\"ytInitialData\"] ="))
+                        html = html.split("window\\[\"ytInitialData\"] =")[1];
+                    JSONObject content = new JSONObject(html.split("</script>")[0]);
 
                     title = content.getJSONObject("metadata").getJSONObject("channelMetadataRenderer").getString("title");
                     logo = ImageIO.read(new URL(content.getJSONObject("metadata").getJSONObject("channelMetadataRenderer").getJSONObject("avatar").getJSONArray("thumbnails").getJSONObject(0).getString("url")));
@@ -228,6 +234,9 @@ public class Social {
                     for (int i = 0; i < Math.min(4, json_videos.length()); i++) {
                         String previewUrl = json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("thumbnail").getJSONArray("thumbnails").getJSONObject(3).getString("url");
                         String title = json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("title").getString("simpleText");
+                        if(title.substring(0, 1).getBytes()[0] == 63)
+                            title = "●" + title.substring(2);
+
                         String url = "https://www.youtube.com/watch?v=" + json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getString("videoId");
                         videos.add(new YouTubeVideoInfo(i, title, previewUrl, url));
                     }
@@ -299,8 +308,6 @@ public class Social {
                 String id = getId();
 
                 Get get = new Get(new HttpsUrlBuilder("vk.com/" + id));
-                get.execute();
-
                 String content = get.getHtmlContent();
 
                 logo = ImageIO.read(new URL(content.split("class=\"basisGroup__mainInfoRow\"")[1].split("src=\"")[1].split("\"")[0]));
@@ -310,14 +317,14 @@ public class Social {
                 else
                     description = "";
 
-                String[] content_items = content.split("container=\"group_wall\">")[1].split("<div class=\"wall_item\">");
+                String[] content_items = content.split("container=\"group_wall\">")[1].split("<div class=\"wall_item\"");
                 for(String item : content_items){
 
                     // Если закреплённая
                     if(item.contains("wi_explain") || !item.contains("wi_info"))
                         continue;
 
-                    String url = "https://vk.com" + item.split("wi_info")[1].split("href=\"")[1].split("\"")[0];
+                    String url = "https://vk.com/" + id + "?w=" + item.split("wi_info")[1].split("href=\"")[1].split("\"")[0].substring(1);
 
                     String text = item.contains("pi_text") ? item.split("pi_text\">")[1].split("</div>")[0] : null;
                     String photo = item.contains("thumb_map thumb_map_wide thumb_map_l al_photo") ? item.split("background-image: url\\(")[1].split("\\)")[0] : null;

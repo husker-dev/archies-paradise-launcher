@@ -39,7 +39,7 @@ public class User {
         return File.hasAccount();
     }
 
-    public void auth(String login, String password) throws WrongAuthDataException, APIException {
+    public void auth(String login, String password) throws WrongAuthDataException, InternalAPIException {
         this.token = API.Auth.getAccessToken(login, password);
         File.setLogin(login);
         File.setPassword(password);
@@ -55,9 +55,11 @@ public class User {
             id = Long.parseLong(data.get(ID));
             status = data.get(STATUS);
 
+            File.setLogin(name);
+
             emailConfirmed = API.Profile.isEmailConfirmed(token);
             skin = API.Profile.getSkin(token);
-        } catch (APIException e) {
+        } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
     }
@@ -65,15 +67,16 @@ public class User {
     public void sendConfirmCode(String email) throws EmailCodeSendingException {
         try {
             API.Profile.sendEmailCode(token, email);
-        }catch (APIException e){
+        }catch (InternalAPIException | WrongAccessTokenException e){
             errorLogoutEvent();
         }
     }
 
-    public boolean confirmMail(String email, String code) throws EmailIsNotSpecifiedException {
+    public boolean confirmMail(String email, String code) throws EmailIsNotSpecifiedException, IncorrectEmailCodeException {
         try {
-            return emailConfirmed = API.Profile.confirmEmail(token, email, code);
-        }catch (APIException e){
+            API.Profile.confirmEmail(token, email, code);
+            return emailConfirmed = API.Profile.isEmailConfirmed(token);
+        }catch (InternalAPIException | WrongAccessTokenException  e){
             errorLogoutEvent();
             return false;
         }
@@ -107,10 +110,13 @@ public class User {
         return emailConfirmed;
     }
 
-    public void setData(String currentPassword, String emailCode, HashMap<String, String> data) throws IncorrectCurrentPasswordException, LoginAlreadyExistException, IncorrectEmailCodeException, IncorrectEmailFormatException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectPassswordFormatException, IncorrectLoginFormatException {
+    public void setData(String currentPassword, String emailCode, HashMap<String, String> data) throws IncorrectCurrentPasswordException, LoginAlreadyExistException, IncorrectEmailCodeException, IncorrectEmailFormatException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectPasswordFormatException, IncorrectLoginFormatException {
         try {
             Profile.setData(token, data, currentPassword, emailCode);
-        } catch (APIException e) {
+            updateData();
+            if(data.containsKey(PASSWORD))
+                File.setPassword(data.get(PASSWORD));
+        } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
     }
@@ -118,7 +124,7 @@ public class User {
     public void bindIP() {
         try {
             Profile.bindIP(token);
-        } catch (APIException e) {
+        } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
     }
@@ -135,7 +141,7 @@ public class User {
         try {
             Profile.setSkin(token, image);
             updateData();
-        } catch (APIException e) {
+        } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
     }
@@ -144,7 +150,7 @@ public class User {
         try {
             Profile.setSkin(token, category, name);
             updateData();
-        } catch (APIException e) {
+        } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
     }

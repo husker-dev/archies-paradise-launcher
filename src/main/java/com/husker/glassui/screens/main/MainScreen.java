@@ -11,6 +11,7 @@ import com.husker.glassui.screens.main.settings.SettingsPanel;
 import com.husker.glassui.screens.main.social.VkGroupPanel;
 import com.husker.glassui.screens.main.social.YoutubePanel;
 import com.husker.launcher.Resources;
+import com.husker.launcher.discord.Discord;
 import com.husker.launcher.ui.components.TransparentPanel;
 
 import javax.swing.*;
@@ -67,6 +68,7 @@ public class MainScreen extends AbstractMainScreen {
     }
 
     public void onShow(){
+        Discord.setState(Discord.Texts.InMainMenu);
         try {
             onShowPanelEvent();
             newsPanel.load();
@@ -98,6 +100,8 @@ public class MainScreen extends AbstractMainScreen {
             keysPanel.onShow();
         if(id.equals("info"))
             infoPanel.onShow();
+        if(id.equals("control"))
+            controlPanel.onShow();
     }
 
     void onRightMenuInit(TransparentPanel menu) {

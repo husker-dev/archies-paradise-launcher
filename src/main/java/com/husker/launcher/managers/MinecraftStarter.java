@@ -1,69 +1,108 @@
 package com.husker.launcher.managers;
 
-import com.husker.launcher.utils.ConsoleUtils;
+import com.husker.launcher.ui.utils.ImageUtils;
 import com.husker.launcher.utils.IOUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.husker.launcher.utils.minecraft.MinecraftClientInfo;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 public class MinecraftStarter {
 
     private static final Logger log = LogManager.getLogger(MinecraftStarter.class);
 
-    private final String folder;
-    private final String versionFolder;
-    private final JSONObject object;
-    private final String version;
-    private final String jarPath;
-
     private Process proc;
 
-    private String nickname = "Player";
-    private String uuid = "00000000-0000-0000-0000-000000000000";
-    private boolean fullscreen = false;
-    private long ram = -1;
+    private final MinecraftClientInfo clientInfo;
 
-    public MinecraftStarter(String folder) throws IOException {
-        this.folder = new File(folder).getAbsolutePath().replace("\\", "/");
-        versionFolder = new File(folder + "/versions").listFiles()[0].getAbsolutePath();
-        jarPath = new File(versionFolder).listFiles(file -> file.getName().endsWith(".jar"))[0].getAbsolutePath();
-        object = new JSONObject(IOUtils.readFileText(new File(versionFolder).listFiles(file -> file.getName().endsWith(".json"))[0].getAbsolutePath()));
-        version = object.getString("id");
+    private BufferedImage icon = null;
+
+    public MinecraftStarter(String folder) throws Exception {
+        clientInfo = MinecraftClientInfo.getDefaultClientInfo(new File(folder));
+    }
+
+    public void setIcon(BufferedImage icon){
+        this.icon = icon;
     }
 
     public void setNickname(String nickname){
-        this.nickname = nickname;
+        clientInfo.getGameParameters().setUserName(nickname);
     }
 
     public void setUUID(String uuid){
-        this.uuid = uuid;
+        clientInfo.getGameParameters().setUUID(uuid);
     }
 
     public void setFullscreen(boolean fullscreen){
-        this.fullscreen = fullscreen;
+        clientInfo.getGameParameters().setFullscreen(fullscreen);
     }
 
     public void setRam(long ram){
-        this.ram = ram;
+        clientInfo.getJvmParameters().setRam(ram);
     }
 
     public void launch(){
         try {
-            String startString = getStartString();
-            log.info("Starting with parameters: " + startString);
+            String startString = getLaunchString();
+            log.info("Executing: " + startString);
+
+            // Setting icon
+            if(icon != null) {
+                String jsonPath = clientInfo.getClientFolder().getAbsolutePath() + "/assets/indexes/" + clientInfo.getAssetsId() + ".json";
+                JSONObject assetsJson = new JSONObject(String.join("", Files.readAllLines(Paths.get(jsonPath))));
+                JSONObject objects = assetsJson.getJSONObject("objects");
+                if(objects.has("icons/icon_16x16.png")){
+                    String hash = objects.getJSONObject("icons/icon_16x16.png").getString("hash");
+                    String firstDigits = hash.substring(0, 2);
+                    BufferedImage scaled = ImageUtils.getScaledInstance(icon, 16, 16, Image.SCALE_SMOOTH);
+                    File file = new File(clientInfo.getClientFolder().getAbsolutePath() + "/assets/objects/" + firstDigits + "/" + hash);
+                    ImageIO.write(scaled, "png", file);
+                }
+                if(objects.has("icons/icon_32x32.png")){
+                    String hash = objects.getJSONObject("icons/icon_32x32.png").getString("hash");
+                    String firstDigits = hash.substring(0, 2);
+                    BufferedImage scaled = ImageUtils.getScaledInstance(icon, 32, 32, Image.SCALE_SMOOTH);
+                    File file = new File(clientInfo.getClientFolder().getAbsolutePath() + "/assets/objects/" + firstDigits + "/" + hash);
+                    ImageIO.write(scaled, "png", file);
+                }
+                if(objects.has("minecraft/icons/icon_16x16.png")){
+                    String hash = objects.getJSONObject("minecraft/icons/icon_16x16.png").getString("hash");
+                    String firstDigits = hash.substring(0, 2);
+                    BufferedImage scaled = ImageUtils.getScaledInstance(icon, 16, 16, Image.SCALE_SMOOTH);
+                    File file = new File(clientInfo.getClientFolder().getAbsolutePath() + "/assets/objects/" + firstDigits + "/" + hash);
+                    ImageIO.write(scaled, "png", file);
+                }
+                if(objects.has("minecraft/icons/icon_32x32.png")){
+                    String hash = objects.getJSONObject("minecraft/icons/icon_32x32.png").getString("hash");
+                    String firstDigits = hash.substring(0, 2);
+                    BufferedImage scaled = ImageUtils.getScaledInstance(icon, 32, 32, Image.SCALE_SMOOTH);
+                    File file = new File(clientInfo.getClientFolder().getAbsolutePath() + "/assets/objects/" + firstDigits + "/" + hash);
+                    ImageIO.write(scaled, "png", file);
+                }
+            }
 
             proc = Runtime.getRuntime().exec(startString);
 
+
+
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+            stdInput.readLine();
 
             new Thread(() -> {
                 try {
@@ -88,74 +127,8 @@ public class MinecraftStarter {
         }
     }
 
-    private String getStartString(){
-        ArrayList<String> arguments = new ArrayList<>();
-        arguments.add("java");
-
-        arguments.add("-Djava.library.path=\"" + versionFolder + "\\natives\"");
-        arguments.add("-Dminecraft.launcher.brand=minecraft-launcher");
-        arguments.add("-Dminecraft.launcher.version=" + UpdateManager.VERSION);
-        if(ram > 0)
-            arguments.add("-Xmx" + ram + "m");
-        if(isWindows())
-            arguments.add("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
-        arguments.add("-classpath \"" + getLibraries() + "\" " + object.getString("mainClass"));
-
-        arguments.add("--username " + nickname);
-        arguments.add("--version " + version);
-        arguments.add("--gameDir \"" + folder + "\"");
-        arguments.add("--assetsDir \"" + folder + "/assets\"");
-        arguments.add("--userType legacy");
-        arguments.add("--versionType release");
-        arguments.add("--accessToken null");
-        arguments.add("--uuid " + uuid);
-        if(fullscreen)
-            arguments.add("--fullscreen");
-
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        arguments.add("--width " + gd.getDisplayMode().getWidth() / 2);
-        arguments.add("--height " + gd.getDisplayMode().getHeight() / 2);
-
-        return String.join(" ", arguments);
-    }
-
-    private String getLibraries(){
-        StringBuilder out = new StringBuilder();
-
-        JSONArray libraries = object.getJSONArray("libraries");
-        for(int i = 0; i < libraries.length(); i++) {
-            try {
-                JSONObject mainObject = libraries.getJSONObject(i).getJSONObject("downloads");
-                if(mainObject.has("artifact"))
-                    out.append(folder).append("/libraries/").append(mainObject.getJSONObject("artifact").getString("path")).append(";");
-                if(mainObject.has("classifiers")) {
-                    if (isWindows() && mainObject.has("natives-windows"))
-                        out.append(folder).append("/libraries/").append(mainObject.getJSONObject("classifiers").getJSONObject("natives-windows").getString("path")).append(";");
-                    if (isUnix() && mainObject.has("atives-linux"))
-                        out.append(folder).append("/libraries/").append(mainObject.getJSONObject("classifiers").getJSONObject("natives-linux").getString("path")).append(";");
-                    if (isMac() && mainObject.has("natives-osx"))
-                        out.append(folder).append("/libraries/").append(mainObject.getJSONObject("classifiers").getJSONObject("natives-osx").getString("path")).append(";");
-                }
-            }catch (Exception ex){
-                ex.printStackTrace();
-                log.error(ex);
-            }
-        }
-        out.append(jarPath);
-
-        return out.toString();
-    }
-
-    private static boolean isWindows() {
-        return (System.getProperty("os.name").contains("win"));
-    }
-
-    private static boolean isMac() {
-        return (System.getProperty("os.name").contains("mac"));
-    }
-
-    private static boolean isUnix() {
-        return (System.getProperty("os.name").contains("nix") || System.getProperty("os.name").contains("nux") || System.getProperty("os.name").contains("aix"));
+    private String getLaunchString(){
+        return "java " + clientInfo.getJVMArguments() + " " + clientInfo.getGameArguments();
     }
 
     public void joinThread()  {
