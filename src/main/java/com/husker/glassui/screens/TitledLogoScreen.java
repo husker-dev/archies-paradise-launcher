@@ -82,12 +82,12 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
                 add(new WebLabel("Статус:  "){{
                     setForeground(new Color(70, 70, 70));
                     setPreferredHeight(15);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                    setFont(Resources.Fonts.getChronicaProExtraBold());
                 }});
                 add(statusLabel = new WebLabel("Обновление..."){{
                     setForeground(new Color(120, 120, 120));
                     setPreferredHeight(15);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                    setFont(Resources.Fonts.getChronicaProExtraBold());
                 }});
             }}, BorderLayout.WEST);
 
@@ -98,7 +98,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
                 add(new WebLabel("v" + UpdateManager.VERSION){{
                     setForeground(new Color(140, 140, 140, 100));
                     setPreferredHeight(15);
-                    setFont(Resources.Fonts.ChronicaPro);
+                    setFont(Resources.Fonts.getChronicaPro());
                 }});
             }}, BorderLayout.EAST);
         }});
@@ -159,7 +159,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(LEFT);
             setPreferredHeight(15);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+            setFont(Resources.Fonts.getChronicaProExtraBold());
         }};
     }
 
@@ -177,7 +177,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
         return new WebLabel(text){{
             setForeground(GlassUI.Colors.labelLightText);
             setFont(getFont().deriveFont(14f));
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+            setFont(Resources.Fonts.getChronicaProExtraBold());
             setHorizontalAlignment(CENTER);
 
             addMouseListener(new MouseAdapter() {

@@ -178,7 +178,7 @@ public abstract class SocialPanel extends BlurPanel {
                 setVerticalAlignment(CENTER);
                 setMaximumRows(2);
                 setForeground(defaultTitleColor);
-                setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(10f));
+                setFont(Resources.Fonts.getChronicaProExtraBold(10));
 
                 setMaximumTextWidth(180);
 
@@ -193,8 +193,8 @@ public abstract class SocialPanel extends BlurPanel {
                 float maxFontSize = 14;
 
                 for(int i = (int)maxFontSize; i >= minFontSize; i--){
-                    if(getFontMetrics(Resources.Fonts.ChronicaPro_Bold.deriveFont((float)i)).stringWidth(text) < 160) {
-                        setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont((float)i));
+                    if(getFontMetrics(Resources.Fonts.getChronicaProBold(i)).stringWidth(text) < 160) {
+                        setFont(Resources.Fonts.getChronicaProBold(i));
                         break;
                     }
                 }

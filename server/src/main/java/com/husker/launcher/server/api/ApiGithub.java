@@ -13,9 +13,7 @@ public class ApiGithub extends ApiClients{
     }
 
     public void setInfo(Profile profile){
-        if(profile.getDataValue(Profile.STATUS).equals("Администратор"))
-            ServerMain.Settings.setGitHubId(getAttribute("repo"));
-        else
-            throw new ApiException("The account has no rights to change this value", 1);
+        profile.checkStatus("Администратор");
+        ServerMain.Settings.setGitHubId(getAttribute("repo"));
     }
 }

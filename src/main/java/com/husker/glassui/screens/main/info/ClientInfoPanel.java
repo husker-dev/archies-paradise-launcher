@@ -2,7 +2,7 @@ package com.husker.glassui.screens.main.info;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
-import com.husker.glassui.components.TagPanel;
+import com.husker.glassui.components.BlurTagPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.ui.Screen;
@@ -28,7 +28,7 @@ public class ClientInfoPanel extends TransparentPanel {
             setLayout(new BorderLayout());
 
             // Info
-            add(new TagPanel(screen, "Информация"){{
+            add(new BlurTagPanel(screen, "Информация"){{
                 addButtonAction(ClientInfoPanel.this::updateData);
                 setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 addContent(GlassUI.createParameterLine("Версия", versionLabel = GlassUI.createParameterLineValueLabel(false)));
@@ -42,7 +42,7 @@ public class ClientInfoPanel extends TransparentPanel {
             }}, BorderLayout.EAST);
         }}, BorderLayout.NORTH);
 
-        add(new TagPanel(screen, "Моды"){{
+        add(new BlurTagPanel(screen, "Моды"){{
             setMargin(10, 0, 0, 0);
             setContentLayout(new BorderLayout());
             addContent(new TransparentPanel(){{
@@ -69,9 +69,14 @@ public class ClientInfoPanel extends TransparentPanel {
                 e.printStackTrace();
             }
 
+            int count = 0;
+            try{
+                count = API.Client.getModsCount(clientId);
+            }catch (Exception ex){}
+
             for(ModPanel panel : modPanels) {
                 try {
-                    panel.updateInfo();
+                    panel.updateInfo(count);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }

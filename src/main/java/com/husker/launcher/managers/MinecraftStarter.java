@@ -1,5 +1,6 @@
 package com.husker.launcher.managers;
 
+import com.husker.launcher.Resources;
 import com.husker.launcher.ui.utils.ImageUtils;
 import com.husker.launcher.utils.IOUtils;
 import com.husker.launcher.utils.minecraft.MinecraftClientInfo;
@@ -17,19 +18,19 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 public class MinecraftStarter {
 
     private static final Logger log = LogManager.getLogger(MinecraftStarter.class);
+    private static final String skinModName = "CustomSkinLoader_Forge.jar";
+    private static final String skinLibraryPath = "customskinloader\\CustomSkinLoader\\" + skinModName;
 
     private Process proc;
-
     private final MinecraftClientInfo clientInfo;
-
     private BufferedImage icon = null;
+
+    private String customTweakClass = null;
 
     public MinecraftStarter(String folder) throws Exception {
         clientInfo = MinecraftClientInfo.getDefaultClientInfo(new File(folder));
@@ -97,8 +98,6 @@ public class MinecraftStarter {
 
             proc = Runtime.getRuntime().exec(startString);
 
-
-
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
 
@@ -127,8 +126,83 @@ public class MinecraftStarter {
         }
     }
 
+    public void clearSkinMod(){
+        IOUtils.delete(clientInfo.getClientFolder() + "\\mods\\" + skinModName);
+        IOUtils.delete(clientInfo.getClientFolder() + "\\libraries\\customskinloader");
+        IOUtils.delete(clientInfo.getClientFolder() + "\\CustomSkinLoader");
+    }
+
+    public void applySkinMod(){
+        try {
+            String toFolder = "";
+            clientInfo.removeLibrary(skinLibraryPath);
+            if(clientInfo.getType() == MinecraftClientInfo.ClientType.FORGE) {
+                toFolder = clientInfo.getClientFolder() + "\\mods\\" + skinModName;
+                customTweakClass = null;
+            }
+            if(clientInfo.getType() == MinecraftClientInfo.ClientType.OPTIFINE) {
+                toFolder = clientInfo.getClientFolder() + "\\libraries\\" + skinLibraryPath;
+                clientInfo.addLibrary(skinLibraryPath);
+                customTweakClass = null;
+            }
+            if(clientInfo.getType() == MinecraftClientInfo.ClientType.VANILLA) {
+                toFolder = clientInfo.getClientFolder() + "\\libraries\\" + skinLibraryPath;
+                clientInfo.addLibrary(skinLibraryPath);
+                customTweakClass = "customskinloader.tweaker.Tweaker";
+            }
+            Files.createDirectories(Paths.get(clientInfo.getClientFolder() + "\\CustomSkinLoader"));
+            Files.copy(Resources.get("mods\\CustomSkinLoader.json"), Paths.get(clientInfo.getClientFolder() + "\\CustomSkinLoader\\CustomSkinLoader.json"));
+            Files.copy(Resources.get("mods\\CustomSkinLoader_Forge.jar"), Paths.get(toFolder));
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
     private String getLaunchString(){
-        return "java " + clientInfo.getJVMArguments() + " " + clientInfo.getGameArguments();
+        String line = "\"" + getJavaPath() + "\" " + clientInfo.getJVMArguments() + " " + clientInfo.getGameArguments();
+        if(customTweakClass != null){
+            if(line.contains("--tweakClass")) {
+                String oldTweakClass = line.split("--tweakClass")[1].split(" ")[1];
+                log.info("OLD TWEAK: " + oldTweakClass);
+                line = line.replace(oldTweakClass, customTweakClass);
+            }else
+                line += " --tweakClass " + customTweakClass;
+        }
+        return line;
+    }
+
+    private String getJavaPath(){
+        HashMap<Integer, String> paths = new HashMap<>();
+
+        for(File drive : File.listRoots()){
+            try {
+                File javaDirectory = new File(drive, "Program Files\\Java");
+                if (javaDirectory.exists()) {
+                    for (File folder : Objects.requireNonNull(javaDirectory.listFiles())) {
+                        File javaRelease = new File(folder, "release");
+                        if(javaRelease.exists()){
+                            String version = String.join("\n", Files.readAllLines(Paths.get(javaRelease.getAbsolutePath()))).split("JAVA_VERSION=\"")[1].split("\"")[0];
+
+                            if(version.startsWith("1.")) {
+                                version = version.substring(2, 3);
+                            } else {
+                                int dot = version.indexOf(".");
+                                if(dot != -1)
+                                    version = version.substring(0, dot);
+                            }
+                            paths.put(Integer.parseInt(version), new File(folder, "bin/java.exe").getAbsolutePath());
+                        }
+                    }
+                }
+            }catch (Exception ignored){}
+        }
+
+        log.info("Installed Java versions: ");
+        paths.forEach((key, val) -> log.info("- " + key + " => " + val));
+        for(int i = 8; i < 14; i++)
+            if(paths.containsKey(i))
+                return paths.get(i);
+        return "java";
     }
 
     public void joinThread()  {

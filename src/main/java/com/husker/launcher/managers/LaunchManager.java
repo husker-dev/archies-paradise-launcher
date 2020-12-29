@@ -143,6 +143,14 @@ public class LaunchManager {
                 if (state == ClientState.PLAY) {
                     process.accept(new DownloadingProcessArguments(5));
 
+                    MinecraftStarter starter = new MinecraftStarter("clients/" + clientId) {{
+                        setNickname(user.getId() + "");
+                        setFullscreen(!LauncherSettings.isWindowed());
+                        setRam(LauncherSettings.getRAM());
+                        setIcon(Resources.Icon);
+                    }};
+                    starter.clearSkinMod();
+
                     while (true) {
                         String md5_mods = getModsMD5(clientId);
                         String md5_client = getClientMD5(clientId);
@@ -193,18 +201,13 @@ public class LaunchManager {
                     }
 
                     user.bindIP();
-
-                    MinecraftStarter starter = new MinecraftStarter("clients/" + clientId) {{
-                        setNickname(user.getNickname());
-                        setFullscreen(!LauncherSettings.isWindowed());
-                        setRam(LauncherSettings.getRAM());
-                        setIcon(Resources.Icon);
-                    }};
+                    starter.applySkinMod();
                     starter.launch();
 
                     process.accept(new DownloadingProcessArguments(6));
                     System.gc();
                     starter.joinThread();
+                    starter.clearSkinMod();
                     process.accept(new DownloadingProcessArguments(-1));
 
                 }
@@ -252,8 +255,6 @@ public class LaunchManager {
             return "";
         }
     }
-
-
 
 
     public static class DownloadingProcessArguments {

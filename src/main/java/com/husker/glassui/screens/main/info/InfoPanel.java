@@ -59,17 +59,15 @@ public class InfoPanel extends TransparentPanel {
 
 
     public void updateCurrentData(){
-        int index = chooser.getSelectedIndex();
-        if(index == 0)
-            launcherPanel.updateData();
-        if(index == 1)
-            clientPanel1.updateData();
-        if(index == 2)
-            clientPanel2.updateData();
+        new Thread(() -> {
+            int index = chooser.getSelectedIndex();
+            if(index == 0)
+                launcherPanel.updateData();
+            if(index == 1)
+                clientPanel1.updateData();
+            if(index == 2)
+                clientPanel2.updateData();
+        }).start();
     }
-
-
-
-
 
 }

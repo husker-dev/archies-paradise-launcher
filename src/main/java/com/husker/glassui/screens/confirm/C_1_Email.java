@@ -18,6 +18,7 @@ public class C_1_Email extends TitledLogoScreen {
         panel.add(createLabel("Электронная почта"));
         panel.add(email = new BlurTextField(this){{
             addTextListener(text -> updateNextButton());
+            addFastAction(() -> event());
         }});
     }
 
@@ -28,21 +29,22 @@ public class C_1_Email extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton("Далее", () -> {
-            getLauncherUI().setScreen(C_2_SendingCode.class, new Parameters(){{
-                put("login", getParameter("login"));
-                put("password", getParameter("password"));
-                put("email", email.getText());
-            }});
-        });
+        nextButton = createButton("Далее", () -> event());
         nextButton.setEnabled(false);
         panel.add(createButton("Назад", () -> getLauncher().User.logout()));
         panel.add(nextButton);
     }
 
+    public void event(){
+        getLauncherUI().setScreen(C_2_SendingCode.class, new Parameters(){{
+            put("login", getParameter("login"));
+            put("password", getParameter("password"));
+            put("email", email.getText());
+        }});
+    }
+
     public void onShow(){
         super.onShow();
-
         email.setText(getParameterValue("email", ""));
     }
 

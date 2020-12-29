@@ -64,7 +64,7 @@ public class v13 extends MinecraftClientInfo {
     }
 
     public String[] getLibraries() {
-        ArrayList<String> libraries = new ArrayList<>();
+        ArrayList<String> libraries = new ArrayList<>(getAdditionLibraries());
 
         JSONArray array = getJSON().getJSONArray("libraries");
         for(int i = 0; i < array.length(); i++){

@@ -37,9 +37,11 @@ public class SettingsFile {
             if (path.startsWith("/"))
                 is = getClass().getResourceAsStream(path);
             else {
-                if(!Files.exists(Paths.get(path)))
-                    Files.createFile(Paths.get(path));
-                is = new FileInputStream(new File(path));
+                Files.createDirectories(Paths.get(path).getParent());
+                File file = new File(path);
+                if(!file.exists())
+                    file.createNewFile();
+                is = new FileInputStream(file);
             }
 
             String text = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
@@ -60,7 +62,9 @@ public class SettingsFile {
                 return;
             if(!Files.exists(Paths.get(path)))
                 Files.createFile(Paths.get(path));
-            yaml.dump(map, new OutputStreamWriter(new FileOutputStream(new File(path)), StandardCharsets.UTF_8));
+            FileOutputStream os = new FileOutputStream(new File(path));
+            yaml.dump(map, new OutputStreamWriter(os, StandardCharsets.UTF_8));
+            os.close();
         }catch (Exception ex){
             ex.printStackTrace();
         }

@@ -117,7 +117,7 @@ public class ServerInfoPanel extends BlurPanel {
     public WebLabel createParameterLabel(String text){
         return new WebLabel(text){{
             setForeground(GlassUI.Colors.labelLightText);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(16f));
+            setFont(Resources.Fonts.getChronicaProExtraBold());
             setHorizontalAlignment(RIGHT);
         }};
     }

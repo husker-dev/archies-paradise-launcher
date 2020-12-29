@@ -4,11 +4,11 @@ import com.husker.launcher.server.services.http.ApiException;
 import com.husker.launcher.server.services.http.ImageLink;
 import com.husker.launcher.server.ServerMain;
 import com.husker.launcher.server.settings.SettingsFile;
+import com.husker.launcher.server.utils.IOUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -17,27 +17,27 @@ import java.util.function.Predicate;
 
 public class Profile {
 
-    private final int id;
+    public static final long MAIL_CODE_VALID_MINUTES = 5;
 
     public static final String profilesFolder = "./players";
     public static final String dataFile = "data.yaml";
     public static final String keysFile = "keys.txt";
     public static final String mailCodesFile = "mail_codes.txt";
+    public static final String passwordResetHashesFile = "password_reset_hashes.txt";
     public static final String skinFile = "skin.png";
     public static final String ipFile = "ip.txt";
 
-    public static final String RESULT = "result";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String LOGIN = "login";
     public static final String EMAIL = "email";
+    public static final String UUID = "uuid";
+    public static final String CREATION_TIME = "creation_time";
     public static final String EMAIL_CODE = "email_code";
     public static final String STATUS = "status";
     public static final String PASSWORD = "password";
     public static final String CURRENT_PASSWORD = "current_password";
     public static final String NEW_PASSWORD = "new_password";
     public static final String ID = "id";
-
-    public SettingsFile data;
 
     public static void create(String login, String password) throws IOException {
         if(!FormatUtils.isCorrectName(login))
@@ -47,7 +47,7 @@ public class Profile {
         if(!FormatUtils.isCorrectPassword(password))
             throw new ApiException("Wrong password format", 3);
 
-        int id = ProfileUtils.getUserCount() + 1;
+        int id = Profile.getProfilesCount() + 1;
         String path = profilesFolder + "/" + id;
 
         Files.createDirectories(Paths.get(path));
@@ -57,178 +57,297 @@ public class Profile {
         data.set(PASSWORD, DigestUtils.md2Hex(password));
         data.set(STATUS, "Гость");
         data.set(EMAIL, "null");
+        data.set(UUID, java.util.UUID.randomUUID().toString());
+        data.set(CREATION_TIME, System.currentTimeMillis());
 
         Files.createFile(Paths.get(path + "/" + ipFile));
         Files.createFile(Paths.get(path + "/" + keysFile));
         Files.createFile(Paths.get(path + "/" + mailCodesFile));
+        Files.createFile(Paths.get(path + "/" + passwordResetHashesFile));
+        Files.copy(Profile.class.getResourceAsStream("/steve.png"), Paths.get(path + "/" + skinFile));
+    }
+
+    public static int getProfilesCount(){
+        try {
+            Files.createDirectories(Paths.get(Profile.profilesFolder));
+        }catch (Exception ignored){}
+        return Objects.requireNonNull(new File(Profile.profilesFolder).list()).length;
+    }
+
+    public static int[] getIds(){
+        String[] ids_text = new File(Profile.profilesFolder).list((dir, name) -> {
+            File[] child = new File(dir.getAbsolutePath() + "\\" + name).listFiles();
+            if(child != null && child.length > 0){
+                for (File value : child)
+                    if (value.getName().equals("data.yaml"))
+                        return true;
+            }
+            return false;
+        });
+        if(ids_text == null)
+            return new int[0];
+        int[] ids = new int[ids_text.length];
+        for(int i = 0; i < ids_text.length; i++) {
+            try {
+                ids[i] = Integer.parseInt(ids_text[i]);
+            }catch (Exception ignored){}
+        }
+        Arrays.sort(ids);
+        return ids;
+    }
+
+    public static Profile[] getProfiles(){
+        ArrayList<Profile> profiles = new ArrayList<>();
+        for(int id : getIds()){
+            try{
+                profiles.add(new Profile(id));
+            }catch (Exception ignored){}
+        }
+        return profiles.toArray(new Profile[0]);
     }
 
     public static Profile getByName(String name){
-        for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
-            try {
-                Profile profile = new Profile(id);
-                if(profile.getDataValue(LOGIN).equals(name))
-                    return profile;
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
+        for(Profile profile : Profile.getProfiles())
+            if(profile.data.get(LOGIN).equals(name))
+                return profile;
+        return null;
+    }
+
+    public static Profile getByEmail(String email){
+        for(Profile profile : Profile.getProfiles())
+            if(profile.data.get(EMAIL).equals(email))
+                return profile;
         return null;
     }
 
     public static Profile get(String key){
-        for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
-            try {
-                for (String line : Files.readAllLines(Paths.get(profilesFolder + "/" + id + "/" + keysFile))) {
-                    if (line.split(",")[1].equals(key) && ProfileUtils.isValidKey(Long.parseLong(line.split(",")[0]))) {
-                        ProfileUtils.removeInvalidKeys(id);
-                        return new Profile(id);
-                    }
-                }
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
+        for(Profile profile : Profile.getProfiles())
+            if(profile.Token.containsKey(key))
+                return profile;
         return null;
     }
 
     public static Profile get(String login, String password){
-        for(int id = 1; id <= ProfileUtils.getUserCount(); id++){
+        for(int id : Profile.getIds()){
             try {
                 Profile profile = new Profile(id);
-                if(profile.getDataValue(LOGIN).equals(login) && ProfileUtils.arePasswordsEquals(profile.data.get(PASSWORD), password))
+                if(profile.Data.getValue(LOGIN).equals(login) && ProfileUtils.arePasswordsEquals(profile.data.get(PASSWORD), password))
                     return profile;
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
+            }catch (Exception ignored){}
         }
         return null;
     }
+
+    public final SettingsFile data;
+    private final int id;
+
+    public Data Data = new Data();
+    public Email Email = new Email();
+    public Password Password = new Password();
+    public IP IP = new IP();
+    public Token Token = new Token();
 
     public Profile(int id){
         this.id = id;
         data = new SettingsFile(getFolder() + "/" + dataFile);
     }
 
+    public void remove(){
+        IOUtils.delete(getFolder());
+    }
+
+    public void checkStatus(String status){
+        if(!Data.getValue(STATUS).equals(status))
+            throw new ApiException("Account does not have permission to perform this method", 26);
+    }
+
     public int getId(){
         return id;
     }
 
-    public void setIP(String ip){
-        try {
-            Files.write(Paths.get(getFolder() + "/" + ipFile), Collections.singletonList(ip));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    public class Token{
 
-    public String getIP(){
-        try {
-            return Files.readAllLines(Paths.get(getFolder() + "/" + ipFile)).get(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public String getDataValue(String parameter){
-        return getData(parameter).get(parameter);
-    }
-
-    public HashMap<String, String> getData(String... parameters){
-        HashMap<String, String> out_data = new HashMap<>();
-
-        List<String> availableData = Arrays.asList(ID, LOGIN, EMAIL, STATUS);
-
-        for(String parameter : parameters) {
-            if (availableData.contains(parameter)) {
-                if (parameter.equals(ID))
-                    out_data.put(parameter, id + "");
-                else
-                    out_data.put(parameter, data.get(parameter));
-            }
-        }
-
-        return out_data;
-    }
-
-    public String createKey(){
-        try {
-            String key = ProfileUtils.generateKey();
-            BufferedWriter output = new BufferedWriter(new FileWriter(getFolder() + "/" + keysFile, true));
-            output.write(System.currentTimeMillis() + "," + key + "\n");
-            output.flush();
-            output.close();
+        public String create(){
+            String key = ProfileUtils.generateAccessToken();
+            ProfileUtils.appendFile(getFolder() + "/" + keysFile, key);
             return key;
-        }catch (Exception ex){
-            ex.printStackTrace();
         }
-        return null;
-    }
 
-    public boolean sendEmailCode(String email) throws IOException {
-        String code = ProfileUtils.generateMailCode();
-
-        BufferedWriter output = new BufferedWriter(new FileWriter(getFolder() + "/" + mailCodesFile, true));
-        output.write(System.currentTimeMillis() + "," + email + "," + code + "\n");
-        output.flush();
-        output.close();
-
-        return ServerMain.MailService.send(email, ServerMain.Settings.getEmailTitle(), ServerMain.Settings.getEmailText().replace("{code}", code).replace("{name}", getDataValue(LOGIN)));
-    }
-
-    public boolean isValidEmailCode(String email, String code){
-        try {
-            ProfileUtils.removeInvalidEmails(id);
-
-            for (String line : Files.readAllLines(Paths.get(getFolder() + "/" + mailCodesFile)))
-                if (line.split(",")[1].equals(email) && line.split(",")[2].equals(code))
-                    return true;
-        }catch (Exception ex){
-            ex.printStackTrace();
+        public void remove(String key){
+            ProfileUtils.fileLineFilter(getFolder() + "/" + keysFile, line -> !key.equals(line));
         }
-        return false;
+
+        public boolean containsKey(String key){
+            return ProfileUtils.fileLinePredicate(getFolder() + "/" + keysFile, key::equals);
+        }
+
     }
 
-    public void removeKey(String key){
-        try {
-            ArrayList<String> newKeys = new ArrayList<>();
-            List<String> currentKeys = Files.readAllLines(Paths.get(getFolder() + "/" + keysFile));
-            for (String line : currentKeys)
-                if(!line.equals(key))
-                    newKeys.add(line);
+    public class Email {
 
-            if (newKeys.size() != currentKeys.size())
-                Files.write(Paths.get(getFolder() + "/" + keysFile), newKeys);
-        }catch (Exception ex){
-            ex.printStackTrace();
+        public void reset(){
+            data.set(EMAIL, "null");
+        }
+
+        public boolean sendCode(String email){
+            String code = ProfileUtils.generateMailCode();
+            ProfileUtils.appendFile(getFolder() + "/" + mailCodesFile, System.currentTimeMillis() + "," + email + "," + code);
+            return ServerMain.MailService.send(email, ServerMain.Settings.getEmailCodeTitle(), ServerMain.Settings.getEmailCodeText().replace("{code}", code).replace("{name}", Data.getValue(LOGIN)));
+        }
+
+        public boolean sendPasswordChangeCode(String email){
+            String code = ProfileUtils.generateMailCode();
+            ProfileUtils.appendFile(getFolder() + "/" + mailCodesFile, System.currentTimeMillis() + "," + email + "," + code);
+            return ServerMain.MailService.send(email, ServerMain.Settings.getEmailPasswordChangeTitle(), ServerMain.Settings.getEmailPasswordChangeText().replace("{code}", code).replace("{name}", Data.getValue(LOGIN)));
+        }
+
+        public void removeInvalid(){
+            ProfileUtils.fileLineFilter(getFolder() + "/" + mailCodesFile, line ->
+                    System.currentTimeMillis() - Long.parseLong(line.split(",")[0]) < 1000 * 60 * MAIL_CODE_VALID_MINUTES);
+        }
+
+        public boolean containsCode(String code){
+            removeInvalid();
+            return ProfileUtils.fileLinePredicate(getFolder() + "/" + mailCodesFile, line ->
+                    line.split(",")[2].equals(code));
+        }
+
+        public boolean containsCode(String email, String code){
+            removeInvalid();
+            return ProfileUtils.fileLinePredicate(getFolder() + "/" + mailCodesFile, line ->
+                    line.split(",")[1].equals(email) && line.split(",")[2].equals(code));
+        }
+
+        public void removeCode(String code){
+            ProfileUtils.fileLineFilter(getFolder() + "/" + mailCodesFile, line ->
+                    !(line.split(",")[2].equals(code)));
+        }
+
+        public void removeCode(String email, String code){
+            ProfileUtils.fileLineFilter(getFolder() + "/" + mailCodesFile, line ->
+                    !(line.split(",")[1].equals(email) && line.split(",")[2].equals(code)));
+        }
+
+        public boolean isConfirmed(){
+            return !Data.getValue(EMAIL).equals("null");
+        }
+
+        public boolean useCode(String code){
+            if(containsCode(code)){
+                removeCode(code);
+                return true;
+            }
+            return false;
+        }
+
+        public boolean useCode(String email, String code){
+            if(containsCode(email, code)){
+                removeCode(email, code);
+                return true;
+            }
+            return false;
         }
     }
 
-    public void setData(JSONObject object, JSONObject confirms){
-        HashMap<String, String> map = new HashMap<>();
-        for(Map.Entry<String, Object> entry : object.toMap().entrySet())
-            map.put(entry.getKey(), entry.getValue() + "");
+    public class Password {
 
-        HashMap<String, String> confirms_map = new HashMap<>();
-        for(Map.Entry<String, Object> entry : confirms.toMap().entrySet())
-            confirms_map.put(entry.getKey(), entry.getValue() + "");
-        setData(map, confirms_map);
+        public String createChangeHash(){
+            String hash = ProfileUtils.generatePasswordChangeHash();
+            ProfileUtils.appendFile(getFolder() + "/" + passwordResetHashesFile, hash);
+            return hash;
+        }
+
+        public void removeChangeHash(String hash){
+            ProfileUtils.fileLineFilter(getFolder() + "/" + passwordResetHashesFile, line -> !hash.equals(line));
+        }
+
+        public boolean containsChangeHash(String hash){
+            return ProfileUtils.fileLinePredicate(getFolder() + "/" + passwordResetHashesFile, hash::equals);
+        }
+
+        public void change(String hash, String newPassword, String currentToken){
+            if(containsChangeHash(hash)) {
+                removeChangeHash(hash);
+                set(newPassword, currentToken);
+            }else
+                throw new RuntimeException("Wrong change hash");
+        }
+
+        public void reset(){
+            String newPassword = ProfileUtils.generatePassword();
+            set(newPassword);
+            ServerMain.MailService.send(Data.getValue(EMAIL), ServerMain.Settings.getEmailPasswordTitle(), ServerMain.Settings.getEmailPasswordText()
+                    .replace("{password}", newPassword).replace("{name}", Data.getValue(LOGIN)));
+        }
+
+        public String get(){
+            return data.get(PASSWORD);
+        }
+
+        public void set(String password){
+            set(password, null);
+        }
+
+        public void set(String password, String currentToken){
+            if(!FormatUtils.isCorrectPassword(password))
+                throw new RuntimeException("Incorrect password format");
+            data.set(PASSWORD, DigestUtils.md2Hex(password));
+            ProfileUtils.fileLineFilter(getFolder() + "/" + keysFile, line -> line.equals(currentToken));
+            ProfileUtils.fileLineFilter(getFolder() + "/" + mailCodesFile, line -> false);
+        }
+
     }
 
-    public void setData(String... parameters){
-        setData(null, parameters);
-    }
+    public class Data{
 
-    public void setData(HashMap<String, String> confirms, String... parameters){
-        HashMap<String, String> parameterMap = new HashMap<>();
-        for(int i = 0; i < parameters.length; i += 2)
-            parameterMap.put(parameters[0], parameters[1]);
-        setData(parameterMap, confirms);
-    }
+        public ImageLink getSkin(){
+            return new ImageLink(new File(getFolder() + "/" + skinFile));
+        }
 
-    public void setData(HashMap<String, String> fields, HashMap<String, String> confirms){
-        try {
+        public String getValue(String parameter){
+            return get(parameter).get(parameter);
+        }
+
+        public HashMap<String, String> get(String... parameters){
+            HashMap<String, String> out_data = new HashMap<>();
+
+            List<String> availableData = Arrays.asList(ID, LOGIN, EMAIL, STATUS, CREATION_TIME);
+
+            for(String parameter : parameters) {
+                if (availableData.contains(parameter)) {
+                    if (parameter.equals(ID))
+                        out_data.put(parameter, id + "");
+                    else
+                        out_data.put(parameter, data.get(parameter));
+                }
+            }
+
+            return out_data;
+        }
+
+        public void set(JSONObject object, JSONObject confirms){
+            HashMap<String, String> map = new HashMap<>();
+            for(Map.Entry<String, Object> entry : object.toMap().entrySet())
+                map.put(entry.getKey(), entry.getValue() + "");
+
+            HashMap<String, String> confirms_map = new HashMap<>();
+            for(Map.Entry<String, Object> entry : confirms.toMap().entrySet())
+                confirms_map.put(entry.getKey(), entry.getValue() + "");
+            set(map, confirms_map);
+        }
+
+        public void set(String... parameters){
+            set(null, parameters);
+        }
+
+        public void set(HashMap<String, String> confirms, String... parameters){
+            HashMap<String, String> parameterMap = new HashMap<>();
+            for(int i = 0; i < parameters.length; i += 2)
+                parameterMap.put(parameters[0], parameters[1]);
+            set(parameterMap, confirms);
+        }
+
+        public void set(HashMap<String, String> fields, HashMap<String, String> confirms){
             HashMap<String, FieldSetter> setters = new HashMap<>();
 
             ApiException PASSWORD_REQUIRED = new ApiException("Current password required", 1);
@@ -238,7 +357,7 @@ public class Profile {
             ApiException INCORRECT_LOGIN_FORMAT = new ApiException("Incorrect login format", 5);
             ApiException LOGIN_EXIST = new ApiException("Required login is already exist", 6);
             ApiException INCORRECT_EMAIL_FORMAT = new ApiException("Incorrect email format", 7);
-            ApiException INCORRECT_PASSWORD_FORMAT = new ApiException("Incorrect password format", 8);
+            ApiException EMAIL_IS_ALREADY_BOUND = new ApiException("Email is already bound", 8);
 
             // Setters
             setters.put(LOGIN, new FieldSetter(){{
@@ -251,13 +370,8 @@ public class Profile {
                 setPasswordRequired(true);
                 setCodeRequired(true);
                 addCondition(INCORRECT_EMAIL_FORMAT, FormatUtils::isCorrectEmail);
+                addCondition(EMAIL_IS_ALREADY_BOUND, email -> !ProfileUtils.isEmailExist(email));
                 setAction(value -> data.set(EMAIL, value));
-            }});
-            setters.put(PASSWORD, new FieldSetter(){{
-                setPasswordRequired(true);
-                setCodeRequired(true);
-                addCondition(INCORRECT_PASSWORD_FORMAT, FormatUtils::isCorrectPassword);
-                setAction(value -> data.set(PASSWORD, DigestUtils.md2Hex(value)));
             }});
 
             // Logic
@@ -266,9 +380,9 @@ public class Profile {
 
             if(confirms != null) {
                 if (confirms.containsKey(EMAIL_CODE)) {
-                    String email = fields.containsKey(EMAIL) ? fields.get(EMAIL) : getDataValue(EMAIL);
+                    String email = fields.containsKey(EMAIL) ? fields.get(EMAIL) : getValue(EMAIL);
 
-                    if (isValidEmailCode(email, confirms.get(EMAIL_CODE)))
+                    if (Email.useCode(email, confirms.get(EMAIL_CODE)))
                         emailConfirmed = true;
                     else
                         throw INCORRECT_EMAIL_CODE;
@@ -306,88 +420,82 @@ public class Profile {
                         throw conditionResult;
                 }
             }
+        }
 
-        }catch (Exception ex){
-            ex.printStackTrace();
-            throw new ApiException("Unknown exception while reading profile data", -2);
+        class FieldSetter{
+
+            private boolean password = false;
+            private boolean email = false;
+
+            private Consumer<String> action;
+
+            private final HashMap<Predicate<String>, ApiException> conditions = new HashMap<>();
+
+            public void setPasswordRequired(boolean required){
+                password = required;
+            }
+
+            public void setCodeRequired(boolean required){
+                email = required;
+            }
+
+            public boolean isPasswordRequired(){
+                return password;
+            }
+
+            public boolean isEmailRequired(){
+                return email;
+            }
+
+            public void addCondition(ApiException error, Predicate<String> condition){
+                conditions.put(condition, error);
+            }
+
+            public ApiException checkConditions(String value){
+                for(Map.Entry<Predicate<String>, ApiException> entry : conditions.entrySet())
+                    if(!entry.getKey().test(value))
+                        return entry.getValue();
+                return null;
+            }
+
+            public void setAction(Consumer<String> action){
+                this.action = action;
+            }
+
+            public void run(String value){
+                action.accept(value);
+            }
         }
     }
 
-    static class FieldSetter{
+    public class IP{
 
-        private boolean password = false;
-        private boolean email = false;
-
-        private Consumer<String> action;
-
-        private final HashMap<Predicate<String>, ApiException> conditions = new HashMap<>();
-
-        public void setPasswordRequired(boolean required){
-            password = required;
+        public void set(String ip){
+            try {
+                Files.write(Paths.get(getFolder() + "/" + ipFile), Collections.singletonList(ip));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
-        public void setCodeRequired(boolean required){
-            email = required;
-        }
-
-        public boolean isPasswordRequired(){
-            return password;
-        }
-
-        public boolean isEmailRequired(){
-            return email;
-        }
-
-        public void addCondition(ApiException error, Predicate<String> condition){
-            conditions.put(condition, error);
-        }
-
-        public ApiException checkConditions(String value){
-            for(Map.Entry<Predicate<String>, ApiException> entry : conditions.entrySet())
-                if(!entry.getKey().test(value))
-                    return entry.getValue();
+        public String get(){
+            try {
+                return Files.readAllLines(Paths.get(getFolder() + "/" + ipFile)).get(0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             return null;
         }
-
-        public void setAction(Consumer<String> action){
-            this.action = action;
-        }
-
-        public void run(String value){
-            action.accept(value);
-        }
     }
 
-
-    public boolean isEmailConfirmed(){
-        return !getData(EMAIL).get(EMAIL).equals("null");
+    public String toString() {
+        return "Profile{" +
+                "id=" + id +
+                '}';
     }
 
     public String getFolder(){
         return profilesFolder + "/" + id;
     }
 
-    public ImageLink getSkin(){
-        try {
-            return new ImageLink(new File(getFolder() + "/skin.png"));
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        try {
-            if(!Files.exists(Paths.get("./steve.png")))
-                Files.copy(getClass().getResourceAsStream("/steve.png"), Paths.get("./steve.png"));
-            return new ImageLink("./steve.png");
-        }catch (Exception ex){
-            return null;
-        }
-    }
-
-    public InputStream getResource(String name){
-        try {
-            return new FileInputStream(new File(getFolder() + "/" + name));
-        }catch (Exception ex){
-            ex.printStackTrace();
-        }
-        return null;
-    }
 }

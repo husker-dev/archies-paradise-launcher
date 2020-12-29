@@ -16,6 +16,8 @@ import com.husker.launcher.ui.components.TransparentPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 
@@ -41,6 +43,16 @@ public class MainScreen extends AbstractMainScreen {
         }catch (Exception ex){
             ex.printStackTrace();
         }
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if(e.getID() == KeyEvent.KEY_PRESSED) {
+                if(e.getKeyCode() == KeyEvent.VK_F5) {
+                    getLauncher().User.updateData();
+                    onShow();
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
     void onMenuInit(TransparentPanel menu) {
@@ -70,9 +82,7 @@ public class MainScreen extends AbstractMainScreen {
     public void onShow(){
         Discord.setState(Discord.Texts.InMainMenu);
         try {
-            onShowPanelEvent();
             newsPanel.load();
-
             tabPanel.removeTab("control");
             tabPanel.removeTab("keys");
             tabPanel.removeTab("people");
@@ -81,6 +91,7 @@ public class MainScreen extends AbstractMainScreen {
                 tabPanel.addBottomTab("keys", "Ссылки", getIcon(Resources.Icon_Code), keysPanel);
                 tabPanel.addBottomTab("people", "Пользователи", getIcon(Resources.Icon_People), peoplePanel);
             }
+            onShowPanelEvent();
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -102,6 +113,8 @@ public class MainScreen extends AbstractMainScreen {
             infoPanel.onShow();
         if(id.equals("control"))
             controlPanel.onShow();
+        if(id.equals("people"))
+            peoplePanel.onShow();
     }
 
     void onRightMenuInit(TransparentPanel menu) {

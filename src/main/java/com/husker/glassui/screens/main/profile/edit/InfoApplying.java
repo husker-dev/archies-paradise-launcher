@@ -44,8 +44,8 @@ public class InfoApplying extends SimpleLoadingScreen {
             showErrorMessage("Требуется ввести текущий пароль!");
         } catch (EmailCodeRequiredException e) {
             showErrorMessage("Требуется ввести код подтверждения!");
-        } catch (IncorrectPasswordFormatException e) {
-            showErrorMessage("Недопустимый формат пароля!");
+        } catch (EmailAlreadyExistException e) {
+            showErrorMessage("Данный email уже привязан к аккаунту!");
         } catch (IncorrectLoginFormatException e) {
             showErrorMessage("Недопустимый формат логина!");
         }

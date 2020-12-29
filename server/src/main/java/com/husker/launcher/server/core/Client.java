@@ -15,10 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -71,77 +68,70 @@ public class Client {
         return new JSONObject(IOUtils.readFileText(folder + "/" + id + "/client_info.json"));
     }
 
-    public JSONObject getModsInfo(ModsGetterParameters parameter) throws IOException {
-        JSONArray mods = getClientInfo().getJSONArray("mods");
-        ModsGetterParameters.IconParameter iconParameter = parameter.getIconParameter();
+    public List<SimpleModInfo> getModsInfo() throws IOException {
+        JSONArray jsonMods = getClientInfo().getJSONArray("mods");
 
+        // Sorting
+        List<SimpleModInfo> mods = new ArrayList<>();
+        for(int i = 0; i < jsonMods.length(); i++)
+            mods.add(new SimpleModInfo(jsonMods.getJSONObject(i), i));
+        Collections.sort(mods);
+
+        return mods;
+    }
+
+    public String getModIcon(int index) throws IOException {
+        return getModsInfo().get(index).iconBase64;
+    }
+
+    public JSONObject getModsInfo(int index) throws IOException {
+        List<SimpleModInfo> mods = getModsInfo();
         JSONArray out = new JSONArray();
 
-        if(parameter.getIndex() == -1) {
-            for (int i = 0; i < Math.min(mods.length(), parameter.getCount()); i++) {
-                JSONObject modInfo = mods.getJSONObject(i);
+        if(index == -1) {
+            for(SimpleModInfo mod : mods)
+                out.put(mod.getJSON());
+        }else
+            out.put(mods.get(index).getJSON());
 
-                boolean icon = !modInfo.getString("icon").equals("null");
-                modInfo.put("index", i);
-                modInfo.put("icon", !modInfo.getString("icon").equals("null"));
-
-                if (!icon && iconParameter == ModsGetterParameters.IconParameter.NOT_REQUIRE)
-                    out.put(modInfo);
-                else if (icon && iconParameter == ModsGetterParameters.IconParameter.REQUIRE)
-                    out.put(modInfo);
-                else if (iconParameter == ModsGetterParameters.IconParameter.NOT_STATED)
-                    out.put(modInfo);
-            }
-        }else {
-            JSONObject modInfo = mods.getJSONObject(parameter.getIndex());
-            modInfo.put("index", parameter.getIndex());
-            modInfo.put("icon", !modInfo.getString("icon").equals("null"));
-            out.put(modInfo);
-        }
         return new JSONObject(){{
             put("mods", out);
         }};
     }
 
-    public String getModIcon(int index) throws IOException {
-        return getClientInfo().getJSONArray("mods").getJSONObject(index).getString("icon");
-    }
+    static class SimpleModInfo implements Comparable<SimpleModInfo>{
+        private final String name;
+        private final Boolean icon;
+        private final String iconBase64;
+        private final JSONObject jsonObject;
 
-    public static class ModsGetterParameters{
-        public enum IconParameter {
-            REQUIRE,
-            NOT_REQUIRE,
-            NOT_STATED
+        public SimpleModInfo(JSONObject info, int index){
+            name = info.getString("name");
+            iconBase64 = info.getString("icon");
+            icon = !iconBase64.equals("null");
+
+            jsonObject = info;
+            jsonObject.put("icon", icon);
+            jsonObject.put("index", index);
         }
 
-        private int count = Integer.MAX_VALUE;
-        private int index = -1;
-        private IconParameter icon = IconParameter.NOT_STATED;
-
-        public void setCount(int count){
-            this.count = count;
+        public int compareTo(SimpleModInfo o) {
+            if(icon.compareTo(o.icon) != 0)
+                return -icon.compareTo(o.icon);
+            else
+                return name.compareTo(o.name);
         }
 
-        public void setIconParameter(IconParameter icon){
-            this.icon = icon;
+        public String getIconBase64(){
+            return iconBase64;
         }
 
-        public void setIndex(int index){
-            this.index = index;
-        }
-
-        public int getIndex(){
-            return index;
-        }
-
-        public int getCount(){
-            return count;
-        }
-
-        public IconParameter getIconParameter(){
-            return icon;
+        public JSONObject getJSON(){
+            return jsonObject;
         }
     }
+
+
 
     public static String createId(){
         return System.currentTimeMillis() + "";

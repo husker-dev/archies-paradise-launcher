@@ -10,7 +10,10 @@ import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.util.function.Consumer;
 
@@ -28,9 +31,20 @@ public class BlurPasswordField extends WebPasswordField implements BlurComponent
 
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
-        setFont(Resources.Fonts.ChronicaPro.deriveFont(15f));
+        setFont(Resources.Fonts.getChronicaPro(15));
         setForeground(GlassUI.Colors.textFieldText);
+
         setCaret(new BlurTextField.CustomCaret(screen.getLauncher()));
+        getActionMap().put(DefaultEditorKit.deletePrevCharAction, new BlurTextField.BeepSouncActionDeletion());
+    }
+
+    public void addFastAction(Runnable runnable){
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER)
+                    runnable.run();
+            }
+        });
     }
 
     private void updateShape(){

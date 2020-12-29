@@ -1,5 +1,6 @@
 package com.husker.launcher.ui.utils;
 
+import com.husker.launcher.settings.LauncherSettings;
 import com.husker.launcher.ui.shadow.ShadowParameter;
 
 import java.awt.*;
@@ -7,13 +8,22 @@ import java.awt.geom.Area;
 
 public class RenderUtils {
 
+    public static void enableInterpolation(Graphics gr){
+        enableAntialiasing((Graphics2D)gr);
+    }
+
+    public static void enableInterpolation(Graphics2D g2d){
+        if(!LauncherSettings.isPotatoSettings())
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    }
+
     public static void enableAntialiasing(Graphics gr){
         enableAntialiasing((Graphics2D)gr);
     }
 
     public static void enableAntialiasing(Graphics2D g2d){
-        RenderingHints qualityHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHints(qualityHints);
+        if(!LauncherSettings.isPotatoSettings())
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
     public static void disableAntialiasing(Graphics gr){
@@ -21,8 +31,7 @@ public class RenderUtils {
     }
 
     public static void disableAntialiasing(Graphics2D g2d){
-        RenderingHints qualityHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        g2d.setRenderingHints(qualityHints);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
     public static void drawShade(Graphics2D g2d, Shape shape, Color color, int width) {

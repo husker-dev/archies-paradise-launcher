@@ -27,10 +27,12 @@ public class InfoEdit extends InfoEditPanel {
             add(createTitleLabel("Имя"));
             add(nickname = createTextField());
             nickname.addTextListener(text -> updateApplyButton());
+            nickname.addFastAction(() -> event());
             add(Box.createRigidArea(new Dimension(0, 5)));
             add(createTitleLabel("Почта"));
             add(email = createTextField());
             email.addTextListener(text -> updateApplyButton());
+            email.addFastAction(() -> event());
         }});
 
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -55,22 +57,24 @@ public class InfoEdit extends InfoEditPanel {
         panel.add(apply = new BlurButton(InfoEdit.this, "Применить"){{
             setEnabled(false);
             setPreferredWidth(120);
-            addActionListener(e -> {
-                if(!email.getText().equals(getLauncher().User.getEmail())){
-                    getLauncherUI().setScreen(SendingCode.class, new Parameters(){{
-                        put(API.PASSWORD, password.getText());
-                        put(API.EMAIL, email.getText());
-                        if(!getLauncher().User.getNickname().equals(nickname.getText()))
-                            put(API.LOGIN, nickname.getText());
-                    }});
-                }else{
-                    getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
-                        put(API.PASSWORD, password.getText());
-                        put(API.LOGIN, nickname.getText());
-                    }});
-                }
-            });
+            addActionListener(e -> event());
         }});
+    }
+
+    public void event(){
+        if(!email.getText().equals(getLauncher().User.getEmail())){
+            getLauncherUI().setScreen(SendingCode.class, new Parameters(){{
+                put(API.PASSWORD, password.getText());
+                put(API.EMAIL, email.getText());
+                if(!getLauncher().User.getNickname().equals(nickname.getText()))
+                    put(API.LOGIN, nickname.getText());
+            }});
+        }else{
+            getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
+                put(API.PASSWORD, password.getText());
+                put(API.LOGIN, nickname.getText());
+            }});
+        }
     }
 
     public void updateApplyButton(){

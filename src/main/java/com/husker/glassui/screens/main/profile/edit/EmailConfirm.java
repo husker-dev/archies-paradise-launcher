@@ -48,7 +48,7 @@ public class EmailConfirm extends InfoEditPanel{
                 setMaximumRows(3);
                 setForeground(GlassUI.Colors.labelLightText);
                 setPreferredHeight(80);
-                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                setFont(Resources.Fonts.getChronicaProExtraBold());
             }});
         }});
         panel.add(createSeparator());
@@ -59,6 +59,7 @@ public class EmailConfirm extends InfoEditPanel{
             add(createTitleLabel("Код"));
             add(code = new BlurTextField(EmailConfirm.this){{
                 addTextListener(text -> new Thread(() -> next.setEnabled(code.getText().length() == 6)).start());
+                addFastAction(() -> event());
             }});
             add(Box.createRigidArea(new Dimension(0, 5)));
             add(resend = new BlurButton(EmailConfirm.this, "Повторить"){{
@@ -75,15 +76,17 @@ public class EmailConfirm extends InfoEditPanel{
         panel.add(next = new BlurButton(this, "Далее"){{
             setEnabled(false);
             setPreferredWidth(120);
-            addActionListener(e -> {
-                getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
-                    put(API.PASSWORD, getParameter(API.PASSWORD));
-                    if(getParameters().containsKey(API.LOGIN))
-                        put(API.LOGIN, getParameter(API.LOGIN));
-                    put(API.EMAIL, getParameter(API.EMAIL));
-                    put(API.EMAIL_CODE, code.getText());
-                }});
-            });
+            addActionListener(e -> event());
+        }});
+    }
+
+    public void event(){
+        getLauncherUI().setScreen(InfoApplying.class, new Parameters(){{
+            put(API.PASSWORD, getParameter(API.PASSWORD));
+            if(getParameters().containsKey(API.LOGIN))
+                put(API.LOGIN, getParameter(API.LOGIN));
+            put(API.EMAIL, getParameter(API.EMAIL));
+            put(API.EMAIL_CODE, code.getText());
         }});
     }
 
@@ -100,6 +103,8 @@ public class EmailConfirm extends InfoEditPanel{
                 getLauncher().User.sendConfirmCode(getParameterValue(API.EMAIL));
             } catch (API.EmailCodeSendingException e) {
                 Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", EmailConfirm.class, getParameters());
+            } catch (API.EmailAlreadyExistException e) {
+                Message.showMessage(getLauncherUI(), "Ошибка", "Данный email уже привязан а аккаунту", EmailConfirm.class, getParameters());
             }
         }).start();
     }

@@ -15,7 +15,7 @@ public class SendingCode extends SimpleLoadingScreen {
         try {
             getLauncher().User.sendConfirmCode(getParameterValue(API.EMAIL));
             getLauncherUI().setScreen(EmailConfirm.class, getParameters());
-        } catch (API.EmailCodeSendingException e) {
+        } catch (API.EmailCodeSendingException | API.EmailAlreadyExistException e) {
             Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", InfoEdit.class, getParameters());
         }
     }

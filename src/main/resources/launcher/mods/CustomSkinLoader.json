@@ -1,0 +1,22 @@
+{
+  "version": "14.12",
+  "loadlist": [
+    {
+      "name": "ArchiesParadiseName",
+      "type": "Legacy",
+      "checkPNG": false,
+      "model": "auto",
+      "skin": "http://127.0.0.1:15565/api/method/skins.getSkin?name\u003d{USERNAME}"
+    }
+  ],
+  "enableDynamicSkull": true,
+  "enableTransparentSkin": true,
+  "ignoreHttpsCertificate": false,
+  "forceLoadAllTextures": false,
+  "enableCape": true,
+  "threadPoolSize": 1,
+  "cacheExpiry": 30,
+  "enableUpdateSkull": false,
+  "enableLocalProfileCache": false,
+  "enableCacheAutoClean": false
+}

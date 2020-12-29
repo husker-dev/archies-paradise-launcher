@@ -2,6 +2,7 @@ package com.husker.glassui.components;
 
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.utils.ComponentUtils;
 
 import java.awt.*;
 
@@ -20,22 +21,18 @@ public interface BlurComponent {
     }
 
     default boolean returnOnInvisible(BlurParameter parameter, Component component){
+        return isReturnOnInvisible(parameter, component);
+    }
+
+    static boolean isReturnOnInvisible(BlurParameter parameter, Component component){
         if(component == null)
             return true;
-        if(!component.isDisplayable() || !component.isVisible()) {
+        if(!component.isDisplayable() || !component.isVisible() || ComponentUtils.isParentInvisible(component)) {
             parameter.setVisible(false);
             return true;
         }
         return false;
     }
 
-    static boolean isReturnOnInvisible(BlurParameter parameter, Component component){
-        if(component == null)
-            return true;
-        if(!component.isDisplayable()) {
-            parameter.setVisible(false);
-            return true;
-        }
-        return false;
-    }
+
 }

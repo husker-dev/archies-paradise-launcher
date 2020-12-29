@@ -1,0 +1,18 @@
+main: com.husker.launcher.plugin.Main
+name: AAuth
+version: 1.0
+author: Husker
+description: Plugin for custom launcher
+commands:
+  id:
+    description: Shows ID of player
+    usage: /<command> [nickname]
+    permission: aauth.id
+  mm:
+    description: Set moderator mode to player
+    usage: /<command> [on/off]
+    permission: aauth.moderatormode
+  moderatormode:
+    description: Set moderator mode to player
+    usage: /<command> [on/off]
+    permission: aauth.moderatormode

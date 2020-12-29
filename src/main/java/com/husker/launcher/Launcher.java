@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Timer;
@@ -37,6 +38,8 @@ public class Launcher extends JFrame {
     public final User User = new User();
 
     private final HashMap<String, Thread> initializations = new HashMap<>();
+    public boolean launchError = false;
+    public Exception launchException;
 
     public Launcher(){
         this(() -> {});
@@ -50,17 +53,9 @@ public class Launcher extends JFrame {
         });
 
         initThread("ui", () -> {
-            log.info("Installing the WebLaF library");
-            WebLookAndFeel.install();
-            loadingListener.run();
-            Toolkit.getDefaultToolkit().setDynamicLayout(true);
-
             setTitle(LauncherConfig.getTitle());
-            setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             setMinimumSize(new Dimension(1070, 690));
-
-            waitThread("resources");
-
+            setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
                     new Thread(() -> {
@@ -69,6 +64,12 @@ public class Launcher extends JFrame {
                     }).start();
                 }
             });
+
+            log.info("Installing the WebLaF library");
+            WebLookAndFeel.install();
+            loadingListener.run();
+
+            waitThread("resources");
 
             currentUIName = LauncherConfig.INSTANCE.get("ui");
             if(currentUIName == null)
@@ -162,8 +163,8 @@ public class Launcher extends JFrame {
     }
 
     public BufferedImage getBackgroundFromSettings(){
-        if((LauncherSettings.getBackgroundIndex() == 0 && Resources.Background[0] == null) || LauncherSettings.getBackgroundIndex() > Resources.Background.length)
-            LauncherSettings.setBackgroundIndex(1);
+        if(LauncherSettings.getBackgroundIndex() >= Resources.Background.length)
+            LauncherSettings.setBackgroundIndex(0);
         return Resources.Background[LauncherSettings.getBackgroundIndex()];
     }
 
@@ -241,11 +242,11 @@ public class Launcher extends JFrame {
             in.read(b);
             in.close();
 
-            return new String(b).split("\\s\\s+")[4] + "/" + LauncherConfig.getTitle();
+            return new String(b).split("\\s\\s+")[4] + "/" + LauncherConfig.getFolderName();
         } catch(Throwable t) {
             t.printStackTrace();
         }
-        return null;
+        return new File(".").getAbsolutePath();
     }
 
     public void updateUI(){
@@ -254,7 +255,15 @@ public class Launcher extends JFrame {
     }
 
     private void initThread(String name, Runnable runnable){
-        Thread thread = new Thread(runnable);
+        Thread thread = new Thread(() -> {
+            try{
+                runnable.run();
+            }catch (Exception ex){
+                launchError = true;
+                launchException = ex;
+                ex.printStackTrace();
+            }
+        });
         initializations.put(name, thread);
         thread.start();
     }
@@ -265,6 +274,16 @@ public class Launcher extends JFrame {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if(version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf(".");
+            if(dot != -1) { version = version.substring(0, dot); }
+        } return Integer.parseInt(version);
     }
 
 }

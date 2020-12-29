@@ -10,6 +10,7 @@ import com.husker.launcher.ui.Screen;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.utils.ShapeUtils;
 import com.sun.management.OperatingSystemMXBean;
+import jdk.nashorn.internal.scripts.JO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,8 +38,19 @@ public class SettingsPanel extends TransparentPanel {
         add(new TransparentPanel(){{
             setMargin(0, 40, 0, 40);
             setLayout(new VerticalFlowLayout(0, 8));
-            add(new BlurCheckbox(screen, "Сохранить пароль", LauncherSettings.isAutoAuth()){{
-                setOnAction(() -> LauncherSettings.setAutoAuth(isChecked()));
+            add(new TransparentPanel(){{
+                setLayout(new FlowLayout(LEFT, 0, 0));
+
+                add(new BlurCheckbox(screen, "Сохранять пароль", LauncherSettings.isAutoAuth()){{
+                    setOnAction(() -> LauncherSettings.setAutoAuth(isChecked()));
+                }});
+                add(Box.createRigidArea(new Dimension(25, 0)));
+                add(new BlurCheckbox(screen, "Высокое качество", !LauncherSettings.isPotatoSettings()){{
+                    setOnAction(() -> {
+                        LauncherSettings.setPotatoSettings(!isChecked());
+                        JOptionPane.showMessageDialog(screen.getLauncher(), "Для применения этой настройки нужно перезапустить лаунчер", "Предупреждение", JOptionPane.INFORMATION_MESSAGE);
+                    });
+                }});
             }});
 
             add(new TransparentPanel(){{
@@ -62,7 +74,7 @@ public class SettingsPanel extends TransparentPanel {
             add(Box.createRigidArea(new Dimension(0, 0)));
             add(new WebLabel("Выделяемая память"){{
                 setForeground(GlassUI.Colors.labelText);
-                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                setFont(Resources.Fonts.getChronicaProExtraBold());
             }});
 
             int gb = 1024;
@@ -165,7 +177,7 @@ public class SettingsPanel extends TransparentPanel {
             setHorizontalAlignment(LEFT);
             setVerticalAlignment(CENTER);
             setPreferredHeight(30);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(23f));
+            setFont(Resources.Fonts.getChronicaProExtraBold(23));
             setMargin(1, 10, 0, 10);
 
             screen.addBlurSegment("SettingsPanel.Label", parameter -> {

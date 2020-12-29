@@ -1,6 +1,7 @@
 package com.husker.launcher.server.api;
 
 import com.husker.launcher.server.core.Profile;
+import com.husker.launcher.server.core.ProfileUtils;
 import com.husker.launcher.server.services.HttpService;
 import com.husker.launcher.server.services.http.*;
 import org.json.JSONObject;
@@ -16,7 +17,7 @@ import java.util.HashMap;
 public class ApiProfile extends ApiClass {
 
     public JSONObject getData(Profile profile){
-        return SimpleJSON.create("data", profile.getData(getAttribute("fields").split(",")));
+        return SimpleJSON.create("data", profile.Data.get(getAttribute("fields").split(",")));
     }
 
     public void setData(Profile profile){
@@ -31,16 +32,18 @@ public class ApiProfile extends ApiClass {
                 fields.remove(Profile.CURRENT_PASSWORD);
             }
         }};
-        profile.setData(fields, confirms);
+        profile.Data.set(fields, confirms);
     }
 
     public JSONObject isEmailConfirmed(Profile profile){
-        return SimpleJSON.create("confirmed", profile.isEmailConfirmed());
+        return SimpleJSON.create("confirmed", profile.Email.isConfirmed());
     }
 
     public void sendEmailCode(Profile profile) throws IOException {
         String email = containsAttribute(Profile.EMAIL) ? getAttribute(Profile.EMAIL) : profile.data.get(Profile.EMAIL);
-        if(!profile.sendEmailCode(email))
+        if(!profile.data.get(Profile.EMAIL).equals(email) && ProfileUtils.isEmailExist(getAttribute(Profile.EMAIL)))
+            throw new ApiException("Email is already bound", 2);
+        if(!profile.Email.sendCode(email))
             throw new ApiException("Can't send email code", 1);
     }
 
@@ -48,22 +51,27 @@ public class ApiProfile extends ApiClass {
         if(!profile.data.get(Profile.EMAIL).equals("null"))
             throw new ApiException("Email is empty", 1);
 
-        if(profile.isValidEmailCode(getAttribute(Profile.EMAIL), getAttribute(Profile.EMAIL_CODE)))
+        if(profile.Email.containsCode(getAttribute(Profile.EMAIL), getAttribute(Profile.EMAIL_CODE)))
             profile.data.set(Profile.EMAIL, getAttribute(Profile.EMAIL));
         else
             throw new ApiException("Email code is not valid", 2);
     }
 
     public void bindIP(Profile profile){
-        profile.setIP(getExchange().getRemoteAddress().getHostName());
+        profile.IP.set(getExchange().getRemoteAddress().getHostName());
     }
 
     public ImageLink getSkin(Profile profile){
-        return profile.getSkin();
+        return profile.Data.getSkin();
     }
 
     public void setSkin(Profile profile) throws IOException {
         BufferedImage skin;
+
+        if(containsAttribute("id")){
+            profile.checkStatus("Администратор");
+            profile = new Profile(Integer.parseInt(getAttribute("id")));
+        }
 
         if (containsAttribute("category") && containsAttribute("name")) {
             String category = getAttribute("category");

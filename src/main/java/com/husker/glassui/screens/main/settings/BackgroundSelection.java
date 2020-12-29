@@ -34,7 +34,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
             setForeground(GlassUI.Colors.labelLightText);
             setVerticalAlignment(CENTER);
             setHorizontalAlignment(CENTER);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(18f));
+            setFont(Resources.Fonts.getChronicaProExtraBold(18));
         }}, BorderLayout.NORTH);
 
         panel.add(new TransparentPanel(){{
@@ -43,9 +43,9 @@ public class BackgroundSelection extends SimpleTitledScreen {
             setPreferredWidth(550);
             setPreferredHeight(250);
 
-            for(int i = 1; i <= 6; i++){
+            for(int i = 0; i < 6; i++){
                 final int I = i;
-                images[i - 1] = new BlurScalableImage(BackgroundSelection.this){
+                images[i] = new BlurScalableImage(BackgroundSelection.this){
                     {
                         setFitType(FitType.FILL_XY);
                     }
@@ -59,7 +59,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
                         }
                     }
                 };
-                images[i - 1].addMouseListener(new MouseAdapter() {
+                images[i].addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent e) {
                         if(pages.getPage() * 6 + I < Resources.Background.length) {
                             getLauncher().setBackgroundImage(Resources.Background[pages.getPage() * 6 + I]);
@@ -68,8 +68,8 @@ public class BackgroundSelection extends SimpleTitledScreen {
                         }
                     }
                 });
-                images[i - 1].setPreferredSize(new Dimension(150, 100));
-                add(images[i - 1]);
+                images[i].setPreferredSize(new Dimension(150, 100));
+                add(images[i]);
             }
         }});
 
@@ -96,15 +96,11 @@ public class BackgroundSelection extends SimpleTitledScreen {
     }
 
     public void setPage(int page){
-        int count = 6;
         int from = 6 * page;
 
-        if(page == Resources.Background.length / 6)
-            count = Resources.Background.length % 6;
-
         for(int i = from; i < from + 6; i++){
-            if(i < Resources.Background.length - 1)
-                images[i - from].setImage(Resources.Background[i + 1]);
+            if(i < Resources.Background.length)
+                images[i - from].setImage(Resources.Background[i]);
             else
                 images[i - from].setImage(null);
         }

@@ -14,6 +14,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -37,10 +38,20 @@ public class BlurTextField extends WebTextField implements BlurComponent{
 
         setMargin(3, 7, 0, 5);
         setPreferredHeight(30);
-        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
+        setFont(Resources.Fonts.getChronicaProExtraBold(15));
         setForeground(GlassUI.Colors.textFieldText);
 
         setCaret(new CustomCaret(screen.getLauncher()));
+        getActionMap().put(DefaultEditorKit.deletePrevCharAction, new BeepSouncActionDeletion());
+    }
+
+    public void addFastAction(Runnable runnable){
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER)
+                    runnable.run();
+            }
+        });
     }
 
     public void setInputPrompt(String text){
@@ -281,6 +292,45 @@ public class BlurTextField extends WebTextField implements BlurComponent{
                 current_x = rectangle.x;
             if(current_x > rectangle.width + rectangle.x)
                 current_x = rectangle.width + rectangle.x;
+        }
+    }
+
+    public static class BeepSouncActionDeletion extends TextAction {
+
+        public BeepSouncActionDeletion() {
+            super(DefaultEditorKit.deletePrevCharAction);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            JTextComponent target = getTextComponent(e);
+            if ((target != null) && (target.isEditable())) {
+                try {
+                    Document doc = target.getDocument();
+                    Caret caret = target.getCaret();
+                    int dot = caret.getDot();
+                    int mark = caret.getMark();
+                    if (dot != mark) {
+                        doc.remove(Math.min(dot, mark), Math.abs(dot - mark));
+                    } else if (dot > 0) {
+                        int delChars = 1;
+
+                        if (dot > 1) {
+                            String dotChars = doc.getText(dot - 2, 2);
+                            char c0 = dotChars.charAt(0);
+                            char c1 = dotChars.charAt(1);
+
+                            if (c0 >= '\uD800' && c0 <= '\uDBFF' &&
+                                    c1 >= '\uDC00' && c1 <= '\uDFFF') {
+                                delChars = 2;
+                            }
+                        }
+
+                        doc.remove(dot - delChars, delChars);
+                    }
+                } catch (BadLocationException ignored) {
+                }
+            }
+
         }
     }
 }

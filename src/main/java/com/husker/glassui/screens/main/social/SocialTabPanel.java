@@ -71,12 +71,12 @@ public abstract class SocialTabPanel extends TransparentPanel {
                     setLayout(new BorderLayout());
                     add(title = new WebLabel(){{
                         setForeground(GlassUI.Colors.labelText);
-                        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(20f));
+                        setFont(Resources.Fonts.getChronicaProExtraBold(20));
                     }}, BorderLayout.NORTH);
 
                     add(description = new WebLabel(){{
                         setForeground(GlassUI.Colors.labelLightText);
-                        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(13f));
+                        setFont(Resources.Fonts.getChronicaProExtraBold(13));
                     }}, BorderLayout.SOUTH);
                 }});
             }});

@@ -9,8 +9,13 @@ public class ServerSettingsFile extends SettingsFile {
 
     private static final String EMAIL = "mail.login";
     private static final String EMAIL_PASSWORD = "mail.password";
-    private static final String EMAIL_TITLE = "mail.title";
-    private static final String EMAIL_TEXT = "mail.text";
+
+    private static final String EMAIL_CODE_TITLE = "mail.code.title";
+    private static final String EMAIL_CODE_TEXT = "mail.code.text";
+    private static final String EMAIL_PASSWORD_RESET_TITLE = "mail.password_reset.title";
+    private static final String EMAIL_PASSWORD_RESET_TEXT = "mail.password_reset.text";
+    private static final String EMAIL_PASSWORD_CHANGE_TITLE = "mail.password_code.title";
+    private static final String EMAIL_PASSWORD_CHANGE_TEXT = "mail.password_code.text";
 
     private static final String VK_GROUP = "social.vk";
     private static final String YOUTUBE_ID = "social.youtube";
@@ -36,8 +41,15 @@ public class ServerSettingsFile extends SettingsFile {
 
         setDefault(EMAIL, "example@mail.com");
         setDefault(EMAIL_PASSWORD, "password");
-        setDefault(EMAIL_TITLE, "Email title");
-        setDefault(EMAIL_TEXT, "Dear {name}, here is your code {code}");
+
+        setDefault(EMAIL_CODE_TITLE, "Email title");
+        setDefault(EMAIL_CODE_TEXT, "Dear {name}, here is your code: {code}");
+
+        setDefault(EMAIL_PASSWORD_RESET_TITLE, "Email title");
+        setDefault(EMAIL_PASSWORD_RESET_TEXT, "Dear {name}, here is your new password: {password}");
+
+        setDefault(EMAIL_PASSWORD_CHANGE_TITLE, "Email title");
+        setDefault(EMAIL_PASSWORD_CHANGE_TEXT, "Dear {name}, here is the code to change your password {code}");
 
         setDefault(VK_GROUP, "id");
         setDefault(YOUTUBE_ID, "id");
@@ -54,34 +66,10 @@ public class ServerSettingsFile extends SettingsFile {
         setDefault(MINECRAFT_PORT, 25565);
     }
 
-    public String getMinecraftServerIP(){
-        return get(MINECRAFT_IP);
-    }
-
-    public int getMinecraftServerPort(){
-        return getInt(MINECRAFT_PORT);
-    }
-
-    public String getOwnerName(){
-        return get(OWNER_NAME);
-    }
-
-    public String getOwnerUrl(){
-        return get(OWNER_URL);
-    }
-
-    public String getSupportName(){
-        return get(SUPPORT_NAME);
-    }
-
-    public String getSupportUrl(){
-        return get(SUPPORT_URL);
-    }
-
+    // Email sending
     public String getEmail(){
         return get(EMAIL);
     }
-
     public String getEmailPassword(){
         try {
             if (Files.exists(Paths.get(get(EMAIL_PASSWORD))))
@@ -93,8 +81,12 @@ public class ServerSettingsFile extends SettingsFile {
         }
     }
 
-    public String getEmailTitle(){
-        return get(EMAIL_TITLE);
+    // Minecraft server
+    public String getMinecraftServerIP(){
+        return get(MINECRAFT_IP);
+    }
+    public int getMinecraftServerPort(){
+        return getInt(MINECRAFT_PORT);
     }
 
     public int getPort(){
@@ -118,10 +110,24 @@ public class ServerSettingsFile extends SettingsFile {
         }
     }
 
+    // Info
+    public String getOwnerName(){
+        return get(OWNER_NAME);
+    }
+    public String getOwnerUrl(){
+        return get(OWNER_URL);
+    }
+    public String getSupportName(){
+        return get(SUPPORT_NAME);
+    }
+    public String getSupportUrl(){
+        return get(SUPPORT_URL);
+    }
+
+    // Social
     public String getVKGroupId(){
         return get(VK_GROUP);
     }
-
     public void setVKGroupId(String key){
         set(VK_GROUP, key);
     }
@@ -129,7 +135,6 @@ public class ServerSettingsFile extends SettingsFile {
     public String getYouTubeId(){
         return get(YOUTUBE_ID);
     }
-
     public void setYouTubeId(String key){
         set(YOUTUBE_ID, key);
     }
@@ -137,7 +142,6 @@ public class ServerSettingsFile extends SettingsFile {
     public String getInstagramId(){
         return get(INSTAGRAM_NAME);
     }
-
     public void setInstagramId(String key){
         set(INSTAGRAM_NAME, key);
     }
@@ -145,20 +149,36 @@ public class ServerSettingsFile extends SettingsFile {
     public String getGitHubId(){
         return get(GITHUB_REPO);
     }
-
     public void setGitHubId(String key){
         set(GITHUB_REPO, key);
-    }
-
-    public String getEmailText(){
-        return get(EMAIL_TEXT);
     }
 
     public void setLauncherVersion(String version){
         set(LAUNCHER_VERSION, version);
     }
-
     public String getLauncherVersion(){
         return get(LAUNCHER_VERSION);
+    }
+
+    // Mail
+    public String getEmailPasswordTitle(){
+        return get(EMAIL_PASSWORD_RESET_TITLE);
+    }
+    public String getEmailPasswordText(){
+        return get(EMAIL_PASSWORD_RESET_TEXT);
+    }
+
+    public String getEmailCodeTitle(){
+        return get(EMAIL_CODE_TITLE);
+    }
+    public String getEmailCodeText(){
+        return get(EMAIL_CODE_TEXT);
+    }
+
+    public String getEmailPasswordChangeTitle(){
+        return get(EMAIL_PASSWORD_CHANGE_TITLE);
+    }
+    public String getEmailPasswordChangeText(){
+        return get(EMAIL_PASSWORD_CHANGE_TEXT);
     }
 }

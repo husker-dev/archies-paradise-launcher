@@ -6,113 +6,97 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class ProfileUtils {
 
-    public static final long KEY_VALID_HOURS = 24;
-    public static final long MAIL_CODE_VALID_MINUTES = 5;
-
-    public static void removeInvalidKeys(int id){
+    public static void fileLineFilter(String path, Predicate<String> lineFilter){
         try {
-            ArrayList<String> newKeys = new ArrayList<>();
-            List<String> currentKeys = Files.readAllLines(Paths.get(Profile.profilesFolder + "/" + id + "/" + Profile.keysFile));
-            for (String line : currentKeys){
-                long time = Long.parseLong(line.split(",")[0]);
-                if(isValidKey(time))
-                    newKeys.add(line);
-            }
+            ArrayList<String> newLines = new ArrayList<>();
+            List<String> lines = Files.readAllLines(Paths.get(path));
+            for (String line : lines)
+                if(lineFilter.test(line))
+                    newLines.add(line);
 
-            if(newKeys.size() != currentKeys.size())
-                Files.write(Paths.get(Profile.profilesFolder + "/" + id + "/" + Profile.keysFile), newKeys);
+            if(lines.size() != newLines.size())
+                Files.write(Paths.get(path), newLines);
         }catch (Exception ex){
             ex.printStackTrace();
         }
     }
 
-    public static void removeInvalidEmails(int id){
+    public static boolean fileLinePredicate(String path, Predicate<String> lineFilter){
         try {
-            ArrayList<String> newKeys = new ArrayList<>();
-            List<String> currentKeys = Files.readAllLines(Paths.get(Profile.profilesFolder + "/" + id + "/" + Profile.mailCodesFile));
-            for (String line : currentKeys){
-                long time = Long.parseLong(line.split(",")[0]);
-                if(isValidMailCode(time))
-                    newKeys.add(line);
-            }
-
-            if(newKeys.size() != currentKeys.size())
-                Files.write(Paths.get(Profile.profilesFolder + "/" + id + "/" + Profile.mailCodesFile), newKeys);
+            List<String> lines = Files.readAllLines(Paths.get(path));
+            for (String line : lines)
+                if(lineFilter.test(line))
+                    return true;
         }catch (Exception ex){
             ex.printStackTrace();
-        }
-    }
-
-    public static boolean isValidIp(String name, String ip){
-        for(int i = 1; i <= getUserCount(); i++) {
-            try {
-                Profile profile = new Profile(i);
-                if (profile.getDataValue(Profile.LOGIN).equals(name)) {
-                    if (profile.getIP().equals(ip))
-                        return true;
-                    else
-                        return false;
-                }
-            }catch (Exception ex){}
         }
         return false;
     }
 
-    public static boolean isValidKey(long time){
-        return System.currentTimeMillis() - time < KEY_VALID_HOURS * 60 * 60 * 1000;
-    }
-
-    public static boolean isValidMailCode(long time){
-        return System.currentTimeMillis() - time < MAIL_CODE_VALID_MINUTES * 60 * 1000;
-    }
-
-    public static String generateKey(){
-        StringBuilder text = new StringBuilder();
-
-        int len = 20;
-        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        String lower = upper.toLowerCase();
-        String digits = "0123456789";
-        String alphanum = upper + lower + digits;
-
-        do {
-            for (int i = 0; i < len; i++)
-                text.append(alphanum.charAt(new Random().nextInt(alphanum.length() - 1)));
-        }while (Profile.get(text.toString()) != null);
-        return text.toString();
-    }
-
-    public static String generateMailCode(){
-        StringBuilder text = new StringBuilder();
-
-        int len = 6;
-        String digits = "0123456789";
-
-        do {
-            for (int i = 0; i < len; i++)
-                text.append(digits.charAt(new Random().nextInt(digits.length() - 1)));
-        }while (Profile.get(text.toString()) != null);
-        return text.toString();
-    }
-
-    public static int getUserCount(){
+    public static void appendFile(String path, String line){
         try {
-            Files.createDirectories(Paths.get(Profile.profilesFolder));
+            BufferedWriter output = new BufferedWriter(new FileWriter(path, true));
+            output.write(line + "\n");
+            output.flush();
+            output.close();
         }catch (Exception ex){
             ex.printStackTrace();
         }
-        return Objects.requireNonNull(new File(Profile.profilesFolder).list()).length;
+    }
+
+    public static String generatePassword(){
+        return new KeyGenerator()
+                .setLength(7)
+                .addAlphabet(KeyGenerator.ALPHABET_LOWER_CASE)
+                .addAlphabet(KeyGenerator.ALPHABET_UPPER_CASE)
+                .get();
+    }
+
+    public static String generatePasswordChangeHash(){
+        return new KeyGenerator()
+                .setLength(24)
+                .addAlphabet(KeyGenerator.ALPHABET_LOWER_CASE)
+                .addAlphabet(KeyGenerator.ALPHABET_UPPER_CASE)
+                .addAlphabet(KeyGenerator.DIGITS)
+                .setCondition(generated -> {
+                    for(Profile profile : Profile.getProfiles())
+                        if(profile.Password.containsChangeHash(generated))
+                            return false;
+                    return true;
+                }).get();
+    }
+
+    public static String generateAccessToken(){
+        return new KeyGenerator()
+                .setLength(24)
+                .addAlphabet(KeyGenerator.ALPHABET_LOWER_CASE)
+                .addAlphabet(KeyGenerator.ALPHABET_UPPER_CASE)
+                .addAlphabet(KeyGenerator.DIGITS)
+                .setCondition(generated -> {
+                    for(Profile profile : Profile.getProfiles())
+                        if(profile.Token.containsKey(generated))
+                            return false;
+                    return true;
+                }).get();
+    }
+
+    public static String generateMailCode(){
+        return new KeyGenerator()
+                .setLength(6)
+                .addAlphabet(KeyGenerator.DIGITS)
+                .get();
     }
 
     public static boolean canChangeName(Profile profile, String newName){
-        for(int i = 1; i <= getUserCount(); i++) {
-            if(profile.getId() == i)
+        for(int id : Profile.getIds()) {
+            if(profile.getId() == id)
                 continue;
             try {
-                if (new Profile(i).getDataValue(Profile.LOGIN).equals(newName))
+                if (new Profile(id).Data.getValue(Profile.LOGIN).equals(newName))
                     return false;
             }catch (Exception ignored){}
         }
@@ -120,17 +104,62 @@ public class ProfileUtils {
     }
 
     public static boolean isNicknameExist(String nickname){
-        for(int i = 1; i <= getUserCount(); i++) {
-            try {
-                if (new Profile(i).getDataValue(Profile.LOGIN).equals(nickname))
-                    return true;
-            }catch (Exception ignored){}
+        return Profile.getByName(nickname) != null;
+    }
+
+    public static boolean isEmailExist(String email){
+        for(int id : Profile.getIds()){
+            Profile profile = new Profile(id);
+            if(profile.data.get(Profile.EMAIL).contains(email))
+                return true;
         }
         return false;
     }
 
     public static boolean arePasswordsEquals(String hashed, String password){
         return hashed.equals(DigestUtils.md2Hex(password));
+    }
+
+    public static boolean isExist(int id){
+        return new File(Profile.profilesFolder + "/" + id).exists();
+    }
+
+    public static class KeyGenerator{
+
+        public static final String ALPHABET_UPPER_CASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        public static final String ALPHABET_LOWER_CASE = ALPHABET_UPPER_CASE.toLowerCase();
+        public static final String DIGITS = "0123456789";
+
+        private int length = 10;
+        private final StringBuilder alphabet = new StringBuilder();
+        private Predicate<String> condition = s -> true;
+
+        public KeyGenerator addAlphabet(String... chars){
+            for(String text : chars)
+                alphabet.append(text);
+            return this;
+        }
+
+        public KeyGenerator setCondition(Predicate<String> condition){
+            this.condition = condition;
+            return this;
+        }
+
+        public KeyGenerator setLength(int length){
+            this.length = length;
+            return this;
+        }
+
+        public String get(){
+            StringBuilder text;
+
+            do{
+                text = new StringBuilder();
+                for (int i = 0; i < length; i++)
+                    text.append(alphabet.charAt(new Random().nextInt(alphabet.length() - 1)));
+            }while(!condition.test(text.toString()));
+            return text.toString();
+        }
     }
 
 }

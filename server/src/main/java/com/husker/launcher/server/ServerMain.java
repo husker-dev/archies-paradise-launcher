@@ -1,11 +1,13 @@
 package com.husker.launcher.server;
 
+import com.husker.launcher.server.core.ProfileUtils;
 import com.husker.launcher.server.settings.ServerSettingsFile;
 import com.husker.launcher.server.services.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 
@@ -39,8 +41,6 @@ public class ServerMain {
 
         log.info("Server is ready!");
         log.info(new String(new char[25]).replace("\0", "-"));
-
-
 
     }
 

@@ -113,7 +113,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
         int index = getComponentCount();
         label.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
-                if(active.get(label))
+                if(active.get(label) && getSelectedIndex() != index)
                     setSelected(index);
             }
         });
@@ -156,7 +156,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
             setVerticalAlignment(CENTER);
             setPreferredHeight(30);
             setForeground(GlassUI.Colors.labelLightText);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+            setFont(Resources.Fonts.getChronicaProExtraBold());
         }};
     }
 

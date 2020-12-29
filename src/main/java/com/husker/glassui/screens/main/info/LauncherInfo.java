@@ -37,7 +37,7 @@ public class LauncherInfo extends TransparentPanel {
             setPreferredHeight(70);
             setMaximumRows(30);
             setForeground(GlassUI.Colors.labelText);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(28f));
+            setFont(Resources.Fonts.getChronicaProExtraBold(28));
             setText(LauncherConfig.getTitle());
         }}, BorderLayout.NORTH);
         add(new BlurPanel(screen) {
@@ -87,7 +87,7 @@ public class LauncherInfo extends TransparentPanel {
             setForeground(new Color(170, 170, 170));
             setHorizontalAlignment(LEFT);
             setPreferredHeight(16);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(16f));
+            setFont(Resources.Fonts.getChronicaProExtraBold());
         }};
     }
 
@@ -96,7 +96,7 @@ public class LauncherInfo extends TransparentPanel {
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(CENTER);
             setPreferredHeight(28);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(18f));
+            setFont(Resources.Fonts.getChronicaProExtraBold(18));
         }};
     }
 
@@ -125,7 +125,7 @@ public class LauncherInfo extends TransparentPanel {
                     setVerticalAlignment(TOP);
                     setForeground(GlassUI.Colors.labelLightText);
                     setPreferredHeight(45);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
+                    setFont(Resources.Fonts.getChronicaProExtraBold(14));
                     setMaximumRows(2);
                     setText(value);
                 }

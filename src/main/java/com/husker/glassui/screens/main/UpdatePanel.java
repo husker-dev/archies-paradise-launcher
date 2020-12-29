@@ -85,7 +85,7 @@ public class UpdatePanel extends BlurPanel {
         new Timer().schedule(new TimerTask() {
             public void run() {
                 try {
-                    setVisible(API.Launcher.getCurrentVersion().equals(UpdateManager.VERSION));
+                    setVisible(!API.Launcher.getCurrentVersion().equals(UpdateManager.VERSION));
                 } catch (API.InternalAPIException e) {
                     e.printStackTrace();
                     setVisible(false);

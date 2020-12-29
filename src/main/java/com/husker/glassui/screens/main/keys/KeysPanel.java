@@ -4,7 +4,7 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurTextField;
-import com.husker.glassui.components.TagPanel;
+import com.husker.glassui.components.BlurTagPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.ui.components.TransparentPanel;
@@ -27,7 +27,7 @@ public class KeysPanel extends TransparentPanel {
             setLayout(new VerticalFlowLayout(0, 10));
             setPreferredWidth(510);
 
-            add(new TagPanel(screen, "YouTube"){{
+            add(new BlurTagPanel(screen, "YouTube"){{
                 addButtonAction(KeysPanel.this::updateYouTubeInfo);
                 setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
@@ -41,7 +41,7 @@ public class KeysPanel extends TransparentPanel {
                 }});
             }});
 
-            add(new TagPanel(screen, "VK"){{
+            add(new BlurTagPanel(screen, "VK"){{
                 addButtonAction(KeysPanel.this::updateVkInfo);
                 setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
@@ -55,7 +55,7 @@ public class KeysPanel extends TransparentPanel {
                 }});
             }});
 
-            add(new TagPanel(screen, "Instagram"){{
+            add(new BlurTagPanel(screen, "Instagram"){{
                 addButtonAction(KeysPanel.this::updateInstagramInfo);
                 setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);
@@ -69,7 +69,7 @@ public class KeysPanel extends TransparentPanel {
                 }});
             }});
 
-            add(new TagPanel(screen, "GitHub"){{
+            add(new BlurTagPanel(screen, "GitHub"){{
                 addButtonAction(KeysPanel.this::updateGitHubInfo);
                 setButtonIcons(Resources.Icon_Reload, Resources.Icon_Reload_Selected);
                 getContent().setMargin(10, 0, 0, 0);

@@ -38,7 +38,7 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
         setChecked(checked);
         setVerticalAlignment(CENTER);
         setForeground(GlassUI.Colors.labelText);
-        setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+        setFont(Resources.Fonts.getChronicaProExtraBold());
         screen.addBlurSegment("Checkbox", parameter -> onBlurApply(parameter, this));
 
         addMouseListener(new MouseAdapter() {

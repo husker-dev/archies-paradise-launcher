@@ -11,7 +11,9 @@ import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.glassui.screens.main.profile.edit.InfoEdit;
 import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
+import com.husker.glassui.screens.reset.R_1_SendingCode;
 import com.husker.launcher.Resources;
+import com.husker.launcher.User;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.Screen;
@@ -93,7 +95,8 @@ public class ProfilePanel extends TransparentPanel {
                 add(new BlurButton(screen, "Сменить пароль"){{
                     setPadding(20, 20);
                     addActionListener(e -> {
-                        Message.showMessage(screen.getLauncherUI(), "Проблемка", "Пока что изменить пароль нельзя(", MainScreen.class);
+                        User user = screen.getLauncher().User;
+                        R_1_SendingCode.show(screen.getLauncherUI(), user.getId(), user.getNickname(), MainScreen.class);
                     });
                 }});
                 add(new BlurButton(screen, "Выйти"){
@@ -142,7 +145,7 @@ public class ProfilePanel extends TransparentPanel {
             setHorizontalAlignment(LEFT);
             setVerticalAlignment(CENTER);
             setPreferredHeight(30);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(23f));
+            setFont(Resources.Fonts.getChronicaProExtraBold(23));
             setMargin(1, 10, 0, 10);
 
             screen.addBlurSegment("ProfilePanel.Label", parameter -> {

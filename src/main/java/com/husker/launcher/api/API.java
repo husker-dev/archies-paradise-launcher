@@ -1,6 +1,7 @@
 package com.husker.launcher.api;
 
 import com.alee.utils.general.Pair;
+import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.settings.LauncherConfig;
 import com.husker.net.Get;
@@ -197,6 +198,16 @@ public class API {
             }
             return null;
         }
+
+        public static BufferedImage getSkin(String name) throws InternalAPIException, UnknownProfileNameException {
+            try {
+                return API.getImage(ApiMethod.create("skins.getSkin").set("name", name), 1);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownProfileNameException(name);
+            }
+            return null;
+        }
     }
 
     public static class Auth {
@@ -290,12 +301,14 @@ public class API {
             return false;
         }
 
-        public static void sendEmailCode(String token, String email) throws InternalAPIException, EmailCodeSendingException, WrongAccessTokenException {
+        public static void sendEmailCode(String token, String email) throws InternalAPIException, EmailCodeSendingException, WrongAccessTokenException, EmailAlreadyExistException {
             try {
-                getJSON(ProfileApiMethod.create("profile.sendEmailCode", token).set(EMAIL, email), 1, 25);
+                getJSON(ProfileApiMethod.create("profile.sendEmailCode", token).set(EMAIL, email), 1, 2, 25);
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new EmailCodeSendingException();
+                if(e.getCode() == 2)
+                    throw new EmailAlreadyExistException();
                 if(e.getCode() == 25)
                     throw new WrongAccessTokenException();
             }
@@ -316,7 +329,7 @@ public class API {
             return null;
         }
 
-        public static void setData(String token, HashMap<String, String> data, String currentPassword, String emailCode) throws InternalAPIException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectCurrentPasswordException, IncorrectEmailCodeException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectEmailFormatException, IncorrectPasswordFormatException, WrongAccessTokenException {
+        public static void setData(String token, HashMap<String, String> data, String currentPassword, String emailCode) throws InternalAPIException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectCurrentPasswordException, IncorrectEmailCodeException, IncorrectLoginFormatException, LoginAlreadyExistException, IncorrectEmailFormatException, EmailAlreadyExistException, WrongAccessTokenException {
             try {
                 ProfileApiMethod method = ProfileApiMethod.create("profile.setData", token);
                 if (currentPassword != null)
@@ -335,7 +348,7 @@ public class API {
                     case 5: throw new IncorrectLoginFormatException();
                     case 6: throw new LoginAlreadyExistException();
                     case 7: throw new IncorrectEmailFormatException();
-                    case 8: throw new IncorrectPasswordFormatException();
+                    case 8: throw new EmailAlreadyExistException();
                     case 25: throw new WrongAccessTokenException();
                 }
             }
@@ -345,18 +358,24 @@ public class API {
 
     public static class Client{
 
-        public static void update(File file, String id, String title, Consumer<Integer> stage) throws IOException {
-            stage.accept(0);
-
+        public static void update(String token, File file, String id, String title, UpdatingActionListener listener) throws IOException {
             try (CloseableHttpClient client = HttpClients.createDefault()) {
-                HttpPost post = new HttpPost(getMethodUrl(ApiMethod.create("clients.update").set("id", id).set("name", title)));
+                HttpPost post = new HttpPost(getMethodUrl(ProfileApiMethod.create("clients.update", token).set("id", id).set("name", title)));
                 HttpEntity entity = MultipartEntityBuilder.create().addPart("file", new FileBody(file, ContentType.create("application/zip"), null)).build();
-                post.setEntity(entity);
+                NetManager.ProgressHttpEntityWrapper.ProgressCallback progressCallback = progress -> {
+                    listener.sending((int)progress);
+                    if(progress == 100)
+                        listener.process();
+                };
+
+                post.setEntity(new NetManager.ProgressHttpEntityWrapper(entity, progressCallback));
                 client.execute(post);
             }
+        }
 
-            stage.accept(1);
-
+        public interface UpdatingActionListener{
+            void sending(int progress);
+            void process();
         }
 
         public static JSONObject getSizeInfo(String clientId) throws InternalAPIException, UnknownClientException {
@@ -410,9 +429,19 @@ public class API {
             return null;
         }
 
-        public static ModInfo getModInfo(String clientId, int index, boolean hasIcons) throws InternalAPIException, UnknownClientException {
+        public static int getModsCount(String clientId) throws InternalAPIException, UnknownClientException {
             try {
-                JSONArray info = getJSON(ApiMethod.create("clients.getModInfo").set("id", clientId).set("index", index).set("require_icon", hasIcons), 1).getJSONArray("mods");
+                return getJSON(ApiMethod.create("clients.getModsCount").set("id", clientId), 1).getInt("count");
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new UnknownClientException();
+            }
+            return 0;
+        }
+
+        public static ModInfo getModInfo(String clientId, int index) throws InternalAPIException, UnknownClientException {
+            try {
+                JSONArray info = getJSON(ApiMethod.create("clients.getModInfo").set("id", clientId).set("index", index), 1).getJSONArray("mods");
                 if(info.length() == 1)
                     return new ModInfo(info.getJSONObject(0));
             }catch (APIException e){
@@ -584,6 +613,18 @@ public class API {
     public static class UnknownClientException extends Exception{
         public UnknownClientException(){
             super("Unknown client part");
+        }
+    }
+
+    public static class UnknownProfileNameException extends Exception{
+        public UnknownProfileNameException(String name){
+            super("Unknown profile name: " + name);
+        }
+    }
+
+    public static class EmailAlreadyExistException extends Exception{
+        public EmailAlreadyExistException(){
+            super("Email is already exist");
         }
     }
 }

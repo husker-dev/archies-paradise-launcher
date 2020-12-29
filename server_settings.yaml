@@ -1,22 +1,29 @@
-port: 15565
-mail:
-  password: vzhqvepladttbmqu
-  text: Dear {name}, here is your code {code}
-  login: redfancoestar@gmail.com
-  title: Email title
 social:
-  youtube: UCAOEGtCBZUmctchRTkQ201A
-  github: husker-dev/minecraft-launcher
   vk: archie.enotik
   instagram: archietheraccoon
+  youtube: UCAOEGtCBZUmctchRTkQ201A
+  github: husker-dev/minecraft-launcher
+port: 15565
+launcher:
+  version: '0.1'
+mail:
+  password: vzhqvepladttbmqu
+  password_code:
+    text: Dear {name}, here is the code to change your password {code}
+    title: Email title
+  code:
+    text: 'Dear {name}, here is your code: {code}'
+    title: Email title
+  password_reset:
+    text: 'Dear {name}, here is your new password: {password}'
+    title: Email title
+  login: redfancoestar@gmail.com
 owner:
-  name: ArcheTheRacoon
-  url: https://youtube.com/channel/UCAOEGtCBZUmctchRTkQ201A
+  name: owner name
+  url: owner url
 support:
-  name: Discord
+  name: support name
   url: support url
 minecraft:
   port: 25565
   ip: 127.0.0.1
-launcher:
-  version: '0.1'

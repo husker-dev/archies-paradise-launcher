@@ -206,7 +206,7 @@ public class SkinCategories extends SimpleTitledScreen {
                         setVerticalAlignment(CENTER);
                         setHorizontalAlignment(CENTER);
                         setForeground(GlassUI.Colors.labelLightText);
-                        setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
+                        setFont(Resources.Fonts.getChronicaProExtraBold(15));
                         ComponentUtils.makeMouseEventTransparent(this, SkinFolderPanel.this);
                     }});
                 }

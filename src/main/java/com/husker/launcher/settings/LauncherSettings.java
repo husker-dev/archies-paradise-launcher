@@ -10,6 +10,7 @@ public class LauncherSettings extends SettingsFile {
     private static final String BACKGROUND = "background";
     private static final String WINDOWED = "windowed";
     private static final String CLIENT_TYPE = "client_type";
+    private static final String POTATO = "potato";
     private static final String RAM = "ram";
 
     private LauncherSettings() {
@@ -19,7 +20,8 @@ public class LauncherSettings extends SettingsFile {
         setDefault(BACKGROUND, 1);
         setDefault(WINDOWED, false);
         setDefault(CLIENT_TYPE, "any");
-        setDefault(RAM, 256);
+        setDefault(POTATO, false);
+        setDefault(RAM, 2048);
     }
 
     public static int getBackgroundIndex(){
@@ -59,7 +61,7 @@ public class LauncherSettings extends SettingsFile {
             Integer.parseInt(ram);
             INSTANCE.set(RAM, ram);
         }catch (Exception ex){
-            INSTANCE.set(RAM, 256);
+            INSTANCE.set(RAM, 2048);
         }
     }
 
@@ -69,5 +71,13 @@ public class LauncherSettings extends SettingsFile {
 
     public static void setClientType(String clientType){
         INSTANCE.set(CLIENT_TYPE, clientType);
+    }
+
+    public static void setPotatoSettings(boolean value){
+        INSTANCE.set(POTATO, value);
+    }
+
+    public static boolean isPotatoSettings(){
+        return INSTANCE.getBoolean(POTATO);
     }
 }

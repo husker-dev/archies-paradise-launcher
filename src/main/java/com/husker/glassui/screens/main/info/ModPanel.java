@@ -42,10 +42,8 @@ public class ModPanel extends BlurPanel {
                         super.onBlurApply(parameter, component);
                         if(returnOnInvisible(parameter, component))
                             return;
-                        if(component == this){
+                        if(component == this)
                             parameter.setShadowSize(0);
-
-                        }
                     }
                 });
             }});
@@ -68,14 +66,16 @@ public class ModPanel extends BlurPanel {
         }
     }
 
-    public void updateInfo(){
+    public void updateInfo(int modCount){
         try {
-            API.Client.ModInfo info = API.Client.getModInfo(clientId, index, true);
+            if(index > modCount - 1)
+                throw new RuntimeException("Out of border");
+            API.Client.ModInfo info = API.Client.getModInfo(clientId, index);
             if(info != null) {
                 name.setText(info.getName());
                 icon.setImage(info.hasIcon() ? API.Client.getModIcon(clientId, info.getIndex()) : null);
             }
-        } catch (API.InternalAPIException | API.UnknownClientException e) {
+        } catch (Exception e) {
             name.setText("");
             icon.setImage(null);
         }

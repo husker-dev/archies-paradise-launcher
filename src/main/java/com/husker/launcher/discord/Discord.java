@@ -2,6 +2,7 @@ package com.husker.launcher.discord;
 
 
 
+import com.husker.launcher.api.API;
 import com.husker.launcher.discord.discordipc.IPCClient;
 import com.husker.launcher.discord.discordipc.IPCListener;
 import com.husker.launcher.discord.discordipc.entities.RichPresence;
@@ -22,11 +23,12 @@ import static com.husker.launcher.discord.discordipc.entities.pipe.PipeStatus.CO
 public class Discord {
 
     public static class Texts{
-        public static final String InMainMenu = "In main menu";
+        public static final String Loading = "Loading...";
+        public static final String InMainMenu = "In Main Menu";
         public static final String InLogin = "Login in account";
-        public static final String InSkins = "Changing skin";
+        public static final String InSkins = "Changing Skin";
         public static final String InRegistration = "Register an account";
-        public static final String InGame = "In game";
+        public static final String InGame = "In Game";
     }
 
     public static final Logger log = LogManager.getLogger(Discord.class);
@@ -68,7 +70,15 @@ public class Discord {
                     builder.setDetails(state);
                     builder.setStartTimestamp(time);
                     builder.setLargeImage("icon_1024", LauncherConfig.getTitle());
-                    builder.setParty("Online", serverInfo.getJSONObject("players").getInt("online"), serverInfo.getJSONObject("players").getInt("max"));
+                    try {
+                        int online = serverInfo.getJSONObject("players").getInt("online");
+                        int max = serverInfo.getJSONObject("players").getInt("max");
+                        if(online == 0)
+                            throw new RuntimeException("Empty");
+                        builder.setParty("Online", online, max);
+                    }catch (Exception ex){
+                        builder.setState("Server is empty");
+                    }
 
                     client.sendRichPresence(builder.build());
                 }catch (Exception ex){
@@ -84,9 +94,12 @@ public class Discord {
                 try {
                     if(client.getStatus() != CONNECTED)
                         return;
-                    serverInfo = NetManager.MinecraftServer.info("mc.hypixel.net", 25565);
+                    API.Minecraft.ServerInfo info = API.Minecraft.getServerInfo();
+                    serverInfo = NetManager.MinecraftServer.info(info.getIP(), info.getPort());
                 }catch (Exception ex){
-                    ex.printStackTrace();
+                    serverInfo = new JSONObject()
+                        .put("online", 0)
+                        .put("max", 0);
                 }
             }
         }, 0, 5000);

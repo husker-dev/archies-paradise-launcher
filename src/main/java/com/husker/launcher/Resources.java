@@ -1,19 +1,27 @@
 package com.husker.launcher;
 
 import com.husker.launcher.ui.utils.ImageUtils;
+import com.husker.launcher.utils.minecraft.MinecraftClientInfo;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.TextAttribute;
+import java.awt.font.TransformAttribute;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class Resources {
 
@@ -58,10 +66,75 @@ public class Resources {
     }
 
     public static class Fonts {
-        public static Font SFPro;
-        public static Font ChronicaPro;
-        public static Font ChronicaPro_Bold;
-        public static Font ChronicaPro_ExtraBold;
+        private static Font SFPro;
+        private static Font ChronicaPro;
+        private static Font ChronicaPro_Bold;
+        private static Font ChronicaPro_ExtraBold;
+
+        private static Boolean needTransform = null;
+
+        private static AffineTransform createTransform(double fontSize){
+            if(needTransform())
+                return AffineTransform.getTranslateInstance(0, (int)(fontSize / 4.5));
+            else
+                return null;
+        }
+
+        public static boolean needTransform(){
+            if(needTransform == null) {
+                BufferedImage testImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g2d = testImage.createGraphics();
+                g2d.setFont(ChronicaPro_ExtraBold.deriveFont(16f));
+                g2d.setColor(Color.black);
+                g2d.drawString("test", 0, 16);
+                needTransform = testImage.getRGB(4, 6) != 0;
+            }
+            return needTransform;
+        }
+
+        public static Font getChronicaPro(double size){
+            return ChronicaPro.deriveFont(new HashMap<TextAttribute, Object>(){{
+                put(TextAttribute.FAMILY, "ChronicaPro-Black");
+                put(TextAttribute.SIZE, size);
+                put(TextAttribute.TRANSFORM, createTransform(size));
+            }});
+        }
+
+        public static Font getChronicaProBold(double size){
+            return ChronicaPro_Bold.deriveFont(new HashMap<TextAttribute, Object>(){{
+                put(TextAttribute.FAMILY, "ChronicaPro-Bold");
+                put(TextAttribute.SIZE, size);
+                put(TextAttribute.TRANSFORM, createTransform(size));
+            }});
+        }
+
+        public static Font getChronicaProExtraBold(double size){
+            return ChronicaPro_ExtraBold.deriveFont(new HashMap<TextAttribute, Object>(){{
+                put(TextAttribute.FAMILY, "ChronicaPro-ExtraBold");
+                put(TextAttribute.SIZE, size);
+                put(TextAttribute.TRANSFORM, createTransform(size));
+            }});
+        }
+
+        public static Font getSFPro(double size){
+            return SFPro.deriveFont(new HashMap<TextAttribute, Object>(){{
+                put(TextAttribute.FAMILY, "SFPro");
+                put(TextAttribute.SIZE, size);
+                put(TextAttribute.TRANSFORM, createTransform(size));
+            }});
+        }
+
+        public static Font getChronicaPro(){
+            return getChronicaPro(16);
+        }
+
+        public static Font getChronicaProBold(){
+            return getChronicaProBold(16);
+        }
+
+        public static Font getChronicaProExtraBold(){
+            return getChronicaProExtraBold(16);
+        }
 
         static {
             try {
@@ -75,6 +148,94 @@ public class Resources {
                 ex.printStackTrace();
             }
         }
+
+        public static void setDefaultFontRenderer(){
+            try {
+                setenv("FREETYPE_PROPERTIES", "truetype:interpreter-version=35");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Not my method
+        public static <K,V> void setenv(final String key, final String value) {
+            try {
+                final Class<?> processEnvironmentClass = Class.forName("java.lang.ProcessEnvironment");
+                final Field theEnvironmentField = processEnvironmentClass.getDeclaredField("theEnvironment");
+                final boolean environmentAccessibility = theEnvironmentField.isAccessible();
+                theEnvironmentField.setAccessible(true);
+
+                final Map<K,V> env = (Map<K, V>) theEnvironmentField.get(null);
+
+                if (MinecraftClientInfo.isWindows()) {
+                    if (value == null) {
+                        env.remove(key);
+                    } else {
+                        env.put((K) key, (V) value);
+                    }
+                } else {
+                    final Class<K> variableClass = (Class<K>) Class.forName("java.lang.ProcessEnvironment$Variable");
+                    final Method convertToVariable = variableClass.getMethod("valueOf", String.class);
+                    final boolean conversionVariableAccessibility = convertToVariable.isAccessible();
+                    convertToVariable.setAccessible(true);
+
+                    final Class<V> valueClass = (Class<V>) Class.forName("java.lang.ProcessEnvironment$Value");
+                    final Method convertToValue = valueClass.getMethod("valueOf", String.class);
+                    final boolean conversionValueAccessibility = convertToValue.isAccessible();
+                    convertToValue.setAccessible(true);
+
+                    if (value == null) {
+                        env.remove(convertToVariable.invoke(null, key));
+                    } else {
+                        env.put((K) convertToVariable.invoke(null, key), (V) convertToValue.invoke(null, value));
+                        convertToValue.setAccessible(conversionValueAccessibility);
+                        convertToVariable.setAccessible(conversionVariableAccessibility);
+                    }
+                }
+                theEnvironmentField.setAccessible(environmentAccessibility);
+                final Field theCaseInsensitiveEnvironmentField = processEnvironmentClass.getDeclaredField("theCaseInsensitiveEnvironment");
+                final boolean insensitiveAccessibility = theCaseInsensitiveEnvironmentField.isAccessible();
+                theCaseInsensitiveEnvironmentField.setAccessible(true);
+                final Map<String, String> cienv = (Map<String, String>) theCaseInsensitiveEnvironmentField.get(null);
+                if (value == null) {
+                    cienv.remove(key);
+                } else {
+                    cienv.put(key, value);
+                }
+                theCaseInsensitiveEnvironmentField.setAccessible(insensitiveAccessibility);
+            } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                throw new IllegalStateException("Failed setting environment variable <"+key+"> to <"+value+">", e);
+            } catch (final NoSuchFieldException e) {
+                final Map<String, String> env = System.getenv();
+                Stream.of(Collections.class.getDeclaredClasses())
+                        .filter(c1 -> "java.util.Collections$UnmodifiableMap".equals(c1.getName()))
+                        .map(c1 -> {
+                            try {
+                                return c1.getDeclaredField("m");
+                            } catch (final NoSuchFieldException e1) {
+                                throw new IllegalStateException("Failed setting environment variable <"+key+"> to <"+value+"> when locating in-class memory map of environment", e1);
+                            }
+                        })
+                        .forEach(field -> {
+                            try {
+                                final boolean fieldAccessibility = field.isAccessible();
+                                field.setAccessible(true);
+                                final Map<String, String> map = (Map<String, String>) field.get(env);
+                                if (value == null) {
+                                    // remove if null
+                                    map.remove(key);
+                                } else {
+                                    map.put(key, value);
+                                }
+                                field.setAccessible(fieldAccessibility);
+                            } catch (final ConcurrentModificationException ignored) {
+                            } catch (final IllegalAccessException e1) {
+                                throw new IllegalStateException("Failed setting environment variable <"+key+"> to <"+value+">. Unable to access field!", e1);
+                            }
+                });
+            }
+        }
+
     }
 
     public static BufferedImage Logo;
@@ -138,23 +299,21 @@ public class Resources {
     public static void load(){
         loadBase();
 
-        BufferedImage custom = null;
-        try{
-            if(Files.exists(Paths.get("./background.jpg")))
-                custom = ImageIO.read(new File("./background.jpg"));
-        }catch (Exception ex){}
-
         ArrayList<BufferedImage> bgs = new ArrayList<>();
-        for(int i = 1;;i++){
-            BufferedImage bg = getBufferedImage("background/bg_" + i + ".jpg");
-            if(bg == null)
-                break;
-            bgs.add(bg);
+        try {
+            bgs.add(getBufferedImage("background.jpg"));
+
+            String backgroundsPath = Launcher.getSettingsFolder() + "/background";
+            Files.createDirectories(Paths.get(backgroundsPath));
+            for(File file : new File(backgroundsPath).listFiles()){
+                try{
+                    bgs.add(ImageIO.read(file));
+                }catch (Exception ignored){}
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Background = new BufferedImage[1 + bgs.size()];
-        Background[0] = custom;
-        for(int i = 0; i < bgs.size(); i++)
-            Background[i + 1] = bgs.get(i);
+        Background = bgs.toArray(new BufferedImage[0]);
 
         Icon_Info = getBufferedImage("info_icon.png");
         Icon_Play = getBufferedImage("play_icon.png");

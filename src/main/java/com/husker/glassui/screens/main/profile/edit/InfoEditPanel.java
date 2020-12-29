@@ -72,7 +72,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                                 add(subTitleLabel = new WebLabel("Информация"){{
                                     setHorizontalAlignment(CENTER);
                                     setForeground(GlassUI.Colors.labelText);
-                                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(25f));
+                                    setFont(Resources.Fonts.getChronicaProExtraBold(25));
                                 }});
 
                                 onContentInit(this);
@@ -148,7 +148,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
 
             add(new WebLabel(text){{
                 setForeground(GlassUI.Colors.labelText);
-                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                setFont(Resources.Fonts.getChronicaProExtraBold());
             }});
         }};
     }

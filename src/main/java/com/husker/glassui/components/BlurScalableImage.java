@@ -20,6 +20,7 @@ import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 public class BlurScalableImage extends ScalableImage implements BlurComponent {
 
     private static final Logger log = LogManager.getLogger(BlurScalableImage.class);
+    private static final int speed = 15;
 
     private enum AnimState{
         NONE,
@@ -54,7 +55,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
                     return;
 
                 if(animState == AnimState.HIDING){
-                    alpha -= 10;
+                    alpha -= speed;
                     if(alpha <= 0){
                         alpha = 0;
                         if(newImg != null) {
@@ -67,7 +68,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
                     screen.getLauncher().updateUI();
                 }
                 if(animState == AnimState.SHOWING){
-                    alpha += 10;
+                    alpha += speed;
                     if(alpha >= 255) {
                         alpha = 255;
                         animState = AnimState.NONE;
@@ -104,7 +105,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
             if(super.getImage() == null)
                 alpha = 0;
             animState = AnimState.HIDING;
-        }else {
+        }else if(animState != AnimState.HIDING) {
             SwingUtilities.invokeLater(() -> {
                 super.setImage(newImg);
 
@@ -112,8 +113,6 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
                 newImg = null;
                 screen.getLauncher().updateUI();
             });
-
-
         }
     }
 

@@ -1,6 +1,5 @@
 package com.husker.launcher.utils.minecraft;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -11,6 +10,12 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class MinecraftClientInfo {
+
+    public enum ClientType{
+        VANILLA,
+        FORGE,
+        OPTIFINE
+    }
 
     public static final int maxSupportedVersion;
     public static final HashMap<Integer, Class<?>> jsonReaders = new HashMap<>();
@@ -52,16 +57,24 @@ public abstract class MinecraftClientInfo {
         return (MinecraftClientInfo) clazz.getConstructor(File.class).newInstance(clientFolder);
     }
 
+    public ClientType getType(){
+        String id = getJSON().getString("id");
+        if(id.contains("Forge"))
+            return ClientType.FORGE;
+        if(id.contains("OptiFine"))
+            return ClientType.OPTIFINE;
+        return ClientType.VANILLA;
+    }
 
-    protected static boolean isWindows() {
+    public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");
     }
 
-    protected static boolean isMac() {
+    public static boolean isMac() {
         return System.getProperty("os.name").toLowerCase().contains("mac");
     }
 
-    protected static boolean isUnix() {
+    public static boolean isUnix() {
         String osName = System.getProperty("os.name").toLowerCase();
         return osName.contains("linux") || osName.contains("mpe/ix") || osName.contains("freebsd") || osName.contains("irix") || osName.contains("digital unix") || osName.contains("unix");
     }
@@ -125,6 +138,8 @@ public abstract class MinecraftClientInfo {
 
     private final JvmArgumentsParameters jvmParameters = new JvmArgumentsParameters();
     private final GameArgumentsParameters gameParameters = new GameArgumentsParameters();
+
+    private final ArrayList<String> additionLibraries = new ArrayList<>();
 
     public MinecraftClientInfo(File clientFolder){
         this.clientFolder = clientFolder;
@@ -193,6 +208,18 @@ public abstract class MinecraftClientInfo {
         }};
         par.forEach((key, val) -> out[0] = out[0].replace("${" + key + "}", val));
         return out[0];
+    }
+
+    public void addLibrary(String library){
+        additionLibraries.add(library);
+    }
+
+    public void removeLibrary(String library){
+        additionLibraries.remove(library);
+    }
+
+    public List<String> getAdditionLibraries(){
+        return additionLibraries;
     }
 
     public static class JvmArgumentsParameters{

@@ -14,9 +14,7 @@ public class ApiYoutube extends ApiClass {
     }
 
     public void setInfo(Profile profile){
-        if(profile.getDataValue(Profile.STATUS).equals("Администратор"))
-            ServerMain.Settings.setYouTubeId(getAttribute("id"));
-        else
-            throw new ApiException("The account has no rights to change this value", 1);
+        profile.checkStatus("Администратор");
+        ServerMain.Settings.setYouTubeId(getAttribute("id"));
     }
 }

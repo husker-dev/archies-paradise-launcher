@@ -5,18 +5,44 @@ plugins {
 group 'com.husker.launcher'
 version 'unspecified'
 
-repositories {
-    mavenCentral()
-}
-
 sourceSets {
     main {
         resources {
-            srcDirs "src/main/java"
+            srcDirs "src/main/resources"
         }
     }
 }
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url 'https://repo.codemc.org/repository/maven-snapshots/' }
+    maven { url "https://jitpack.io/" }
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
 dependencies {
-    implementation files('C:\\Users\\redfa\\Desktop\\bukkit\\Spigot\\Spigot-API\\target\\spigot-api-1.16.3-R0.1-SNAPSHOT.jar')
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    compileOnly files("libs/spigot-1.12.2-R0.1-SNAPSHOT-shaded.jar")
+    shade 'com.github.husker-dev:SimpleHttp:+'
+    shade 'org.json:json:+'
+    //shade 'org.apache.commons:commons-lang3:3.11'
+    compileOnly 'net.luckperms:api:5.2'
+}
+
+jar {
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)) {
+            exclude 'META-INF', 'META-INF/**'
+        }
+    }
 }

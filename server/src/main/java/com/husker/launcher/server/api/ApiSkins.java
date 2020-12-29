@@ -70,13 +70,21 @@ public class ApiSkins extends ApiClass {
     }
 
     public ImageLink getSkin(){
-        String name = getAttribute("name");
-        Profile profile = Profile.getByName(name);
+        Profile profile;
+
+        if(containsAttribute("name")){
+            profile = Profile.getByName(getAttribute("name"));
+        }else if(containsAttribute("id"))
+            profile = new Profile(Integer.parseInt(getAttribute("id")));
+        else
+            throw new ApiException("Attribute \"name\" or \"id\" not specified", 2);
+
         if(profile != null) {
-            if(profile.getSkin() == null)
+            if(profile.Data.getSkin() == null)
                 return new ImageLink("./steve.png");
-            return profile.getSkin();
+            return profile.Data.getSkin();
         }else
-            throw new ApiException("Can't find profile with name: '" + name + "'", 1);
+            throw new ApiException("Can't find profile", 1);
     }
+
 }

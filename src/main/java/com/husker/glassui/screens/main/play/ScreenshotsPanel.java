@@ -132,11 +132,6 @@ public class ScreenshotsPanel extends TransparentPanel {
             try {
                 if(usePreview)
                     viewer.setImage(urls_preview[index]);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 BufferedImage loaded = ImageIO.read(new URL(urls[index]));
                 if(index == selectedIndex) {
                     if(usePreview) {
@@ -158,7 +153,10 @@ public class ScreenshotsPanel extends TransparentPanel {
 
     public void nextPage(boolean usePreview){
         currentDelay = 0;
-        if(selectedIndex == urls.length - 1)
+
+        if(urls == null || urls.length == 0)
+            return;
+        if (selectedIndex == urls.length - 1)
             setPage(0, usePreview);
         else
             setPage(selectedIndex + 1, usePreview);

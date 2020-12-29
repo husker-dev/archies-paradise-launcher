@@ -1,6 +1,7 @@
 package com.husker.launcher;
 
 
+import com.husker.launcher.discord.Discord;
 import com.husker.launcher.ui.components.ProgressBar;
 import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.managers.UpdateManager;
@@ -16,8 +17,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.TimerTask;
+import java.lang.reflect.Field;
+import java.util.*;
 
 import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
@@ -36,7 +37,6 @@ public class LoadingWindow extends JFrame {
     private boolean launcherStarted = false;
     private boolean updated = false;
 
-    //private JLabel statusLabel;
     private JLabel closeLabel;
     private JLabel hideLabel;
     private JPanel statusPanel;
@@ -45,9 +45,10 @@ public class LoadingWindow extends JFrame {
 
     private int launcherStatus = 0;
 
-
     public LoadingWindow(){
-        super("Launcher loading");
+        super("Launcher Loading");
+
+        Discord.setState(Discord.Texts.Loading);
         Resources.loadBase();
         setIconImage(Resources.Icon);
 
@@ -96,7 +97,7 @@ public class LoadingWindow extends JFrame {
                                 {
                                     setHorizontalAlignment(CENTER);
                                     setVerticalAlignment(CENTER);
-                                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
+                                    setFont(Resources.Fonts.getChronicaProExtraBold(14));
                                     setPreferredSize(new Dimension(width, height));
                                     setForeground(defaultTextColor);
                                     addMouseListener(new MouseAdapter() {
@@ -130,7 +131,7 @@ public class LoadingWindow extends JFrame {
                                 {
                                     setHorizontalAlignment(CENTER);
                                     setVerticalAlignment(CENTER);
-                                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(14f));
+                                    setFont(Resources.Fonts.getChronicaProExtraBold(14));
                                     setPreferredSize(new Dimension(width, height));
                                     setForeground(defaultTextColor);
                                     addMouseListener(new MouseAdapter() {
@@ -230,6 +231,8 @@ public class LoadingWindow extends JFrame {
                     if(updated)
                         setStatusText("Запуск...", 100d / 3 * launcherStatus);
                 });
+                if(launcher.launchError)
+                    throw launcher.launchException;
                 launcherStarted = true;
             }catch (Exception ex){
                 ex.printStackTrace();
@@ -315,10 +318,7 @@ public class LoadingWindow extends JFrame {
     }
 
     private void setErrorText(){
-        if(!System.getProperty("java.version").startsWith("1.8"))
-            setStatusText("Для работы рекомендуется Java 1.8 ", 0);
-        else
-            setStatusText("Ошибка при запуске!", 0);
+        setStatusText("Ошибка при запуске лаунчера         ", 0);
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             if(e.getKeyCode() == KeyEvent.VK_F5){

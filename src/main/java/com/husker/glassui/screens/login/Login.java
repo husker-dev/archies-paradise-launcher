@@ -5,6 +5,7 @@ import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.screens.TitledLogoScreen;
 import com.husker.glassui.screens.registration.Registration;
+import com.husker.glassui.screens.reset.Reset;
 import com.husker.launcher.discord.Discord;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.utils.FormatUtils;
@@ -26,6 +27,7 @@ public class Login extends TitledLogoScreen {
         panel.add(createLabel("Имя"));
         panel.add(loginField = new BlurTextField(Login.this){{
             addTextListener(text -> updateLoginButton());
+            addFastAction(() -> event());
         }});
 
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -33,6 +35,7 @@ public class Login extends TitledLogoScreen {
         panel.add(createLabel("Пароль"));
         panel.add(passwordField = new BlurPasswordField(Login.this){{
             addTextListener(text -> updateLoginButton());
+            addFastAction(() -> event());
         }});
     }
 
@@ -44,15 +47,17 @@ public class Login extends TitledLogoScreen {
 
     public void createComponents(TransparentPanel panel) {
         BlurButton createButton = createButton("Создать", () -> getLauncherUI().setScreen(Registration.class));
-        loginButton = createButton("Войти", () -> {
-            getLauncherUI().setScreen(LoginProcess.class, new Parameters(){{
-                put("login", loginField.getText());
-                put("password", new String(passwordField.getPassword()));
-            }});
-        });
+        loginButton = createButton("Войти", this::event);
         loginButton.setEnabled(false);
         panel.add(createButton);
         panel.add(loginButton);
+    }
+
+    public void event(){
+        getLauncherUI().setScreen(LoginProcess.class, new Parameters(){{
+            put("login", loginField.getText());
+            put("password", new String(passwordField.getPassword()));
+        }});
     }
 
     public void onShow(){
@@ -64,7 +69,7 @@ public class Login extends TitledLogoScreen {
 
     public void createSubComponents(TransparentPanel panel) {
         panel.add(createSubLabel("Забыли пароль?", () -> {
-
+        getLauncherUI().setScreen(Reset.class);
         }));
     }
 }

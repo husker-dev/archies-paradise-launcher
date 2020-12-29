@@ -1,6 +1,7 @@
 package com.husker.launcher.server.api;
 
 import com.husker.launcher.server.core.Client;
+import com.husker.launcher.server.core.Profile;
 import com.husker.launcher.server.services.HttpService;
 import com.husker.launcher.server.services.http.ApiClass;
 import com.husker.launcher.server.services.http.ApiException;
@@ -18,7 +19,9 @@ import java.util.Objects;
 
 public class ApiClients extends ApiClass {
 
-    public void update() throws IOException {
+    public void update(Profile profile) throws IOException {
+        profile.checkStatus("Администратор");
+
         String name = getAttribute("name");
         String id = getAttribute("id");
 
@@ -60,8 +63,6 @@ public class ApiClients extends ApiClass {
 
         if(Objects.requireNonNull(new File("./received_clients_tmp/").listFiles()).length == 0)
             IOUtils.delete("./received_clients_tmp/");
-
-
     }
 
     public JSONObject getList(){
@@ -127,22 +128,21 @@ public class ApiClients extends ApiClass {
         }
     }
 
+    public JSONObject getModsCount(){
+        try {
+            Client client = new Client(getAttribute("id"));
+            return new SimpleJSON("count", client.getClientInfo().getJSONArray("mods").length());
+        }catch (NullPointerException e){
+            throw new ApiException("Client part not specified or not found", 1);
+        } catch (IOException e) {
+            return new SimpleJSON("count", 0);
+        }
+    }
+
     public JSONObject getModInfo() throws IOException {
         try {
             Client client = new Client(getAttribute("id"));
-            return client.getModsInfo(new Client.ModsGetterParameters() {{
-                if (containsAttribute("count"))
-                    setCount(Integer.parseInt(getAttribute("count")));
-                if (containsAttribute("index"))
-                    setIndex(Integer.parseInt(getAttribute("index")));
-                if (containsAttribute("icon")) {
-                    String icon = getAttribute("icon");
-                    if (icon.equals("true"))
-                        setIconParameter(IconParameter.REQUIRE);
-                    if (icon.equals("false"))
-                        setIconParameter(IconParameter.NOT_REQUIRE);
-                }
-            }});
+            return client.getModsInfo(containsAttribute("index") ? Integer.parseInt(getAttribute("index")) : -1);
         }catch (NullPointerException e){
             throw new ApiException("Client part not specified or not found", 1);
         }

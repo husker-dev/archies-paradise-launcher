@@ -34,7 +34,6 @@ public abstract class AbstractMainScreen extends Screen {
                 setLayout(new BorderLayout());
                 add(new BlurScalableImage(AbstractMainScreen.this, Resources.Logo){
                     {
-
                         setFitType(FitType.FILL_Y);
                     }
 
@@ -66,12 +65,12 @@ public abstract class AbstractMainScreen extends Screen {
                             add(new WebLabel("Статус: "){{
                                 setForeground(new Color(70, 70, 70));
                                 setPreferredHeight(15);
-                                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                                setFont(Resources.Fonts.getChronicaProExtraBold());
                             }});
                             add(statusLabel = new WebLabel("Обновление..."){{
                                 setForeground(new Color(120, 120, 120));
                                 setPreferredHeight(15);
-                                setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+                                setFont(Resources.Fonts.getChronicaProExtraBold());
                             }});
                         }
                         public void onBlurApply(BlurParameter parameter, Component component) {

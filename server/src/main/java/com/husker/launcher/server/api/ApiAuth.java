@@ -13,7 +13,7 @@ public class ApiAuth extends ApiClass {
     public JSONObject getAccessToken(){
         Profile profile = Profile.get(getAttribute("login"), getAttribute("password"));
         if(profile != null)
-            return SimpleJSON.create("access_token", profile.createKey());
+            return SimpleJSON.create("access_token", profile.Token.create());
         else
             throw new ApiException("Wrong login or password", 1);
     }

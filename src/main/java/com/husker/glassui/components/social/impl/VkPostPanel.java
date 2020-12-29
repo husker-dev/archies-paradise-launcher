@@ -49,7 +49,7 @@ public class VkPostPanel extends ImageSocialPanel {
                     setHorizontalAlignment(CENTER);
                     setForeground(new Color(255, 255, 255));
                     setPreferredHeight(20);
-                    setFont(Resources.Fonts.ChronicaPro_ExtraBold.deriveFont(15f));
+                    setFont(Resources.Fonts.getChronicaProExtraBold(15));
                 }});
 
                 add(new WebStyledLabel(snippet.getSnippetAuthor()){{
@@ -57,7 +57,7 @@ public class VkPostPanel extends ImageSocialPanel {
                     setHorizontalAlignment(CENTER);
                     setForeground(new Color(255, 255, 255));
                     setPreferredHeight(20);
-                    setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(12f));
+                    setFont(Resources.Fonts.getChronicaProBold(12));
                 }});
             }}, 1);
         }
@@ -72,7 +72,7 @@ public class VkPostPanel extends ImageSocialPanel {
                     setHorizontalAlignment(CENTER);
                     setForeground(GlassUI.Colors.labelText);
                     setPreferredHeight(20);
-                    setFont(Resources.Fonts.ChronicaPro_Bold.deriveFont(11f));
+                    setFont(Resources.Fonts.getChronicaProBold(11));
                     getScreen().addBlurSegment("VkPostPanel.Video.Tag", parameter1 -> onBlurApply(parameter1, tag));
                     setIcon(new ImageIcon(Resources.Icon_Play.getScaledInstance(14, 14, Image.SCALE_SMOOTH)));
                 }});

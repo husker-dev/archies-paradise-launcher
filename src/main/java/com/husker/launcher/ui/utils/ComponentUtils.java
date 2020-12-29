@@ -23,9 +23,11 @@ public class ComponentUtils {
             return new Point(0, 0);
         }
     }
+
     public static void makeMouseEventTransparent(Component component){
         makeMouseEventTransparent(component, component.getParent());
     }
+
     public static void makeMouseEventTransparent(Component component, Component parent){
         component.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
@@ -59,6 +61,15 @@ public class ComponentUtils {
                     parent.dispatchEvent(e);
             }
         });
+    }
+
+    public static boolean isParentInvisible(Component component){
+        Component current = component;
+        while((current = current.getParent()) != null){
+            if(!current.isVisible())
+                return true;
+        }
+        return false;
     }
 
     public static int getStringWidth(String text, Font font){

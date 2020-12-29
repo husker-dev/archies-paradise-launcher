@@ -162,7 +162,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             setIcon(icon);
 
             setForeground(GlassUI.Colors.labelText);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+            setFont(Resources.Fonts.getChronicaProExtraBold());
             setPreferredHeight(50);
             setHorizontalAlignment(CENTER);
         }};

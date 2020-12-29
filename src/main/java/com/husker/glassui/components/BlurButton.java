@@ -48,7 +48,7 @@ public class BlurButton extends WebButton implements BlurComponent{
             }
         });
 
-        setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+        setFont(Resources.Fonts.getChronicaProExtraBold());
         setPreferredHeight(30);
         setForeground(GlassUI.Colors.labelText);
         setPadding(3, 15, 0, 15);
@@ -122,5 +122,30 @@ public class BlurButton extends WebButton implements BlurComponent{
 
     public boolean isDisposed() {
         return disposed;
+    }
+
+    public static class Flat extends BlurButton{
+
+        public Flat(Screen screen) {
+            super(screen);
+        }
+
+        public Flat(Screen screen, String text) {
+            super(screen, text);
+        }
+
+        public void onBlurApply(BlurParameter parameter, Component component) {
+            super.onBlurApply(parameter, component);
+            if(returnOnInvisible(parameter, component))
+                return;
+            if(component == this){
+                parameter.setAdditionColor(new Color(0, 0, 0, 0));
+                parameter.setBlurFactor(0);
+                parameter.setShadowSize(2);
+
+                if(isHovered())
+                    parameter.setShadowColor(new Color(0, 0, 0, 90));
+            }
+        }
     }
 }

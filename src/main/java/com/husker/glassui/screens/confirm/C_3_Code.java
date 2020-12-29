@@ -47,7 +47,7 @@ public class C_3_Code extends TitledLogoScreen {
             setMaximumRows(3);
             setForeground(GlassUI.Colors.labelLightText);
             setPreferredHeight(80);
-            setFont(Resources.Fonts.ChronicaPro_ExtraBold);
+            setFont(Resources.Fonts.getChronicaProExtraBold());
         }};
         panel.add(emailLabel);
         panel.add(new TransparentPanel(){{
@@ -57,6 +57,7 @@ public class C_3_Code extends TitledLogoScreen {
             add(createLabel("Код (6 цифр)"));
             add(code = new BlurTextField(C_3_Code.this){{
                 addTextListener(text -> nextButton.setEnabled(code.getText().length() == 6));
+                addFastAction(() -> event());
             }});
             add(resendButton = createButton("Повторить", () -> {
                 seconds = 60;
@@ -64,7 +65,7 @@ public class C_3_Code extends TitledLogoScreen {
                 new Thread(() -> {
                     try {
                         getLauncher().User.sendConfirmCode(getParameterValue("email"));
-                    } catch (API.EmailCodeSendingException e) {
+                    } catch (API.EmailCodeSendingException | API.EmailAlreadyExistException e) {
                         Message.showMessage(getLauncherUI(), "Ошибка", "Ошибка отправки кода", "emailConfirm", getParameters());
                     }
                 }).start();
@@ -73,23 +74,24 @@ public class C_3_Code extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton("Далее", () -> {
-            getLauncherUI().setScreen(C_4_ConfirmingCode.class, new Parameters(){{
-                put("login", getParameter("login"));
-                put("password", getParameter("password"));
-                put("email", getParameter("email"));
-                put("code", code.getText());
-            }});
-        });
+        nextButton = createButton("Далее", this::event);
         nextButton.setEnabled(false);
         panel.add(createButton("Назад", () -> getLauncherUI().setScreen(C_1_Email.class, getParameters())));
         panel.add(nextButton);
 
     }
 
-    public void createSubComponents(TransparentPanel panel) {
+    public void event(){
+        getLauncherUI().setScreen(C_4_ConfirmingCode.class, new Parameters(){{
+            put("login", getParameter("login"));
+            put("password", getParameter("password"));
+            put("email", getParameter("email"));
+            put("code", code.getText());
+        }});
     }
 
+    public void createSubComponents(TransparentPanel panel) {
+    }
 
     public void onShow() {
         super.onShow();

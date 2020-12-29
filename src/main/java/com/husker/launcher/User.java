@@ -64,7 +64,7 @@ public class User {
         }
     }
 
-    public void sendConfirmCode(String email) throws EmailCodeSendingException {
+    public void sendConfirmCode(String email) throws EmailCodeSendingException, EmailAlreadyExistException {
         try {
             API.Profile.sendEmailCode(token, email);
         }catch (InternalAPIException | WrongAccessTokenException e){
@@ -110,7 +110,7 @@ public class User {
         return emailConfirmed;
     }
 
-    public void setData(String currentPassword, String emailCode, HashMap<String, String> data) throws IncorrectCurrentPasswordException, LoginAlreadyExistException, IncorrectEmailCodeException, IncorrectEmailFormatException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectPasswordFormatException, IncorrectLoginFormatException {
+    public void setData(String currentPassword, String emailCode, HashMap<String, String> data) throws IncorrectCurrentPasswordException, LoginAlreadyExistException, IncorrectEmailCodeException, IncorrectEmailFormatException, CurrentPasswordRequiredException, EmailCodeRequiredException, IncorrectLoginFormatException, EmailAlreadyExistException {
         try {
             Profile.setData(token, data, currentPassword, emailCode);
             updateData();
@@ -135,6 +135,7 @@ public class User {
         email = "";
         id = -1;
         logoutListeners.forEach(Runnable::run);
+        File.setPassword("null");
     }
 
     public void setSkin(BufferedImage image) throws SkinTooLargeException {

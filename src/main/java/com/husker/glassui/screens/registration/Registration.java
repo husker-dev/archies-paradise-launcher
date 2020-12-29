@@ -27,6 +27,7 @@ public class Registration extends TitledLogoScreen {
         panel.add(createLabel("Имя"));
         panel.add(loginField = new BlurTextField(this){{
             addTextListener(text -> updateButton());
+            addFastAction(() -> event());
         }});
 
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -34,6 +35,7 @@ public class Registration extends TitledLogoScreen {
         panel.add(createLabel("Пароль"));
         panel.add(passwordField = new BlurPasswordField(this){{
             addTextListener(text -> updateButton());
+            addFastAction(() -> event());
         }});
 
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -41,6 +43,7 @@ public class Registration extends TitledLogoScreen {
         panel.add(createLabel("Подтверждение пароля"));
         panel.add(password1Field = new BlurPasswordField(this){{
             addTextListener(text -> updateButton());
+            addFastAction(() -> event());
         }});
     }
 
@@ -51,14 +54,16 @@ public class Registration extends TitledLogoScreen {
     }
 
     public void createComponents(TransparentPanel panel) {
-        nextButton = createButton("Далее", () -> {
-            getLauncherUI().setScreen(RegistrationProgress.class, new Parameters(){{
-                put("login", loginField.getText());
-                put("password", passwordField.getText());
-            }});
-        });
+        nextButton = createButton("Далее", this::event);
         nextButton.setEnabled(false);
         panel.add(nextButton);
+    }
+
+    public void event(){
+        getLauncherUI().setScreen(RegistrationProgress.class, new Parameters(){{
+            put("login", loginField.getText());
+            put("password", passwordField.getText());
+        }});
     }
 
     public void onShow(){

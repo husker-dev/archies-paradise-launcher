@@ -1,5 +1,7 @@
 package com.husker.launcher.managers;
 
+import com.husker.launcher.api.API;
+import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.utils.IOUtils;
 import com.husker.net.Get;
@@ -16,34 +18,23 @@ public class UpdateManager {
     private static final Logger log = LogManager.getLogger(UpdateManager.class);
     public static boolean enable = true;
 
-    public static final String VERSION = "0.0.1";
+    public static final String VERSION = "0.1";
     private static final String UpdateFolder = "./launcher_update";
 
-    private static final String[] filesToSave = new String[]{"client"};
-
-    private static JSONObject LatestReleaseInfo = null;
+    private static final String[] filesToSave = new String[]{"clients"};
 
     static{
         log.info("Current launcher version: " + VERSION);
         IOUtils.delete(UpdateFolder);
     }
 
-    private static void checkHTML() throws UpdateException{
-        if(LatestReleaseInfo == null) {
-            try {
-                Get get = new Get("https://api.github.com/repos/" + Social.GitHub.getRepository() + "/releases/latest");
-                LatestReleaseInfo = new JSONObject(get.getHtmlContent());
-                if(LatestReleaseInfo.has("message") && LatestReleaseInfo.getString("message").equals("Not Found"))
-                    throw new IOException("Can't find any releases");
-            }catch (IOException e) {
-                throw new UpdateException(UpdateException.Stage.VERSION_GET, 0, new Exception("Failed while getting release info: " + e.getMessage()));
-            }
-        }
-    }
-
     public static String getLatestVersion() throws UpdateException{
-        checkHTML();
-        return LatestReleaseInfo.getString("tag_name");
+        try {
+            return API.getJSON(ApiMethod.create("launcher.getVersion")).getString("version");
+        }catch (Exception ex){
+            ex.printStackTrace();
+            throw new UpdateException(UpdateException.Stage.VERSION_GET, 1, ex);
+        }
     }
 
     public static boolean hasUpdate() throws UpdateException{
@@ -53,8 +44,7 @@ public class UpdateManager {
     }
 
     public static String getDownloadLink() throws UpdateException{
-        checkHTML();
-        return LatestReleaseInfo.getJSONArray("assets").getJSONObject(0).getString("browser_download_url");
+        return "https://github.com/" + Social.GitHub.getRepository() + "/releases/download/" + getLatestVersion() + "/launcher.zip";
     }
 
     public static void processUpdating(UpdateProcessor processor){
@@ -62,6 +52,7 @@ public class UpdateManager {
             IOUtils.delete(UpdateFolder, processor::onRemoveOld);
             Files.createDirectories(Paths.get(UpdateFolder));
 
+            System.out.println("Update URL: " + getDownloadLink());
             IOUtils.receiveFile(getDownloadLink(), UpdateFolder + "/update_archive.zip", processor::onDownloading);
 
             IOUtils.unzip(UpdateFolder + "/update_archive.zip", UpdateFolder, processor::onUnzipping);

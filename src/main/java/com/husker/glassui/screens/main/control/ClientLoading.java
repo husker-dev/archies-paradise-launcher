@@ -29,28 +29,24 @@ public class ClientLoading extends SimpleLoadingScreen {
     }
 
     public void process() {
-        setText("Архивация...");
+        setText("Добавление в архив...");
         try {
             File file = new File(getParameterValue("file"));
             String id = getParameterValue("id");
             String title = getParameterValue("title");
-
             String zipPath = "./" + file.getName() + ".zip";
 
             zip(file.getAbsolutePath(), zipPath);
-            System.out.println(new File(zipPath).length());
 
             setText("Соединение...");
-            API.Client.update(new File(zipPath), id, title, stage -> {
-                if(stage == 0)
-                    setText("Отправка");
-                if(stage == 1)
+            API.Client.update(getLauncher().User.getToken(), new File(zipPath), id, title, new API.Client.UpdatingActionListener() {
+                public void sending(int progress) {
+                    setText("Отправка... " + progress + "%");
+                }
+                public void process() {
                     setText("Обработка...");
-            });
-
-            setText("Удаление временных файлов...");
-            com.husker.launcher.utils.IOUtils.delete(zipPath, progress -> {
-                setText("Удаление временных файлов... (" + progress + "%)");
+                    com.husker.launcher.utils.IOUtils.delete(zipPath);
+                }
             });
 
             getLauncherUI().setScreen(MainScreen.class);

@@ -19,6 +19,8 @@ public class UserInfoFile extends SettingsFile {
     }
 
     public String getLogin(){
+        if(!containsVar("login"))
+            return null;
         return get("login");
     }
 
@@ -27,6 +29,8 @@ public class UserInfoFile extends SettingsFile {
     }
 
     public String getPassword(){
+        if(!containsVar("password"))
+            return null;
         return decrypt(get("password"));
     }
 

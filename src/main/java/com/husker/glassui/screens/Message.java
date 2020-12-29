@@ -11,6 +11,8 @@ import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.utils.UIUtils;
 
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
 
 import static com.husker.launcher.ui.utils.UIUtils.ShadowSide.BOTTOM;
@@ -25,7 +27,6 @@ public class Message extends CenteredMenuScreen {
     private Parameters prevParameters;
 
     public void onMenuInit() {
-
         addBlurSegment("Message.Menu", parameter -> {
             GlassUI.applyBottomLayer(parameter);
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), getMenuHeight() - 15, 25, 25));
@@ -36,7 +37,6 @@ public class Message extends CenteredMenuScreen {
             parameter.setShape(new RoundRectangle2D.Double(getMenuX(), getMenuY(), getMenuWidth(), title_size, 25, 25));
             parameter.setShadowClip(UIUtils.keepShadow(parameter, BOTTOM));
         });
-
 
         setLayout(new GridBagLayout());
 
@@ -49,11 +49,20 @@ public class Message extends CenteredMenuScreen {
             setLayout(new VerticalFlowLayout());
             setMargin(0, 50, 0, 50);
             add(new BlurButton(Message.this, "Окей"){{
-                addActionListener(e -> {
-                    getLauncherUI().setScreen(prevScreen, prevParameters);
-                });
+                addActionListener(e -> event());
             }});
         }});
+
+        addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent e) {
+                if(e.getKeyCode() == KeyEvent.VK_ENTER)
+                    event();
+            }
+        });
+    }
+
+    public void event(){
+        getLauncherUI().setScreen(prevScreen, prevParameters);
     }
 
     public static void showMessage(LauncherUI ui, String title, String text, Class<? extends Screen> prevScreen){

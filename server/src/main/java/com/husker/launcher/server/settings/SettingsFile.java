@@ -63,7 +63,9 @@ public class SettingsFile {
                 return;
             if(!Files.exists(Paths.get(path)))
                 Files.createFile(Paths.get(path));
-            yaml.dump(map, new OutputStreamWriter(new FileOutputStream(new File(path)), StandardCharsets.UTF_8));
+            FileOutputStream os = new FileOutputStream(new File(path));
+            yaml.dump(map, new OutputStreamWriter(os, StandardCharsets.UTF_8));
+            os.close();
         }catch (Exception ex){
             ex.printStackTrace();
         }
