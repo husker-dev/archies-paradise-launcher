@@ -19,8 +19,6 @@ import org.bridj.jawt.JAWTUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -96,7 +94,7 @@ public class PlayPanel extends TransparentPanel {
     }
 
     public void onPlayClick(){
-        updateData();
+        updateStatus();
         if(!playBtn.isEnabled())
             return;
         setProcessVisible(true);
@@ -108,7 +106,7 @@ public class PlayPanel extends TransparentPanel {
                 Discord.setState(Discord.Texts.InMainMenu);
                 screen.getLauncher().setVisible(true);
                 setProcessVisible(false);
-                updateData();
+                updateStatus();
 
                 TaskBar.setProgress(screen.getLauncher(), -1);
             }
@@ -178,7 +176,7 @@ public class PlayPanel extends TransparentPanel {
             clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
         else
             clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR_Disabled, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
-        updateData();
+        updateStatus();
     }
 
     public void setProcessVisible(boolean visible){
@@ -190,10 +188,11 @@ public class PlayPanel extends TransparentPanel {
     }
 
     public void onShow(){
-        updateData();
+        updateScreenshots();
+        updateStatus();
     }
 
-    public void updateData(){
+    public void updateScreenshots(){
         new Thread(() -> {
             try {
                 int count = API.getJSON(ApiMethod.create("screenshots.getCount")).getInt("count");
@@ -210,17 +209,24 @@ public class PlayPanel extends TransparentPanel {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    public void updateStatus(){
         new Thread(() -> {
             playBtn.setText("Загрузка...");
             playBtn.setEnabled(false);
 
             LaunchManager.ClientState lastState = LaunchManager.getClientState(clients[vr ? 0:1]);
-            playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR);
 
+            playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR && lastState != LaunchManager.ClientState.UPDATING);
             switch (lastState){
                 case PLAY:
                     playBtn.setIcon(new ImageIcon(Resources.Icon_Play.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
                     playBtn.setText("Играть");
+                    break;
+                case UPDATING:
+                    playBtn.setIcon(new ImageIcon(Resources.Icon_Dot_Selected.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setText("Обновляется");
                     break;
                 case DOWNLOAD:
                     playBtn.setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
@@ -235,6 +241,8 @@ public class PlayPanel extends TransparentPanel {
                     playBtn.setText("Недоступно");
                     break;
             }
+
+
         }).start();
     }
 

@@ -1,9 +1,11 @@
 package com.husker.launcher.ui.components;
 
 import com.husker.launcher.ui.utils.RenderUtils;
+import com.husker.launcher.utils.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -98,7 +100,6 @@ public class ScalableImage extends JComponent {
         RoundRectangle2D.Double imageShape = new RoundRectangle2D.Double((getWidth() - newWidth) / 2d - 1, (getHeight() - newHeight) / 2d - 1, newWidth + 2, newHeight + 2, round, round);
         RoundRectangle2D.Double componentShape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), round, round);
 
-        RenderUtils.enableAntialiasing(g2d);
         RenderUtils.enableInterpolation(g2d);
 
         g2d.setPaint(new TexturePaint(image, imageShape.getBounds()));

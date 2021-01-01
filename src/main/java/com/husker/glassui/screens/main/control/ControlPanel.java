@@ -6,21 +6,19 @@ import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.*;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
-import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
+import com.husker.launcher.utils.filechooser.FileChooser;
 import com.husker.net.Get;
 import com.husker.net.HttpsUrlBuilder;
-import li.flor.nativejfilechooser.NativeJFileChooser;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -28,6 +26,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+
+import static com.husker.launcher.utils.filechooser.FileChooser.Mode.DIRECTORIES_ONLY;
+import static com.husker.launcher.utils.filechooser.FileChooser.Mode.FILES_AND_DIRECTORIES;
 
 public class ControlPanel extends TransparentPanel {
 
@@ -217,23 +218,7 @@ public class ControlPanel extends TransparentPanel {
     }
 
     private File chooseFile() {
-        JFileChooser chooser = new NativeJFileChooser();
-        chooser.setDialogTitle("Выбор сборки");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setFileFilter(new FileFilter() {
-            public String getDescription() {
-                return "Directory";
-            }
-            public boolean accept(File f) {
-                return f.isDirectory();
-            }
-        });
-
-        File file = null;
-
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-            file = chooser.getSelectedFile();
-        return file;
+        return new FileChooser(DIRECTORIES_ONLY).open(screen.getLauncher());
     }
 
     static class Release {

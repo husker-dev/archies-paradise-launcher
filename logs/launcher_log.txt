@@ -1,191 +1,213 @@
-[15:21:20] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:21] [Resources/INFO]: Reading resources/logo.png
-[15:21:21] [Resources/INFO]: Reading resources/icon.png
-[15:21:21] [Resources/INFO]: Reading resources/loading_background.png
-[15:21:21] [UpdateManager/INFO]: Current launcher version: 0.1
-[15:21:21] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:21:21] [Launcher/INFO]: Loading resources...
-[15:21:21] [Resources/INFO]: Reading resources/background.jpg
-[15:21:21] [Launcher/INFO]: Installing the WebLaF library
-[15:21:21] [Resources/INFO]: Reading resources/info_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/play_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/profile_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/settings_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/book_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/videos_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/image_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/frame_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/edit_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/edit_icon_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/arrow_left.png
-[15:21:21] [Resources/INFO]: Reading resources/arrow_right.png
-[15:21:21] [Resources/INFO]: Reading resources/arrow_left_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/arrow_right_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/dot.png
-[15:21:21] [Resources/INFO]: Reading resources/dot_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/reply.png
-[15:21:21] [Resources/INFO]: Reading resources/reply_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/download_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/reload.png
-[15:21:21] [Resources/INFO]: Reading resources/reload_selected.png
-[15:21:21] [Resources/INFO]: Reading resources/code_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/people_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/key_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/folder_icon.png
-[15:21:21] [Resources/INFO]: Reading resources/fullscreen.png
-[15:21:21] [Resources/INFO]: Reading resources/dot_light.png
-[15:21:21] [Resources/INFO]: Reading resources/vr_icon.png
-[15:21:22] [Resources/INFO]: Reading resources/vr_icon_disabled.png
-[15:21:22] [Resources/INFO]: Reading resources/social_loading_logo.png
-[15:21:22] [Resources/INFO]: Reading resources/youtube_logo.png
-[15:21:22] [Resources/INFO]: Reading resources/vk_logo.png
-[15:21:22] [Resources/INFO]: Reading resources/instagram_logo.png
-[15:21:22] [Resources/INFO]: Reading resources/steve.png
-[15:21:22] [Resources/INFO]: Reading resources/checkbox_on.png
-[15:21:22] [Resources/INFO]: Reading resources/checkbox_off.png
-[15:21:22] [Resources/INFO]: Reading resources/paper.png
-[15:21:24] [LauncherUI/INFO]: Initializing screen: Message
-[15:21:25] [LauncherUI/INFO]: Loaded screen: Message
-[15:21:25] [LauncherUI/INFO]: Initializing screen: Login
-[15:21:25] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:25] [LauncherUI/INFO]: Loaded screen: Login
-[15:21:25] [LauncherUI/INFO]: Initializing screen: LoginProcess
-[15:21:25] [LauncherUI/INFO]: Loaded screen: LoginProcess
-[15:21:25] [LauncherUI/INFO]: Initializing screen: Reset
-[15:21:25] [LauncherUI/INFO]: Loaded screen: Reset
-[15:21:25] [LauncherUI/INFO]: Initializing screen: R_1_SendingCode
-[15:21:25] [LauncherUI/INFO]: Loaded screen: R_1_SendingCode
-[15:21:25] [LauncherUI/INFO]: Initializing screen: R_2_EmailCode
-[15:21:25] [LauncherUI/INFO]: Loaded screen: R_2_EmailCode
-[15:21:25] [LauncherUI/INFO]: Initializing screen: R_3_NewPassword
-[15:21:25] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:26] [LauncherUI/INFO]: Loaded screen: R_3_NewPassword
-[15:21:26] [LauncherUI/INFO]: Initializing screen: Registration
-[15:21:26] [LauncherUI/INFO]: Loaded screen: Registration
-[15:21:26] [LauncherUI/INFO]: Initializing screen: RegistrationProgress
-[15:21:26] [LauncherUI/INFO]: Loaded screen: RegistrationProgress
-[15:21:26] [LauncherUI/INFO]: Initializing screen: C_1_Email
-[15:21:26] [LauncherUI/INFO]: Loaded screen: C_1_Email
-[15:21:26] [LauncherUI/INFO]: Initializing screen: C_2_SendingCode
-[15:21:26] [LauncherUI/INFO]: Loaded screen: C_2_SendingCode
-[15:21:26] [LauncherUI/INFO]: Initializing screen: C_3_Code
-[15:21:26] [LauncherUI/INFO]: Loaded screen: C_3_Code
-[15:21:26] [LauncherUI/INFO]: Initializing screen: C_4_ConfirmingCode
-[15:21:26] [LauncherUI/INFO]: Loaded screen: C_4_ConfirmingCode
-[15:21:26] [LauncherUI/INFO]: Initializing screen: MainScreen
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
-[15:21:26] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
-[15:21:27] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
-[15:21:27] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
-[15:21:27] [API/INFO]: http://127.0.0.1:15565/api/method/about.getOwnerInfo
-[15:21:27] [API/INFO]: http://127.0.0.1:15565/api/method/about.getSupportInfo
-[15:21:27] [LauncherUI/INFO]: Loaded screen: MainScreen
-[15:21:27] [LauncherUI/INFO]: Initializing screen: BackgroundSelection
-[15:21:27] [LauncherUI/INFO]: Loaded screen: BackgroundSelection
-[15:21:27] [LauncherUI/INFO]: Initializing screen: ClientLoading
-[15:21:27] [LauncherUI/INFO]: Loaded screen: ClientLoading
-[15:21:27] [LauncherUI/INFO]: Initializing screen: InfoEdit
-[15:21:27] [Resources/INFO]: Reading resources/steve.png
-[15:21:28] [LauncherUI/INFO]: Loaded screen: InfoEdit
-[15:21:28] [LauncherUI/INFO]: Initializing screen: InfoApplying
-[15:21:28] [LauncherUI/INFO]: Loaded screen: InfoApplying
-[15:21:28] [LauncherUI/INFO]: Initializing screen: EmailConfirm
-[15:21:28] [Resources/INFO]: Reading resources/steve.png
-[15:21:28] [LauncherUI/INFO]: Loaded screen: EmailConfirm
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SendingCode
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SendingCode
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SkinCategoriesLoading
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SkinCategoriesLoading
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SkinCategories
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SkinCategories
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SkinListLoading
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SkinListLoading
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SkinList
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SkinList
-[15:21:28] [LauncherUI/INFO]: Initializing screen: SkinApply
-[15:21:28] [LauncherUI/INFO]: Loaded screen: SkinApply
-[15:21:28] [LauncherUI/INFO]: Changing screen to: LoginProcess  login=Husker41,password=password
-[15:21:28] [API/INFO]: http://127.0.0.1:15565/api/method/auth.getAccessToken?password=password&login=Husker41
-[15:21:28] [LauncherUI/INFO]: Changing screen to: Message  title=Ошибка,text=Неправильный логин или пароль,prevScreen=Login,backParameters={login=Husker41}
-[15:21:30] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:31] [LauncherUI/INFO]: Changing screen to: Login  login=Husker41
-[15:21:35] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:36] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:21:37] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:38] [LauncherUI/INFO]: Changing screen to: Registration  
-[15:21:40] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:45] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:46] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:21:47] [LauncherUI/INFO]: Changing screen to: RegistrationProgress  login=Husker41,password=password
-[15:21:47] [API/INFO]: http://127.0.0.1:15565/api/method/auth.create?password=password&login=Husker41
-[15:21:47] [LauncherUI/INFO]: Changing screen to: LoginProcess  login=Husker41,password=password
-[15:21:47] [API/INFO]: http://127.0.0.1:15565/api/method/auth.getAccessToken?password=password&login=Husker41
-[15:21:48] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getData?access_token=CkE3j6CYFB15LFoa1jRHnEDB&fields=login%2Cemail%2Cid%2Cstatus
-[15:21:48] [API/INFO]: http://127.0.0.1:15565/api/method/profile.isEmailConfirmed?access_token=CkE3j6CYFB15LFoa1jRHnEDB
-[15:21:48] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getSkin?access_token=CkE3j6CYFB15LFoa1jRHnEDB
-[15:21:48] [LauncherUI/INFO]: Changing screen to: C_1_Email  login=Husker41,password=password
-[15:21:49] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:50] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:53] [LauncherUI/INFO]: Changing screen to: C_2_SendingCode  login=Husker41,password=password,email=redfancoestar@gmail.com
-[15:21:54] [API/INFO]: http://127.0.0.1:15565/api/method/profile.sendEmailCode?access_token=CkE3j6CYFB15LFoa1jRHnEDB&email=redfancoestar%40gmail.com
-[15:21:55] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:21:56] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:00] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:01] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:05] [LauncherUI/INFO]: Changing screen to: C_3_Code  login=Husker41,password=password,email=redfancoestar@gmail.com
-[15:22:05] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:06] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:10] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:13] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:14] [LauncherUI/INFO]: Changing screen to: C_4_ConfirmingCode  login=Husker41,password=password,email=redfancoestar@gmail.com,code=086826
-[15:22:14] [API/INFO]: http://127.0.0.1:15565/api/method/profile.confirmEmail?access_token=CkE3j6CYFB15LFoa1jRHnEDB&email_code=086826&email=redfancoestar%40gmail.com
-[15:22:14] [API/INFO]: http://127.0.0.1:15565/api/method/profile.isEmailConfirmed?access_token=CkE3j6CYFB15LFoa1jRHnEDB
-[15:22:14] [LauncherUI/INFO]: Changing screen to: Message  title=Уведомление,text=Приятной игры!,prevScreen=LoginProcess,backParameters={login=Husker41,password=password}
-[15:22:15] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:16] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:17] [LauncherUI/INFO]: Changing screen to: LoginProcess  login=Husker41,password=password
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/auth.getAccessToken?password=password&login=Husker41
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getData?access_token=VQ20uWsPNH7Ra3VAfAahf4oa&fields=login%2Cemail%2Cid%2Cstatus
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/profile.isEmailConfirmed?access_token=VQ20uWsPNH7Ra3VAfAahf4oa
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getSkin?access_token=VQ20uWsPNH7Ra3VAfAahf4oa
-[15:22:17] [LauncherUI/INFO]: Changing screen to: MainScreen  
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.getInfo
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
-[15:22:17] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
-[15:22:18] [API/INFO]: http://127.0.0.1:15565/api/method/vk.getInfo
-[15:22:19] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.getInfo
-[15:22:20] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:25] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:25] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:26] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
-[15:22:30] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:35] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:36] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:37] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:40] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:45] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:46] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
-[15:22:49] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:50] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
-[15:22:52] [Launcher/INFO]: Closed
+[22:29:21] [Resources/INFO]: Reading resources/logo.png
+[22:29:21] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:22] [Resources/INFO]: Reading resources/icon.png
+[22:29:22] [Resources/INFO]: Reading resources/loading_background.png
+[22:29:22] [UpdateManager/INFO]: Current launcher version: 0.1
+[22:29:22] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:22] [Launcher/INFO]: Loading resources...
+[22:29:22] [Resources/INFO]: Reading resources/background.jpg
+[22:29:22] [Resources/INFO]: Reading resources/info_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/play_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/profile_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/settings_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/book_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/videos_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/image_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/frame_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/edit_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/edit_icon_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/arrow_left.png
+[22:29:22] [Resources/INFO]: Reading resources/arrow_right.png
+[22:29:22] [Resources/INFO]: Reading resources/arrow_left_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/arrow_right_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/dot.png
+[22:29:22] [Resources/INFO]: Reading resources/dot_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/reply.png
+[22:29:22] [Resources/INFO]: Reading resources/reply_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/download_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/reload.png
+[22:29:22] [Resources/INFO]: Reading resources/reload_selected.png
+[22:29:22] [Resources/INFO]: Reading resources/code_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/people_icon.png
+[22:29:22] [Launcher/INFO]: Installing the WebLaF library
+[22:29:22] [Resources/INFO]: Reading resources/key_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/folder_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/fullscreen.png
+[22:29:22] [Resources/INFO]: Reading resources/dot_light.png
+[22:29:22] [Resources/INFO]: Reading resources/vr_icon.png
+[22:29:22] [Resources/INFO]: Reading resources/vr_icon_disabled.png
+[22:29:22] [Resources/INFO]: Reading resources/social_loading_logo.png
+[22:29:22] [Resources/INFO]: Reading resources/youtube_logo.png
+[22:29:22] [Resources/INFO]: Reading resources/vk_logo.png
+[22:29:22] [Resources/INFO]: Reading resources/instagram_logo.png
+[22:29:22] [Resources/INFO]: Reading resources/steve.png
+[22:29:22] [Resources/INFO]: Reading resources/checkbox_on.png
+[22:29:22] [Resources/INFO]: Reading resources/checkbox_off.png
+[22:29:22] [Resources/INFO]: Reading resources/paper.png
+[22:29:25] [LauncherUI/INFO]: Initializing screen: Message
+[22:29:25] [LauncherUI/INFO]: Loaded screen: Message
+[22:29:25] [LauncherUI/INFO]: Initializing screen: Login
+[22:29:25] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:25] [LauncherUI/INFO]: Loaded screen: Login
+[22:29:25] [LauncherUI/INFO]: Initializing screen: LoginProcess
+[22:29:25] [LauncherUI/INFO]: Loaded screen: LoginProcess
+[22:29:25] [LauncherUI/INFO]: Initializing screen: Reset
+[22:29:25] [LauncherUI/INFO]: Loaded screen: Reset
+[22:29:25] [LauncherUI/INFO]: Initializing screen: R_1_SendingCode
+[22:29:25] [LauncherUI/INFO]: Loaded screen: R_1_SendingCode
+[22:29:25] [LauncherUI/INFO]: Initializing screen: R_2_EmailCode
+[22:29:25] [LauncherUI/INFO]: Loaded screen: R_2_EmailCode
+[22:29:25] [LauncherUI/INFO]: Initializing screen: R_3_NewPassword
+[22:29:26] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:28] [LauncherUI/INFO]: Loaded screen: R_3_NewPassword
+[22:29:28] [LauncherUI/INFO]: Initializing screen: Registration
+[22:29:28] [LauncherUI/INFO]: Loaded screen: Registration
+[22:29:28] [LauncherUI/INFO]: Initializing screen: RegistrationProgress
+[22:29:28] [LauncherUI/INFO]: Loaded screen: RegistrationProgress
+[22:29:28] [LauncherUI/INFO]: Initializing screen: C_1_Email
+[22:29:28] [LauncherUI/INFO]: Loaded screen: C_1_Email
+[22:29:28] [LauncherUI/INFO]: Initializing screen: C_2_SendingCode
+[22:29:28] [LauncherUI/INFO]: Loaded screen: C_2_SendingCode
+[22:29:28] [LauncherUI/INFO]: Initializing screen: C_3_Code
+[22:29:28] [LauncherUI/INFO]: Loaded screen: C_3_Code
+[22:29:28] [LauncherUI/INFO]: Initializing screen: C_4_ConfirmingCode
+[22:29:28] [LauncherUI/INFO]: Loaded screen: C_4_ConfirmingCode
+[22:29:28] [LauncherUI/INFO]: Initializing screen: MainScreen
+[22:29:28] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:29] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:29] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:29] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:29] [API/INFO]: http://127.0.0.1:15565/api/method/about.getOwnerInfo
+[22:29:29] [API/INFO]: http://127.0.0.1:15565/api/method/about.getSupportInfo
+[22:29:29] [LauncherUI/INFO]: Loaded screen: MainScreen
+[22:29:29] [LauncherUI/INFO]: Initializing screen: BackgroundSelection
+[22:29:29] [LauncherUI/INFO]: Loaded screen: BackgroundSelection
+[22:29:29] [LauncherUI/INFO]: Initializing screen: ClientLoading
+[22:29:29] [LauncherUI/INFO]: Loaded screen: ClientLoading
+[22:29:29] [LauncherUI/INFO]: Initializing screen: InfoEdit
+[22:29:29] [Resources/INFO]: Reading resources/steve.png
+[22:29:30] [LauncherUI/INFO]: Loaded screen: InfoEdit
+[22:29:30] [LauncherUI/INFO]: Initializing screen: InfoApplying
+[22:29:30] [LauncherUI/INFO]: Loaded screen: InfoApplying
+[22:29:30] [LauncherUI/INFO]: Initializing screen: EmailConfirm
+[22:29:30] [Resources/INFO]: Reading resources/steve.png
+[22:29:30] [LauncherUI/INFO]: Loaded screen: EmailConfirm
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SendingCode
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SendingCode
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SkinCategoriesLoading
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SkinCategoriesLoading
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SkinCategories
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SkinCategories
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SkinListLoading
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SkinListLoading
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SkinList
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SkinList
+[22:29:30] [LauncherUI/INFO]: Initializing screen: SkinApply
+[22:29:30] [LauncherUI/INFO]: Loaded screen: SkinApply
+[22:29:30] [LauncherUI/INFO]: Changing screen to: LoginProcess  login=Husker41,password=password
+[22:29:30] [API/INFO]: http://127.0.0.1:15565/api/method/auth.getAccessToken?password=password&login=Husker41
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getData?access_token=pDRbSG1Uc66dCltb12JByQTG&fields=login%2Cemail%2Cid%2Cstatus
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/profile.isEmailConfirmed?access_token=pDRbSG1Uc66dCltb12JByQTG
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/profile.getSkin?access_token=pDRbSG1Uc66dCltb12JByQTG
+[22:29:31] [LauncherUI/INFO]: Changing screen to: MainScreen  
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.getInfo
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
+[22:29:31] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:32] [API/INFO]: http://127.0.0.1:15565/api/method/vk.getInfo
+[22:29:32] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:33] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.getInfo
+[22:29:33] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:33] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:34] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:34] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:34] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:35] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:36] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:37] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:37] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:37] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:38] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=non_vr
+[22:29:38] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:38] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.searchProfiles?access_token=pDRbSG1Uc66dCltb12JByQTG&search=
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=UCAOEGtCBZUmctchRTkQ201A
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/vk.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archie.enotik
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archietheraccoon
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:39] [API/INFO]: http://127.0.0.1:15565/api/method/github.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&repo=husker-dev%2Fminecraft-launcher
+[22:29:40] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.searchProfiles?access_token=pDRbSG1Uc66dCltb12JByQTG&search=
+[22:29:40] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.getProfileInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&fields=login%2Cemail%2Cstatus%2Ccreation_time
+[22:29:40] [API/INFO]: http://127.0.0.1:15565/api/method/skins.getSkin?name=Husker41
+[22:29:41] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.setStatus?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&status=%D0%90%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80
+[22:29:41] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:42] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:43] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.searchProfiles?access_token=pDRbSG1Uc66dCltb12JByQTG&search=
+[22:29:44] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.getProfileInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&fields=login%2Cemail%2Cstatus%2Ccreation_time
+[22:29:44] [API/INFO]: http://127.0.0.1:15565/api/method/skins.getSkin?name=Husker41
+[22:29:44] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.setStatus?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&status=%D0%90%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80
+[22:29:45] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.getProfileInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&fields=login%2Cemail%2Cstatus%2Ccreation_time
+[22:29:45] [API/INFO]: http://127.0.0.1:15565/api/method/skins.getSkin?name=Husker41
+[22:29:45] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.setStatus?access_token=pDRbSG1Uc66dCltb12JByQTG&id=1&status=%D0%90%D0%B4%D0%BC%D0%B8%D0%BD%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%82%D0%BE%D1%80
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
+[22:29:46] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
+[22:29:48] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:49] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:50] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:50] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:51] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=UCAOEGtCBZUmctchRTkQ201A
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/vk.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/vk.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archie.enotik
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archietheraccoon
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/github.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&repo=
+[22:29:55] [API/INFO]: http://127.0.0.1:15565/api/method/github.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&repo=husker-dev%2Fminecraft-launcher
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/profiles.searchProfiles?access_token=pDRbSG1Uc66dCltb12JByQTG&search=
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/youtube.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=UCAOEGtCBZUmctchRTkQ201A
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/vk.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/vk.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archie.enotik
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/instagram.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&id=archietheraccoon
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/github.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&repo=
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/github.setInfo?access_token=pDRbSG1Uc66dCltb12JByQTG&repo=husker-dev%2Fminecraft-launcher
+[22:29:56] [API/INFO]: http://127.0.0.1:15565/api/method/minecraft.getServerInfo
+[22:29:57] [API/INFO]: http://127.0.0.1:15565/api/method/github.getInfo
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.getCount
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/clients.getFilesInfo?id=vr
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=0
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=0
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=0
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?index=1
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=small&index=1
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/screenshots.get?size=large&index=1
+[22:29:58] [API/INFO]: http://127.0.0.1:15565/api/method/launcher.getVersion
+[22:29:59] [Launcher/INFO]: Closed

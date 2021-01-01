@@ -110,7 +110,7 @@ public class HttpService implements Runnable {
 
                     if(result == null)
                         result = new JSONObject();
-                    log.info("Invoked API method: " + methodClass + "." + methodName);
+                    log.info("(" + exchange.getRemoteAddress().getHostName() + ") Invoked API method: " + methodClass + "." + methodName);
 
 
                     if (result instanceof File)
@@ -129,7 +129,7 @@ public class HttpService implements Runnable {
                 }catch (Exception e){
                     if(e instanceof InvocationTargetException)
                         e = (Exception) e.getCause();
-                    e.printStackTrace();
+                    //e.printStackTrace();
 
                     int code = ErrorCodes.SIMPLE_EXCEPTION;
                     if(e instanceof ApiException)

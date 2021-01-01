@@ -195,11 +195,14 @@ public class BlurTextField extends WebTextField implements BlurComponent{
                 Rectangle p1 = c.getUI().modelToView(c, offs1);
                 Rectangle r = p0.union(p1);
 
-                g.setColor(isFocused ? GlassUI.Colors.selectedColor : new Color(100, 100, 100, 0));
-
                 RenderUtils.enableAntialiasing(g2d);
+
                 int offset = 1;
-                g2d.fill(new RoundRectangle2D.Double(current_x - offset, r.y - 1, current_width + offset * 2d, r.height, 8, 8));
+                Shape shape = new RoundRectangle2D.Double(current_x - offset, r.y - 1, current_width + offset * 2d, r.height, 8, 8);
+                if(isFocused)
+                    RenderUtils.drawOuterShade(g2d, shape, new Color(140, 140, 140), 5);
+                g.setColor(isFocused ? GlassUI.Colors.selectedColor : new Color(100, 100, 100, 0));
+                g2d.fill(shape);
             } catch (BadLocationException e) {
                 // can't render
             }

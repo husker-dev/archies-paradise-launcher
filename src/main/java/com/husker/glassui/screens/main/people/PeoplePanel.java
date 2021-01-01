@@ -14,13 +14,12 @@ import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.utils.ImageUtils;
-import li.flor.nativejfilechooser.NativeJFileChooser;
+import com.husker.launcher.utils.filechooser.FileChooser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
@@ -260,24 +259,10 @@ public class PeoplePanel extends TransparentPanel {
         }).start();
     }
 
-    public static File chooseSkin(){
-        JFileChooser chooser = new NativeJFileChooser(){{
-            setDialogTitle("Выбор скина");
-            setFileFilter(new FileFilter() {
-                public String getDescription() {
-                    return "PNG Images (*.png)";
-                }
-
-                public boolean accept(File f) {
-                    return f.isDirectory() || f.getName().toLowerCase().endsWith(".png");
-                }
-            });
-        }};
-
-        if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-            return chooser.getSelectedFile();
-        else
-            return null;
+    public File chooseSkin(){
+        FileChooser chooser = new FileChooser("Выбор скина");
+        chooser.addFileFilter("PNG Images", "png");
+        return chooser.open(screen.getLauncher());
     }
 
     public static class Player{

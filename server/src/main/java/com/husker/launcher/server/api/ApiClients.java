@@ -75,6 +75,8 @@ public class ApiClients extends ApiClass {
             client = new Client(getAttribute("id"));
         }catch (NullPointerException ex){
             throw new ApiException("Can't find client with id: " + getAttribute("id"), 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
         String name = getAttribute("name");
 
@@ -91,6 +93,8 @@ public class ApiClients extends ApiClass {
             return new Client(getAttribute("id")).getSizeInfo();
         } catch (NullPointerException | IOException ex){
             throw new ApiException("Client part not specified or not found", 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 
@@ -105,6 +109,8 @@ public class ApiClients extends ApiClass {
             return out;
         }catch (NullPointerException | IOException ex){
             throw new ApiException("Client part not specified or not found", 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 
@@ -125,6 +131,8 @@ public class ApiClients extends ApiClass {
             return out;
         }catch (NullPointerException | IOException ax){
             throw new ApiException("Client part not specified or not found", 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 
@@ -136,6 +144,8 @@ public class ApiClients extends ApiClass {
             throw new ApiException("Client part not specified or not found", 1);
         } catch (IOException e) {
             return new SimpleJSON("count", 0);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 
@@ -145,6 +155,8 @@ public class ApiClients extends ApiClass {
             return client.getModsInfo(containsAttribute("index") ? Integer.parseInt(getAttribute("index")) : -1);
         }catch (NullPointerException e){
             throw new ApiException("Client part not specified or not found", 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 
@@ -154,6 +166,8 @@ public class ApiClients extends ApiClass {
             return HttpService.fromBase64(client.getModIcon(Integer.parseInt(getAttribute("index"))));
         }catch (NullPointerException e){
             throw new ApiException("Client part not specified or not found", 1);
+        } catch (IllegalAccessException e) {
+            throw new ApiException("Client is updating", 2);
         }
     }
 }

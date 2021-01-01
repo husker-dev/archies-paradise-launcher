@@ -321,9 +321,10 @@ public class BlurPainter {
                 }
             }else
                 full = null;
+            lastParameters = parameter;
         }
 
-        lastParameters = parameter;
+
     }
 
     public boolean isOneNull(Object... objects){

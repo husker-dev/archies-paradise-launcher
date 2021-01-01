@@ -1,7 +1,6 @@
 package com.husker.glassui.screens.main.profile.skin;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.WebLookAndFeel;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
@@ -17,10 +16,8 @@ import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.utils.ComponentUtils;
-import li.flor.nativejfilechooser.NativeJFileChooser;
+import com.husker.launcher.utils.filechooser.FileChooser;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -72,21 +69,12 @@ public class SkinCategories extends SimpleTitledScreen {
         panel.add(new BlurButton(this, "Открыть..."){{
             addActionListener(e -> {
                 try{
-                    JFileChooser chooser = new NativeJFileChooser(){{
-                        setDialogTitle("Выбор скина");
-                        setFileFilter(new FileFilter() {
-                            public String getDescription() {
-                                return "PNG Images (*.png)";
-                            }
+                    FileChooser chooser = new FileChooser("Выбор скина");
+                    chooser.addFileFilter("PNG Image", "png");
 
-                            public boolean accept(File f) {
-                                return f.isDirectory() || f.getName().toLowerCase().endsWith(".png");
-                            }
-                        });
-                    }};
-
-                    if(chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)
-                        getLauncherUI().setScreen(SkinApply.class, new Parameters("path", chooser.getSelectedFile().getAbsolutePath()));
+                    File file = chooser.open(getLauncher());
+                    if(file != null)
+                        getLauncherUI().setScreen(SkinApply.class, new Parameters("path", file.getAbsolutePath()));
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }

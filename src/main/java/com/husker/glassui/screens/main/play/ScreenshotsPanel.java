@@ -44,6 +44,11 @@ public class ScreenshotsPanel extends TransparentPanel {
                     currentDelay = 0;
                     nextPage(false);
                 }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
         setLayout(new OverlayLayout(this));
@@ -74,11 +79,9 @@ public class ScreenshotsPanel extends TransparentPanel {
                             public void mouseEntered(MouseEvent e) {
                                 hovered = true;
                             }
-
                             public void mouseExited(MouseEvent e) {
                                 hovered = false;
                             }
-
                             public void mousePressed(MouseEvent e) {
                                 NetManager.openLink(urls_fullscreen[selectedIndex]);
                             }
@@ -130,7 +133,8 @@ public class ScreenshotsPanel extends TransparentPanel {
         updateDots(urls.length, index);
         new Thread(() -> {
             try {
-                if(usePreview)
+                boolean first = viewer.getImage() == null;
+                if(usePreview && !first)
                     viewer.setImage(urls_preview[index]);
                 BufferedImage loaded = ImageIO.read(new URL(urls[index]));
                 if(index == selectedIndex) {
@@ -186,7 +190,7 @@ public class ScreenshotsPanel extends TransparentPanel {
             try {
                 this.urls_preview[0] = ImageIO.read(new URL(preview[0]));
                 setPage(0);
-                updateDots(urls.length, 0);
+                //updateDots(urls.length, 0);
 
                 for(int i = 1; i < urls.length; i++)
                     this.urls_preview[i] = ImageIO.read(new URL(preview[i]));

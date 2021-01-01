@@ -22,8 +22,9 @@ import java.util.zip.ZipOutputStream;
 public class Client {
 
     private static final Logger log = LogManager.getLogger(Client.class);
-
     public static final String folder = "./loaded_clients";
+
+    public static ArrayList<String> updatingClients = new ArrayList<>();
 
     static {
         try {
@@ -42,10 +43,12 @@ public class Client {
 
     private final String id;
 
-    public Client(String id) {
+    public Client(String id) throws IllegalAccessException {
         this.id = id;
         if (!Files.exists(Paths.get(folder + "/" + id)))
             throw new NullPointerException("Can't find client with id: " + id);
+        if(updatingClients.contains(id))
+            throw new IllegalAccessException("Client is updating");
     }
 
     public File getModsFile() {
@@ -142,6 +145,7 @@ public class Client {
     }
 
     public static void archive(String name, String id){
+        updatingClients.add(id);
         try {
             log.info("Updating...");
 
@@ -221,6 +225,7 @@ public class Client {
             log.error("Error while updating: " + e.getMessage());
             e.printStackTrace();
         }
+        updatingClients.remove(id);
     }
 
     private static void removeIfExist(String path){

@@ -3,6 +3,7 @@ package com.husker.launcher.utils;
 import com.husker.launcher.settings.LauncherConfig;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -160,5 +161,16 @@ public class SystemUtils {
 
     public static int getRefreshRate(Component context){
         return context.getGraphicsConfiguration().getDevice().getDisplayMode().getRefreshRate();
+    }
+
+    public static double getWindowScaleFactor(){
+        if (GraphicsEnvironment.isHeadless())
+            return 1.0;
+        GraphicsConfiguration gc = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .getDefaultConfiguration();
+        AffineTransform transform = gc.getDefaultTransform();
+        return transform.getScaleX();
     }
 }

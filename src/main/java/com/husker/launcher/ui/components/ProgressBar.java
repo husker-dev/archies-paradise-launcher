@@ -91,8 +91,6 @@ public class ProgressBar extends JComponent {
 
         g2d.setColor(new Color(0, 200, 0, 200));
         g2d.fill(progressShape);
-
-        RenderUtils.disableAntialiasing(g2d);
     }
 
     public void setValue(double value){

@@ -65,7 +65,7 @@ public class ClientInfoPanel extends TransparentPanel {
             try {
                 versionLabel.setText(API.Client.getJarVersion(clientId));
                 buildVersionLabel.setText(API.Client.getShortClientVersion(clientId) + "");
-            } catch (API.InternalAPIException | API.UnknownClientException e) {
+            } catch (API.InternalAPIException | API.UnknownClientException | API.ClientIsUpdatingException e) {
                 e.printStackTrace();
             }
 

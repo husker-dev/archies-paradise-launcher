@@ -45,10 +45,12 @@ public class LoadingWindow extends JFrame {
     private ProgressBar progressBar;
 
     private int launcherStatus = 0;
+    private Thread launcherLoadingThread;
 
     public LoadingWindow(){
         super("Launcher Loading");
 
+        Discord.init();
         Discord.setState(Discord.Texts.Loading);
         Resources.loadBase();
         setIconImage(Resources.Icon);
@@ -225,7 +227,7 @@ public class LoadingWindow extends JFrame {
             }
         }, 0, 30);
 
-        new Thread(() -> {
+        launcherLoadingThread = new Thread(() -> {
             try {
                 launcher = new Launcher(() -> {
                     launcherStatus++;
@@ -239,12 +241,14 @@ public class LoadingWindow extends JFrame {
                 ex.printStackTrace();
                 launcherError = true;
             }
-        }).start();
+        });
+        launcherLoadingThread.start();
 
         new Thread(() -> {
             setStatusText("Проверка обновлений...", 15);
             try {
                 if(UpdateManager.hasUpdate()){
+                    launcherLoadingThread.stop();
                     UpdateManager.processUpdating(new UpdateManager.UpdateProcessor() {
                         public void onRemoveOld(double percent) {
                             setStatusText("Удаление временных файлов...", percent);
@@ -275,6 +279,7 @@ public class LoadingWindow extends JFrame {
                     updated = true;
                 }
             }catch (UpdateManager.UpdateException ex){
+                launcherLoadingThread.stop();
                 switch (ex.getStage()) {
                     case VERSION_GET:
                         setStatusText("Ошибка проверки обновления!", "(" + ex.getCode() + ")", 0);

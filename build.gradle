@@ -66,12 +66,10 @@ dependencies {
     implementation 'com.nativelibs4java:bridj:+'
     implementation 'net.java.dev.jna:jna:+'
     implementation 'net.java.dev.jna:jna-platform:+'
+    //implementation 'com.github.steos:jnafilechooser:1.0'
 
     // MD to Html
     implementation 'com.atlassian.commonmark:commonmark:0.16.1'
-
-    // Native file chooser
-    implementation 'com.github.veluria:NativeJFileChooser:1.6.4'
 }
 
 // launch4j

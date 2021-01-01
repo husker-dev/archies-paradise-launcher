@@ -378,85 +378,101 @@ public class API {
             void process();
         }
 
-        public static JSONObject getSizeInfo(String clientId) throws InternalAPIException, UnknownClientException {
+        public static JSONObject getSizeInfo(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getJSON(ApiMethod.create("clients.getSizeInfo").set("id", clientId), 1);
+                return getJSON(ApiMethod.create("clients.getSizeInfo").set("id", clientId), 1, 2);
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
 
-        public static Pair<Boolean, Boolean> checksum(String clientId, String mods, String versions) throws InternalAPIException, UnknownClientException {
+        public static Pair<Boolean, Boolean> checksum(String clientId, String mods, String versions) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                JSONObject object = getJSON(ApiMethod.create("clients.checksum").set("id", clientId).set("mods", mods).set("versions", versions));
+                JSONObject object = getJSON(ApiMethod.create("clients.checksum").set("id", clientId).set("mods", mods).set("versions", versions), 1, 2);
                 return new Pair<>(object.getBoolean("equal_mods"), object.getBoolean("equal_versions"));
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
 
-        public static String getClientVersion(String clientId) throws InternalAPIException, UnknownClientException {
+        public static String getClientVersion(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId), 1).getString("build");
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId), 1, 2).getString("build");
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
 
-        public static int getShortClientVersion(String clientId) throws InternalAPIException, UnknownClientException {
+        public static int getShortClientVersion(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId)).getInt("build_id");
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId), 1, 2).getInt("build_id");
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return -1;
         }
 
-        public static String getJarVersion(String clientId) throws InternalAPIException, UnknownClientException {
+        public static String getJarVersion(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId)).getString("version");
+                return getJSON(ApiMethod.create("clients.getFilesInfo").set("id", clientId), 1, 2).getString("version");
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
 
-        public static int getModsCount(String clientId) throws InternalAPIException, UnknownClientException {
+        public static int getModsCount(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getJSON(ApiMethod.create("clients.getModsCount").set("id", clientId), 1).getInt("count");
+                return getJSON(ApiMethod.create("clients.getModsCount").set("id", clientId), 1, 2).getInt("count");
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return 0;
         }
 
-        public static ModInfo getModInfo(String clientId, int index) throws InternalAPIException, UnknownClientException {
+        public static ModInfo getModInfo(String clientId, int index) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                JSONArray info = getJSON(ApiMethod.create("clients.getModInfo").set("id", clientId).set("index", index), 1).getJSONArray("mods");
+                JSONArray info = getJSON(ApiMethod.create("clients.getModInfo").set("id", clientId).set("index", index), 1, 2).getJSONArray("mods");
                 if(info.length() == 1)
                     return new ModInfo(info.getJSONObject(0));
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
 
-        public static BufferedImage getModIcon(String clientId, int index) throws InternalAPIException, UnknownClientException {
+        public static BufferedImage getModIcon(String clientId, int index) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
-                return getImage(ApiMethod.create("clients.getModIcon").set("id", clientId).set("index", index));
+                return getImage(ApiMethod.create("clients.getModIcon").set("id", clientId).set("index", index), 1, 2);
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
+                if(e.getCode() == 2)
+                    throw new ClientIsUpdatingException();
             }
             return null;
         }
@@ -625,6 +641,12 @@ public class API {
     public static class EmailAlreadyExistException extends Exception{
         public EmailAlreadyExistException(){
             super("Email is already exist");
+        }
+    }
+
+    public static class ClientIsUpdatingException extends Exception{
+        public ClientIsUpdatingException(){
+            super("Client is updating");
         }
     }
 }

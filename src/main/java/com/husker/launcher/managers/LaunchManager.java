@@ -29,6 +29,7 @@ public class LaunchManager {
 
     public enum ClientState{
         ERROR,
+        UPDATING,
         PLAY,
         UPDATE,
         DOWNLOAD
@@ -58,6 +59,8 @@ public class LaunchManager {
                 return ClientState.PLAY;
             }else
                 return currentVersion.equals("-1") ? ClientState.DOWNLOAD : ClientState.UPDATE;
+        }catch (API.ClientIsUpdatingException ex){
+            return ClientState.UPDATING;
         }catch (Exception ex){
             return ClientState.ERROR;
         }
