@@ -4,6 +4,7 @@ package com.husker.launcher;
 import com.husker.launcher.discord.Discord;
 import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.utils.SystemUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -23,6 +24,8 @@ public class Main {
     public static void main(String[] args) {
         System.setProperty("illegal-access", "permit");
         System.out.println("Java version: " + System.getProperty("java.version"));
+        System.out.println("Launcher version: " + Launcher.VERSION);
+        System.out.println("OS: " + SystemUtils.getOSName() + " x" + SystemUtils.getArch());
         Resources.Fonts.setDefaultFontRenderer();
         System.out.println("truetype:interpreter-version=35".equals(System.getenv("FREETYPE_PROPERTIES")) ? "With font renderer fix": "Without font renderer fix");
 
@@ -37,7 +40,6 @@ public class Main {
             ex.printStackTrace();
         }
 
-        //System.setProperty("sun.java2d.opengl", "true");
         if(!LauncherSettings.isPotatoSettings()) {
             System.setProperty("sun.java2d.ddscale", "true");
             System.setProperty("sun.java2d.ddoffscreen", "true");

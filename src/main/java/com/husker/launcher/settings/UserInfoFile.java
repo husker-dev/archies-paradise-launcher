@@ -1,6 +1,6 @@
 package com.husker.launcher.settings;
 
-import com.husker.launcher.Launcher;
+import com.husker.launcher.utils.SystemUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -15,7 +15,7 @@ import java.util.Base64;
 public class UserInfoFile extends SettingsFile {
 
     public UserInfoFile() {
-        super(Launcher.getSettingsFolder() + "/user.yaml");
+        super(SystemUtils.getSettingsFolder() + "/user.yaml");
     }
 
     public String getLogin(){

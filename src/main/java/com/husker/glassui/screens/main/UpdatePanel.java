@@ -3,6 +3,7 @@ package com.husker.glassui.screens.main;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.managers.UpdateManager;
@@ -85,7 +86,7 @@ public class UpdatePanel extends BlurPanel {
         new Timer().schedule(new TimerTask() {
             public void run() {
                 try {
-                    setVisible(!API.Launcher.getCurrentVersion().equals(UpdateManager.VERSION));
+                    setVisible(!API.Launcher.getCurrentVersion().equals(Launcher.VERSION));
                 } catch (API.InternalAPIException e) {
                     e.printStackTrace();
                     setVisible(false);

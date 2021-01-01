@@ -56,7 +56,7 @@ public class ProgressBar extends JComponent {
         return new JLabel(){
             {
                 setForeground(GlassUI.Colors.labelText);
-                SizeMethodsImpl.setPreferredWidth(this, 16);
+                //SizeMethodsImpl.setPreferredWidth(this, 16);
                 setFont(Resources.Fonts.getChronicaProExtraBold());
                 setBackground(new Color(0, 0, 0, 0));
             }

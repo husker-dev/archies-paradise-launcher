@@ -184,7 +184,7 @@ public class BlurPainter {
 
                     texture = ImageUtils.createVolatileImage(launcher, translatedShape.getBounds().width, translatedShape.getBounds().height);
                     Graphics2D g2d = texture.createGraphics();
-                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, parameter.getTextureAlpha()));
+                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)parameter.getTextureAlpha()));
                     g2d.setPaint(new TexturePaint(parameter.getTexture(), toRender.getBounds()));
                     RenderUtils.enableAntialiasing(g2d);
 

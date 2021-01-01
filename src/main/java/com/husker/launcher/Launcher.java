@@ -24,6 +24,8 @@ import java.util.TimerTask;
 
 public class Launcher extends JFrame {
 
+    public static final String VERSION = "0.1";
+
     private static final Logger log = LogManager.getLogger(Launcher.class);
 
     private ScalableImage backgroundImage;
@@ -232,23 +234,6 @@ public class Launcher extends JFrame {
         return currentUIName;
     }
 
-    public static String getSettingsFolder(){
-        try {
-            Process p =  Runtime.getRuntime().exec("reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v personal");
-            p.waitFor();
-
-            InputStream in = p.getInputStream();
-            byte[] b = new byte[in.available()];
-            in.read(b);
-            in.close();
-
-            return new String(b).split("\\s\\s+")[4] + "/" + LauncherConfig.getFolderName();
-        } catch(Throwable t) {
-            t.printStackTrace();
-        }
-        return new File(".").getAbsolutePath();
-    }
-
     public void updateUI(){
         getContentPane().revalidate();
         getContentPane().repaint();
@@ -276,14 +261,6 @@ public class Launcher extends JFrame {
         }
     }
 
-    public static int getJavaVersion() {
-        String version = System.getProperty("java.version");
-        if(version.startsWith("1.")) {
-            version = version.substring(2, 3);
-        } else {
-            int dot = version.indexOf(".");
-            if(dot != -1) { version = version.substring(0, dot); }
-        } return Integer.parseInt(version);
-    }
+
 
 }

@@ -4,6 +4,7 @@ import com.alee.extended.label.WebStyledLabel;
 import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.managers.UpdateManager;
@@ -47,7 +48,7 @@ public class LauncherInfo extends TransparentPanel {
                 setLayout(new FlowLayout(CENTER));
                 setMargin(20, 20, 0, 20);
 
-                add(versionInfo = new InfoParameter("Версия", UpdateManager.VERSION));
+                add(versionInfo = new InfoParameter("Версия", Launcher.VERSION));
                 add(developerInfo = new InfoParameter("Разработчик", "Штенгауэр Никита", "https://vk.com/shtengauer_nikita"));
                 add(ownerInfo = new InfoParameter("Владелец"));
                 add(gitHubInfo = new InfoParameter("GitHub"));

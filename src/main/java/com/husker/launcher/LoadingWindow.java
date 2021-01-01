@@ -9,6 +9,7 @@ import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
 import com.husker.launcher.utils.IOUtils;
+import org.apache.commons.codec.binary.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -248,10 +249,13 @@ public class LoadingWindow extends JFrame {
                         public void onRemoveOld(double percent) {
                             setStatusText("Удаление временных файлов...", percent);
                         }
+                        public void onConnecting() {
+                            setStatusText("Соединение...", 0);
+                        }
                         public void onDownloading(IOUtils.FileReceivingArguments args) {
                             String speed = (int)args.getSpeed() + " Мб/с";
-                            String data = "(" + (int)(args.getSize() / 1000000d) + "/" + (int)(args.getCurrentSize() / 1000000d) + " Мб)";
-                            setStatusText("Удаление временных данных...", speed, data, args.getPercent());
+                            String data = (int)(args.getCurrentSize() / 1000000d) + "/" + (int)(args.getSize() / 1000000d) + " Мб";
+                            setStatusText("Скачивание...", speed, data, args.getPercent());
                         }
                         public void onUnzipping(IOUtils.ZipArguments args) {
                             setStatusText("Распаковка обновления...", args.getPercent());
@@ -310,15 +314,23 @@ public class LoadingWindow extends JFrame {
         setStatusText(text, addition, "", progress);
     }
 
+    private String correctText(String text){
+        if(Resources.Fonts.needTransform()) {
+            String spaceBuffer = new String(new char[(int)((double)text.length() * 0.3)]).replace("\0", " ");
+            text += spaceBuffer;
+        }
+        return text;
+    }
+
     public void setStatusText(String text, String addition, String addition2, double progress){
-        progressBar.setValueText(addition);
+        progressBar.setValueText(correctText(addition));
         progressBar.setValue(progress);
-        progressBar.setText(text);
-        progressBar.setSpeedText(addition2);
+        progressBar.setText(correctText(text));
+        progressBar.setSpeedText(correctText(addition2));
     }
 
     private void setErrorText(){
-        setStatusText("Ошибка при запуске лаунчера         ", 0);
+        setStatusText("Ошибка при запуске лаунчера", 0);
 
         KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             if(e.getKeyCode() == KeyEvent.VK_F5){

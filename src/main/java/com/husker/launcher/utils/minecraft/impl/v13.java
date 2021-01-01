@@ -1,5 +1,6 @@
 package com.husker.launcher.utils.minecraft.impl;
 
+import com.husker.launcher.utils.SystemUtils;
 import com.husker.launcher.utils.minecraft.MinecraftClientInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,7 +53,7 @@ public class v13 extends MinecraftClientInfo {
             put("-Djava.library.path", getVersionFolder().getAbsolutePath() + "\\natives");
             put("-Dminecraft.launcher.brand", parameters.getLauncherName());
             put("-Dminecraft.launcher.version", parameters.getLauncherVersion());
-            if(isWindows())
+            if(SystemUtils.isWindows())
                 put("-XX:HeapDumpPath", "MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
         }};
         StringBuilder builder = new StringBuilder();
@@ -78,13 +79,13 @@ public class v13 extends MinecraftClientInfo {
                 libraries.add(instance.getJSONObject("artifact").getString("path"));
 
             if(instance.has("classifies")){
-                if(instance.getJSONObject("classifies").has(getOSName()))
-                    libraries.add(instance.getJSONObject("classifies").getJSONObject(getOSName()).getString("path"));
-                else if(instance.getJSONObject("classifies").has("natives-" + getOSName()))
-                    libraries.add(instance.getJSONObject("classifies").getJSONObject("natives-" + getOSName()).getString("path"));
-                else if(getOSName().equals("windows")){
-                    if(instance.getJSONObject("classifies").has("windows-" + getArch()))
-                        libraries.add(instance.getJSONObject("classifies").getJSONObject("windows-" + getArch()).getString("path"));
+                if(instance.getJSONObject("classifies").has(SystemUtils.getOSName()))
+                    libraries.add(instance.getJSONObject("classifies").getJSONObject(SystemUtils.getOSName()).getString("path"));
+                else if(instance.getJSONObject("classifies").has("natives-" + SystemUtils.getOSName()))
+                    libraries.add(instance.getJSONObject("classifies").getJSONObject("natives-" + SystemUtils.getOSName()).getString("path"));
+                else if(SystemUtils.getOSName().equals("windows")){
+                    if(instance.getJSONObject("classifies").has("windows-" + SystemUtils.getArch()))
+                        libraries.add(instance.getJSONObject("classifies").getJSONObject("windows-" + SystemUtils.getArch()).getString("path"));
                 }
             }
         }
@@ -103,7 +104,7 @@ public class v13 extends MinecraftClientInfo {
 
             if(rule.has("os")){
                 JSONObject os = rule.getJSONObject("os");
-                if(os.has("name") && !os.getString("name").equals(getOSName()))
+                if(os.has("name") && !os.getString("name").equals(SystemUtils.getOSName()))
                     out = false;
                 if(os.has("version") && !Pattern.compile(os.getString("version")).matcher(System.getProperty("os.version")).lookingAt())
                     out = false;

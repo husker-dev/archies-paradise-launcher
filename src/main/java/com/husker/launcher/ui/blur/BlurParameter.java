@@ -18,7 +18,7 @@ public class BlurParameter {
     private int blurFactor = 5;
     private boolean useTexture = false;
     private BufferedImage texture = null;
-    private float textureAlpha = 0.015f;
+    private double textureAlpha = 0.015f;
     private Color additionColor = new Color(0, 0, 0, 0);
     private Color shadowColor = new Color(0, 0, 0, 60);
     private ShadowType shadowType = ShadowType.OUTER;
@@ -124,11 +124,11 @@ public class BlurParameter {
         this.texture = texture;
     }
 
-    public float getTextureAlpha() {
+    public double getTextureAlpha() {
         return textureAlpha;
     }
 
-    public void setTextureAlpha(float textureAlpha) {
+    public void setTextureAlpha(double textureAlpha) {
         this.textureAlpha = textureAlpha;
     }
 
@@ -143,7 +143,7 @@ public class BlurParameter {
         BlurParameter that = (BlurParameter) o;
         return blurFactor == that.blurFactor &&
                 useTexture == that.useTexture &&
-                Float.compare(that.textureAlpha, textureAlpha) == 0 &&
+                Double.compare(that.textureAlpha, textureAlpha) == 0 &&
                 shadowSize == that.shadowSize &&
                 visible == that.visible &&
                 Objects.equals(shape, that.shape) &&

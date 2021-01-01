@@ -66,39 +66,6 @@ public abstract class MinecraftClientInfo {
         return ClientType.VANILLA;
     }
 
-    public static boolean isWindows() {
-        return System.getProperty("os.name").toLowerCase().contains("win");
-    }
-
-    public static boolean isMac() {
-        return System.getProperty("os.name").toLowerCase().contains("mac");
-    }
-
-    public static boolean isUnix() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return osName.contains("linux") || osName.contains("mpe/ix") || osName.contains("freebsd") || osName.contains("irix") || osName.contains("digital unix") || osName.contains("unix");
-    }
-
-    protected static String getArch(){
-        String arch = System.getProperty("os.arch");
-        if(arch.contains("64"))
-            arch = "64";
-        if(arch.contains("32") || arch.contains("86"))
-            arch = "32";
-        return arch;
-    }
-
-    protected static String getOSName(){
-        if(isWindows())
-            return "windows";
-        else if(isMac())
-            return "osx";
-        else if(isUnix())
-            return "linux";
-        else
-            return "other";
-    }
-
     public static File getVersionFolder(File clientFolder){
         File versions = new File(clientFolder.getAbsoluteFile() + "/versions");
         return Objects.requireNonNull(versions.listFiles(file -> {

@@ -1,6 +1,7 @@
 package com.husker.glassui.components;
 
-import com.husker.glassui.screens.main.play.ScreenshotsPanel;
+import com.husker.launcher.Launcher;
+import com.husker.launcher.ui.AnimTimer;
 import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -11,8 +12,8 @@ import org.apache.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
+import java.util.function.Predicate;
 
 import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
@@ -20,7 +21,22 @@ import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 public class BlurScalableImage extends ScalableImage implements BlurComponent {
 
     private static final Logger log = LogManager.getLogger(BlurScalableImage.class);
-    private static final int speed = 15;
+    private static final double speed = 600;
+
+    private static final ArrayList<Predicate<Double>> painters = new ArrayList<>();
+    private static Launcher launcher;
+
+
+    static{
+        new AnimTimer(delta -> {
+            boolean repaint = false;
+            for(Predicate<Double> painter : painters)
+                if(painter.test(delta))
+                    repaint = true;
+            if(repaint && launcher != null)
+                launcher.updateUI();
+        });
+    }
 
     private enum AnimState{
         NONE,
@@ -32,7 +48,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     private int oldWidth = -1;
     private int oldHeight = -1;
     private boolean disposed = false;
-    private float alpha = 255;
+    private double alpha = 255;
     private boolean isAnimated = false;
 
     private BufferedImage showingImage;
@@ -43,40 +59,69 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
 
     public BlurScalableImage(Screen screen, BufferedImage image){
         this.screen = screen;
+        launcher = screen.getLauncher();
         setImage(image);
         setFitType(FitType.FILL_Y);
         screen.addBlurSegment("ScalableImage", parameter -> onBlurApply(parameter, this));
 
-        new Timer().schedule(new TimerTask() {
-            public void run() {
-                if(!isDisplayable())
-                    return;
-                if(getWidth() <= 0 || getHeight() <= 0)
-                    return;
+        painters.add(delta -> {
+            if(!isDisplayable())
+                return false;
+            if(getWidth() <= 0 || getHeight() <= 0)
+                return false;
 
-                if(animState == AnimState.HIDING){
-                    alpha -= speed;
-                    if(alpha <= 0){
-                        alpha = 0;
-                        if(newImg != null) {
-                            BlurScalableImage.super.setImage(newImg);
-                            updateImage();
-                            newImg = null;
-                        }
-                        animState = AnimState.SHOWING;
+            if(animState == AnimState.HIDING){
+                alpha -= speed * delta;
+                if(alpha <= 0){
+                    alpha = 0;
+                    if(newImg != null) {
+                        super.setImage(newImg);
+                        updateImage();
+                        newImg = null;
                     }
-                    screen.getLauncher().updateUI();
+                    animState = AnimState.SHOWING;
                 }
-                if(animState == AnimState.SHOWING){
-                    alpha += speed;
-                    if(alpha >= 255) {
-                        alpha = 255;
-                        animState = AnimState.NONE;
-                    }
-                    screen.getLauncher().updateUI();
-                }
+                return true;
             }
-        }, 0, 10);
+            if(animState == AnimState.SHOWING){
+                alpha += speed * delta;
+                if(alpha >= 255) {
+                    alpha = 255;
+                    animState = AnimState.NONE;
+                }
+                return true;
+            }
+            return false;
+        });
+
+        new AnimTimer(screen.getLauncher(), delta -> {
+            if(!isDisplayable())
+                return;
+            if(getWidth() <= 0 || getHeight() <= 0)
+                return;
+
+            if(animState == AnimState.HIDING){
+                alpha -= speed * delta;
+                if(alpha <= 0){
+                    alpha = 0;
+                    if(newImg != null) {
+                        BlurScalableImage.super.setImage(newImg);
+                        updateImage();
+                        newImg = null;
+                    }
+                    animState = AnimState.SHOWING;
+                }
+                screen.getLauncher().updateUI();
+            }
+            if(animState == AnimState.SHOWING){
+                alpha += speed * delta;
+                if(alpha >= 255) {
+                    alpha = 255;
+                    animState = AnimState.NONE;
+                }
+                screen.getLauncher().updateUI();
+            }
+        });
     }
 
     public BlurScalableImage(Screen screen){
@@ -124,7 +169,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
         parameter.setBlurFactor(0);
         parameter.setShadowSize(5);
         parameter.setShape(ShapeUtils.createRoundRectangle(this, 15, 15, ALL_CORNERS));
-        parameter.setTextureAlpha(alpha / 255f);
+        parameter.setTextureAlpha(alpha / 255d);
 
         if(showingImage == null)
             updateImage();

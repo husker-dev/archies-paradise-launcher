@@ -1,5 +1,6 @@
 package com.husker.launcher.managers;
 
+import com.husker.launcher.Launcher;
 import com.husker.launcher.api.API;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.social.Social;
@@ -18,13 +19,14 @@ public class UpdateManager {
     private static final Logger log = LogManager.getLogger(UpdateManager.class);
     public static boolean enable = true;
 
-    public static final String VERSION = "0.1";
-    private static final String UpdateFolder = "./launcher_update";
+    private static final String UpdateFolder = "./update_launcher";
 
-    private static final String[] filesToSave = new String[]{"clients"};
+    private static final String[] filesToDelete = new String[]{
+            "lib", "resources", "launcher.exe", "shell.sh"
+    };
 
     static{
-        log.info("Current launcher version: " + VERSION);
+        log.info("Current launcher version: " + Launcher.VERSION);
         IOUtils.delete(UpdateFolder);
     }
 
@@ -40,25 +42,33 @@ public class UpdateManager {
     public static boolean hasUpdate() throws UpdateException{
         if(!enable)
             return false;
-        return !VERSION.equals(getLatestVersion());
+        return !Launcher.VERSION.equals(getLatestVersion());
     }
 
     public static String getDownloadLink() throws UpdateException{
-        return "https://github.com/" + Social.GitHub.getRepository() + "/releases/download/" + getLatestVersion() + "/launcher.zip";
+        return "https://github.com/" + Social.GitHub.getRepository() + "/releases/download/" + getLatestVersion() + "/release.zip";
     }
 
     public static void processUpdating(UpdateProcessor processor){
         try {
+            if(new File("build.gradle").exists()){
+                log.info("Опять хочешь, что бы половина проекта удалилась!?");
+                return;
+            }
+
             IOUtils.delete(UpdateFolder, processor::onRemoveOld);
             Files.createDirectories(Paths.get(UpdateFolder));
 
-            System.out.println("Update URL: " + getDownloadLink());
+            processor.onConnecting();
+            log.info("Update URL: " + getDownloadLink());
             IOUtils.receiveFile(getDownloadLink(), UpdateFolder + "/update_archive.zip", processor::onDownloading);
 
             IOUtils.unzip(UpdateFolder + "/update_archive.zip", UpdateFolder, processor::onUnzipping);
             IOUtils.delete(UpdateFolder + "/update_archive.zip", processor::onZipRemoving);
+            if(Files.exists(Paths.get(UpdateFolder + "/updater.jar")))
+                IOUtils.delete(UpdateFolder + "/updater.jar");
 
-            IOUtils.moveDirectoryContent(IOUtils.fileList(UpdateFolder)[0].getAbsolutePath(), UpdateFolder, processor::onUnpack);
+            //IOUtils.move(UpdateFolder + "/updater.jar", "./updater.jar");
 
             processor.onReboot();
             applyUpdate();
@@ -69,6 +79,7 @@ public class UpdateManager {
 
     public interface UpdateProcessor{
         void onRemoveOld(double percent);
+        void onConnecting();
         void onDownloading(IOUtils.FileReceivingArguments arguments);
         void onUnzipping(IOUtils.ZipArguments arguments);
         void onZipRemoving(double percent);
@@ -77,10 +88,10 @@ public class UpdateManager {
     }
 
     private static void applyUpdate() throws UpdateException{
-        if(!Files.exists(Paths.get(UpdateFolder + "/updater.jar")))
-            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException(UpdateFolder + "/updater.jar doesn't exist"));
+        if(!Files.exists(Paths.get("./updater.jar")))
+            throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException("updater.jar doesn't exist"));
         try {
-            Runtime.getRuntime().exec("java -jar " + UpdateFolder + "/updater.jar --path=\"" + new File(".").getAbsolutePath() + "\" --save=\"" + String.join(",", filesToSave) + "\"");
+            Runtime.getRuntime().exec("java -jar \"" + new File("./updater.jar").getAbsolutePath() + "\" --delete=\"" + String.join(",", filesToDelete) + "\" --folder=\"" + new File(UpdateFolder).getAbsolutePath() + "\"");
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();

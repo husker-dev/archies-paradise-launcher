@@ -4,6 +4,7 @@ import com.alee.extended.layout.VerticalFlowLayout;
 import com.alee.laf.label.WebLabel;
 import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.components.BlurButton;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.components.TransparentPanel;
@@ -95,7 +96,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
                 setPreferredHeight(statusSize);
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-                add(new WebLabel("v" + UpdateManager.VERSION){{
+                add(new WebLabel("v" + Launcher.VERSION){{
                     setForeground(new Color(140, 140, 140, 100));
                     setPreferredHeight(15);
                     setFont(Resources.Fonts.getChronicaPro());

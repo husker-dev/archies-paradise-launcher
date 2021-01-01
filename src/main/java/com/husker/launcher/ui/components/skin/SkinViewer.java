@@ -148,7 +148,6 @@ public class SkinViewer extends GLJPanel {
                     textures = local;
                     textureId++;
                 }
-
             }).start();
         }
     }

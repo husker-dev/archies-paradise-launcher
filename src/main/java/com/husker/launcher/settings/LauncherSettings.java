@@ -1,6 +1,7 @@
 package com.husker.launcher.settings;
 
 import com.husker.launcher.Launcher;
+import com.husker.launcher.utils.SystemUtils;
 
 public class LauncherSettings extends SettingsFile {
 
@@ -14,7 +15,7 @@ public class LauncherSettings extends SettingsFile {
     private static final String RAM = "ram";
 
     private LauncherSettings() {
-        super(Launcher.getSettingsFolder() + "/launcher.yaml");
+        super(SystemUtils.getSettingsFolder() + "/launcher.yaml");
 
         setDefault(AUTO_AUTH, true);
         setDefault(BACKGROUND, 1);
