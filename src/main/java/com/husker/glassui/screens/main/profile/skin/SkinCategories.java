@@ -1,7 +1,6 @@
 package com.husker.glassui.screens.main.profile.skin;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurPanel;
@@ -10,6 +9,7 @@ import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.discord.Discord;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -66,7 +66,7 @@ public class SkinCategories extends SimpleTitledScreen {
             this.weightx = 1;
         }});
 
-        panel.add(new BlurButton(this, "Открыть..."){{
+        panel.add(new BlurButton(this, "Открыть"){{
             addActionListener(e -> {
                 try{
                     FileChooser chooser = new FileChooser("Выбор скина");
@@ -127,7 +127,7 @@ public class SkinCategories extends SimpleTitledScreen {
     public static class SkinFolderPanel extends BlurPanel{
 
         private final SkinViewer viewer;
-        private WebLabel nameLabel;
+        private MLabel nameLabel;
         private final BlurPanel namePanel;
         private boolean hovered = false;
 
@@ -188,7 +188,7 @@ public class SkinCategories extends SimpleTitledScreen {
             add(namePanel = new BlurPanel(screen){
                 {
                     ComponentUtils.makeMouseEventTransparent(this, SkinFolderPanel.this);
-                    add(nameLabel = new WebLabel("[Name]"){{
+                    add(nameLabel = new MLabel("[Name]"){{
                         setMargin(4, 5, 2, 5);
                         setPreferredHeight(35);
                         setVerticalAlignment(CENTER);

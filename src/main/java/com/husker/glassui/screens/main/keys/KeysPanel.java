@@ -1,12 +1,12 @@
 package com.husker.glassui.screens.main.keys;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.glassui.components.BlurTagPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.social.Social;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
@@ -123,7 +123,7 @@ public class KeysPanel extends TransparentPanel {
         return new TransparentPanel(){{
             setLayout(new BorderLayout());
 
-            WebLabel label = GlassUI.createSimpleLabel(text);
+            MLabel label = GlassUI.createSimpleLabel(text);
             label.setPreferredWidth(80);
             add(label, BorderLayout.WEST);
             add(component);

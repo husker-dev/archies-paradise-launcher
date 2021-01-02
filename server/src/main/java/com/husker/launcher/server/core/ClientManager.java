@@ -140,7 +140,11 @@ public class ClientManager {
     private static String readInputStream(InputStream inputStream){
         if(inputStream == null)
             return null;
-        return new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        String out = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
+        try {
+            inputStream.close();
+        } catch (Exception ignored) {}
+        return out;
     }
 
     public static class VersionInfo {

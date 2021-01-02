@@ -1,9 +1,9 @@
 package com.husker.glassui.screens.main.info;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.api.API;
 import com.husker.launcher.ui.Screen;
@@ -16,7 +16,7 @@ public class ModPanel extends BlurPanel {
 
     private final int index;
     private BlurScalableImage icon;
-    private WebLabel name;
+    private MLabel name;
 
     private final String clientId;
 

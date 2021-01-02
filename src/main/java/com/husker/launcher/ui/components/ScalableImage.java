@@ -49,6 +49,10 @@ public class ScalableImage extends JComponent {
     }
 
     public void paint(Graphics g) {
+        drawImage(g, getWidth(), getHeight());
+    }
+
+    public void drawImage(Graphics g, int width, int height){
         Graphics2D g2d = (Graphics2D) g;
 
         int newWidth = 0;
@@ -58,47 +62,47 @@ public class ScalableImage extends JComponent {
             return;
 
         if(fitType == FitType.FILL_X){
-            float scalePercent = (float)getWidth() / (float)image.getWidth();
+            float scalePercent = (float)width / (float)image.getWidth();
 
-            newWidth = getWidth();
+            newWidth = width;
             newHeight = (int)(image.getHeight(null) * scalePercent);
         }
 
         if(fitType == FitType.FILL_Y){
-            float scalePercent = (float)getHeight() / (float)image.getHeight();
+            float scalePercent = (float)height / (float)image.getHeight();
 
             newWidth = (int)(image.getWidth(null) * scalePercent);
-            newHeight = getHeight();
+            newHeight = height;
         }
 
         if(fitType == FitType.FILL_XY){
-            float scalePercent = (float)getWidth() / (float)image.getWidth();
+            float scalePercent = (float)width / (float)image.getWidth();
 
-            newWidth = getWidth();
+            newWidth = width;
             newHeight = (int)(image.getHeight(null) * scalePercent);
 
-            if(newHeight < getHeight()){
-                scalePercent = (float)getHeight() / (float)image.getHeight();
+            if(newHeight < height){
+                scalePercent = (float)height / (float)image.getHeight();
 
                 newWidth = (int)(image.getWidth(null) * scalePercent);
-                newHeight = getHeight();
+                newHeight = height;
             }
         }
 
         if(fitType == FitType.FIT_XY){
-            float scale = (float)Math.max(getWidth(), getHeight()) / Math.max(image.getWidth(), image.getHeight());
+            float scale = (float)Math.max(width, height) / Math.max(image.getWidth(), image.getHeight());
 
             newWidth = (int)(image.getWidth() * scale) - 20;
             newHeight = (int)(image.getHeight() * scale) - 20;
         }
 
         if(fitType == FitType.FILL){
-            newWidth = getWidth();
-            newHeight = getHeight();
+            newWidth = width;
+            newHeight = height;
         }
 
-        RoundRectangle2D.Double imageShape = new RoundRectangle2D.Double((getWidth() - newWidth) / 2d - 1, (getHeight() - newHeight) / 2d - 1, newWidth + 2, newHeight + 2, round, round);
-        RoundRectangle2D.Double componentShape = new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), round, round);
+        RoundRectangle2D.Double imageShape = new RoundRectangle2D.Double((width - newWidth) / 2d - 1, (height - newHeight) / 2d - 1, newWidth + 2, newHeight + 2, round, round);
+        RoundRectangle2D.Double componentShape = new RoundRectangle2D.Double(0, 0, width, height, round, round);
 
         RenderUtils.enableInterpolation(g2d);
 

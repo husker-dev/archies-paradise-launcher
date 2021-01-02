@@ -1,12 +1,12 @@
 package com.husker.glassui.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.components.BlurButton;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.components.ScalableImage;
@@ -32,8 +32,8 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
     private final int statusSize = 35;
     private final int logoSize = 180;
 
-    private WebLabel statusLabel;
-    private WebLabel titleLabel;
+    private MLabel statusLabel;
+    private MLabel titleLabel;
 
     private String title = "Заголовок";
 
@@ -80,12 +80,12 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
                 setPreferredHeight(statusSize);
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-                add(new WebLabel("Статус:  "){{
+                add(new MLabel("Статус:  "){{
                     setForeground(new Color(70, 70, 70));
                     setPreferredHeight(15);
                     setFont(Resources.Fonts.getChronicaProExtraBold());
                 }});
-                add(statusLabel = new WebLabel("Обновление..."){{
+                add(statusLabel = new MLabel("Обновление..."){{
                     setForeground(new Color(120, 120, 120));
                     setPreferredHeight(15);
                     setFont(Resources.Fonts.getChronicaProExtraBold());
@@ -96,7 +96,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
                 setPreferredHeight(statusSize);
                 setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-                add(new WebLabel("v" + Launcher.VERSION){{
+                add(new MLabel("v" + Launcher.VERSION){{
                     setForeground(new Color(140, 140, 140, 100));
                     setPreferredHeight(15);
                     setFont(Resources.Fonts.getChronicaPro());
@@ -155,8 +155,8 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
     public abstract void createComponents(TransparentPanel panel);
     public abstract void createSubComponents(TransparentPanel panel);
 
-    public WebLabel createLabel(String text){
-        return new WebLabel(text){{
+    public MLabel createLabel(String text){
+        return new MLabel(text){{
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(LEFT);
             setPreferredHeight(15);
@@ -174,8 +174,8 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
         }};
     }
 
-    public WebLabel createSubLabel(String text, Runnable runnable){
-        return new WebLabel(text){{
+    public MLabel createSubLabel(String text, Runnable runnable){
+        return new MLabel(text){{
             setForeground(GlassUI.Colors.labelLightText);
             setFont(getFont().deriveFont(14f));
             setFont(Resources.Fonts.getChronicaProExtraBold());

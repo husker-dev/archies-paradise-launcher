@@ -1,8 +1,8 @@
 package com.husker.glassui.screens;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurButton;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.launcher.ui.LauncherUI;
@@ -21,8 +21,8 @@ public class Message extends CenteredMenuScreen {
 
     private final int title_size = 50;
 
-    private WebLabel title;
-    private WebLabel message;
+    private MLabel title;
+    private MLabel message;
     private String prevScreen = "";
     private Parameters prevParameters;
 

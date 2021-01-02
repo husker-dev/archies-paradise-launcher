@@ -1,13 +1,13 @@
 package com.husker.glassui.screens.main.control;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.*;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.social.Social;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.utils.filechooser.FileChooser;
@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,8 +39,8 @@ public class ControlPanel extends TransparentPanel {
 
     private Screen screen;
 
-    private WebLabel releaseTitle;
-    private WebLabel releaseDescription;
+    private MLabel releaseTitle;
+    private MLabel releaseDescription;
     private BlurButton applyBtn;
 
     private Release selectedRelease;
@@ -228,8 +229,8 @@ public class ControlPanel extends TransparentPanel {
 
     static class ReleasePanel extends BlurList.ContentPanel<Release> {
 
-        private final WebLabel date, version, icon;
-        private final Icon selectedIcon;
+        private final MLabel date, version, icon;
+        private final BufferedImage selectedIcon = Resources.Icon_Checkbox_On;
         private final ControlPanel panel;
 
         public ReleasePanel(ControlPanel panel){
@@ -239,25 +240,24 @@ public class ControlPanel extends TransparentPanel {
             version = GlassUI.createSimpleLabel("");
             date = GlassUI.createSimpleLabel("");
             date.setForeground(GlassUI.Colors.labelLightText);
-            icon = new WebLabel();
+            icon = new MLabel();
             icon.setPreferredWidth(30);
 
             add(version);
             add(icon, BorderLayout.WEST);
             add(date, BorderLayout.EAST);
-
-            selectedIcon = new ImageIcon(Resources.Icon_Checkbox_On.getScaledInstance(30, 30, Image.SCALE_SMOOTH));
         }
 
         public void applyContent(Release release) {
             if(release != null) {
                 version.setText((release.id.startsWith("v") ? "" : "v") + release.id);
                 date.setText(new SimpleDateFormat("dd.MM.yyyy").format(release.date));
-                icon.setIcon(panel.currentVersion.equals(release.id) ? selectedIcon : null);
+                icon.setImage(panel.currentVersion.equals(release.id) ? selectedIcon : null);
+                icon.setImageSize(30);
             }else{
                 version.setText("");
                 date.setText("");
-                icon.setIcon(null);
+                icon.setImage(null);
             }
         }
     }

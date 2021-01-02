@@ -66,11 +66,12 @@ public class PlayPanel extends TransparentPanel {
                 add(playBtn = new BlurButton(screen, "Загрузка..."){{
                     setPreferredHeight(btnSize);
                     setPreferredWidth(250);
-                    //setPadding(90, 90);
                     setEnabled(false);
+                    setImageSize(27);
                     addActionListener(e -> onPlayClick());
                 }});
                 add(clientBtn = new BlurButton(screen, ""){{
+                    setImageSize((int)(btnSize * 0.8));
                     setPreferredHeight(btnSize);
                     addActionListener(e -> setClient(!vr));
                 }});
@@ -173,9 +174,9 @@ public class PlayPanel extends TransparentPanel {
         LauncherSettings.setClientType(clients[vr ? 0:1]);
         double scale = 0.8;
         if(vr)
-            clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
+            clientBtn.setImage(Resources.Icon_VR);
         else
-            clientBtn.setIcon(new ImageIcon(ImageUtils.getScaledInstance(Resources.Icon_VR_Disabled, (int)(btnSize * scale), (int)(btnSize * scale), BufferedImage.SCALE_SMOOTH)));
+            clientBtn.setImage(Resources.Icon_VR_Disabled);
         updateStatus();
     }
 
@@ -221,23 +222,23 @@ public class PlayPanel extends TransparentPanel {
             playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR && lastState != LaunchManager.ClientState.UPDATING);
             switch (lastState){
                 case PLAY:
-                    playBtn.setIcon(new ImageIcon(Resources.Icon_Play.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setImage(Resources.Icon_Play);
                     playBtn.setText("Играть");
                     break;
                 case UPDATING:
-                    playBtn.setIcon(new ImageIcon(Resources.Icon_Dot_Selected.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setImage(Resources.Icon_Dot_Selected);
                     playBtn.setText("Обновляется");
                     break;
                 case DOWNLOAD:
-                    playBtn.setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setImage(Resources.Icon_Download);
                     playBtn.setText("Скачать");
                     break;
                 case UPDATE:
-                    playBtn.setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setImage(Resources.Icon_Download);
                     playBtn.setText("Обновить");
                     break;
                 case ERROR:
-                    playBtn.setIcon(new ImageIcon(Resources.Icon_Dot_Selected.getScaledInstance(27, 27, Image.SCALE_SMOOTH)));
+                    playBtn.setImage(Resources.Icon_Dot_Selected);
                     playBtn.setText("Недоступно");
                     break;
             }

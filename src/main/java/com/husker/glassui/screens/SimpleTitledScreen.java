@@ -1,11 +1,10 @@
 package com.husker.glassui.screens;
 
-import com.alee.laf.label.WebLabel;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
-import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
 import com.husker.launcher.ui.utils.UIUtils;
 
@@ -20,7 +19,7 @@ public abstract class SimpleTitledScreen extends SimpleCenteredScreen {
     private final String title;
     private final String subTitle;
 
-    private WebLabel subTitleLabel, titleLabel;
+    private MLabel subTitleLabel, titleLabel;
 
     public SimpleTitledScreen(String title){
         this(title, null);

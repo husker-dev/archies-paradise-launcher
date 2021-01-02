@@ -16,11 +16,7 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Launcher extends JFrame {
 

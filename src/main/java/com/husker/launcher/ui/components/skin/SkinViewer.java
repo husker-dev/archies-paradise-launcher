@@ -1,10 +1,15 @@
 package com.husker.launcher.ui.components.skin;
 
 import com.husker.launcher.utils.SkinUtils;
+import com.husker.launcher.utils.SystemUtils;
+import com.jogamp.nativewindow.ScalableSurface;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLJPanel;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.bridj.relocated.org.objectweb.asm.ClassWriter;
+import org.bridj.relocated.org.objectweb.asm.FieldVisitor;
+import org.bridj.relocated.org.objectweb.asm.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -14,7 +19,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.HashMap;
 
 public class SkinViewer extends GLJPanel {
@@ -45,24 +55,25 @@ public class SkinViewer extends GLJPanel {
         this(null);
     }
 
-    public SkinViewer(BufferedImage texture){
+    public SkinViewer(BufferedImage texture) {
         super(new GLCapabilities(GLProfile.getDefault()) {{
             setBackgroundOpaque(false);
             setSampleBuffers(true);
             setNumSamples(16);
         }});
 
+        setSurfaceScale(new float[]{(float)SystemUtils.getWindowScaleFactor(), (float)SystemUtils.getWindowScaleFactor()});
+
         try {
             Field act = GLJPanel.class.getDeclaredField("disposeAction");
             act.setAccessible(true);
-
             act.set(this, (Runnable) () -> {});
-        }catch (Exception ex){
+
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         Threading.disableSingleThreading();
-
         setPlayerTexture(texture);
 
         setOpaque(false);
@@ -75,7 +86,7 @@ public class SkinViewer extends GLJPanel {
         });
         addMouseMotionListener(new MouseAdapter() {
             public void mouseDragged(MouseEvent mouseEvent) {
-                if(rotationEnabled) {
+                if (rotationEnabled) {
                     rotateX += 0.3f * (mouseEvent.getX() - lastMouseX);
                     rotateY += 0.3f * (mouseEvent.getY() - lastMouseY);
 
@@ -100,6 +111,31 @@ public class SkinViewer extends GLJPanel {
 
     public void addNotify() {
         try{
+
+            /*float scale = 1 / (float)SystemUtils.getWindowScaleFactor();
+
+            Field hasPixelScale = GLJPanel.class.getDeclaredField("hasPixelScale");
+            hasPixelScale.setAccessible(true);
+            Array.set(hasPixelScale.get(this), 0, scale);
+            Array.set(hasPixelScale.get(this), 1, scale);
+
+            Field minPixelScale = GLJPanel.class.getDeclaredField("minPixelScale");
+            minPixelScale.setAccessible(true);
+            Array.set(minPixelScale.get(this), 0, scale);
+            Array.set(minPixelScale.get(this), 1, scale);
+
+            Field maxPixelScale = GLJPanel.class.getDeclaredField("maxPixelScale");
+            maxPixelScale.setAccessible(true);
+            Array.set(maxPixelScale.get(this), 0, scale);
+            Array.set(maxPixelScale.get(this), 1, scale);
+
+            Field reqPixelScale = GLJPanel.class.getDeclaredField("reqPixelScale");
+            reqPixelScale.setAccessible(true);
+            Array.set(reqPixelScale.get(this), 0, scale);
+            Array.set(reqPixelScale.get(this), 1, scale);
+
+             */
+
             super.addNotify();
         }catch (Exception ignored){}
     }

@@ -1,10 +1,11 @@
 package com.husker.glassui.components.social;
 
-import com.alee.extended.label.WebStyledLabel;
+
 import com.alee.utils.swing.extensions.SizeMethods;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.MStyledLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -22,7 +23,7 @@ import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 public abstract class SocialPanel extends BlurPanel {
 
-    private WebStyledLabel titleLabel;
+    private MStyledLabel titleLabel;
 
     private final Color defaultTitleColor = GlassUI.Colors.labelLightText;
     private final Color hoveredTitleColor = GlassUI.Colors.labelText;
@@ -95,7 +96,7 @@ public abstract class SocialPanel extends BlurPanel {
         return titleLabel.getForeground() == hoveredTitleColor;
     }
 
-    public WebStyledLabel getTitleLabel(){
+    public MStyledLabel getTitleLabel(){
         return titleLabel;
     }
 
@@ -144,7 +145,7 @@ public abstract class SocialPanel extends BlurPanel {
 
     public void setIcon(BufferedImage image){
         if(image == null){
-            titleLabel.setIcon(null);
+            titleLabel.setImage(null);
             return;
         }
 
@@ -162,12 +163,12 @@ public abstract class SocialPanel extends BlurPanel {
             newHeight = size;
             newWidth = size / height * width;
         }
-
-        titleLabel.setIcon(new ImageIcon(image.getScaledInstance((int)newWidth, (int)newHeight, Image.SCALE_SMOOTH)));
+        titleLabel.setImageSize((int)newWidth, (int)newHeight);
+        titleLabel.setImage(image);
     }
 
-    private WebStyledLabel createTitleLabel(){
-        return new WebStyledLabel(){
+    private MStyledLabel createTitleLabel(){
+        return new MStyledLabel(){
             {
                 ComponentUtils.makeMouseEventTransparent(this, SocialPanel.this);
                 setOpaque(false);

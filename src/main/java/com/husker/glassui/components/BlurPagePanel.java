@@ -1,8 +1,8 @@
 package com.husker.glassui.components;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -18,21 +18,21 @@ import java.util.function.Consumer;
 public class BlurPagePanel extends BlurPanel {
 
     private final TransparentPanel dotsPanel;
-    private WebLabel[] dots = new WebLabel[0];
-    private final WebLabel leftArrow, rightArrow;
+    private MLabel[] dots = new MLabel[0];
+    private final MLabel leftArrow, rightArrow;
     private int pages = 0;
     private int currentPage = 0;
 
     private final ArrayList<Consumer<Integer>> listeners = new ArrayList<>();
 
-    private final Icon leftDefault = createIcon(21, Resources.Icon_Arrow_Left);
-    private final Icon leftSelected = createIcon(21, Resources.Icon_Arrow_Left_Selected);
+    private final BufferedImage leftDefault = Resources.Icon_Arrow_Left;
+    private final BufferedImage leftSelected = Resources.Icon_Arrow_Left_Selected;
 
-    private final Icon rightDefault = createIcon(21, Resources.Icon_Arrow_Right);
-    private final Icon rightSelected = createIcon(21, Resources.Icon_Arrow_Right_Selected);
+    private final BufferedImage rightDefault = Resources.Icon_Arrow_Right;
+    private final BufferedImage rightSelected = Resources.Icon_Arrow_Right_Selected;
 
-    private final Icon dotDefault = createIcon(13, Resources.Icon_Dot);
-    private final Icon dotSelected = createIcon(13, Resources.Icon_Dot_Selected);
+    private final BufferedImage dotDefault = Resources.Icon_Dot;
+    private final BufferedImage dotSelected = Resources.Icon_Dot_Selected;
 
     public BlurPagePanel(Screen screen){
         super(screen, true);
@@ -41,10 +41,11 @@ public class BlurPagePanel extends BlurPanel {
         setMargin(6, 0, 0, 0);
         setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 
-        add(leftArrow = new WebLabel(){{
+        add(leftArrow = new MLabel(){{
             setVerticalAlignment(CENTER);
             setHorizontalAlignment(CENTER);
             setPreferredWidth(40);
+            setImageSize(21);
 
             addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent mouseEvent) {
@@ -60,10 +61,11 @@ public class BlurPagePanel extends BlurPanel {
             setLayout(new FlowLayout(FlowLayout.CENTER));
         }});
 
-        add(rightArrow = new WebLabel(){{
+        add(rightArrow = new MLabel(){{
             setVerticalAlignment(CENTER);
             setHorizontalAlignment(CENTER);
             setPreferredWidth(40);
+            setImageSize(21);
 
             addMouseListener(new MouseAdapter() {
                 public void mousePressed(MouseEvent mouseEvent) {
@@ -88,15 +90,16 @@ public class BlurPagePanel extends BlurPanel {
     public void setPages(int pages){
         this.pages = pages;
 
-        dots = new WebLabel[pages];
+        dots = new MLabel[pages];
         dotsPanel.removeAll();
         for(int i = 0; i < pages; i++){
             final int I = i;
-            dots[i] = new WebLabel(){{
+            dots[i] = new MLabel(){{
                 setPreferredWidth(20);
                 setVerticalAlignment(CENTER);
                 setHorizontalAlignment(CENTER);
-                setIcon(dotDefault);
+                setImageSize(13);
+                setImage(dotDefault);
                 addMouseListener(new MouseAdapter() {
                     public void mousePressed(MouseEvent mouseEvent) {
                         if(I != currentPage) {
@@ -115,11 +118,11 @@ public class BlurPagePanel extends BlurPanel {
 
     public void setSelectedPage(int page){
         this.currentPage = page;
-        leftArrow.setIcon(currentPage > 0 ? leftSelected : leftDefault);
-        rightArrow.setIcon(currentPage < pages - 1 ? rightSelected : rightDefault);
+        leftArrow.setImage(currentPage > 0 ? leftSelected : leftDefault);
+        rightArrow.setImage(currentPage < pages - 1 ? rightSelected : rightDefault);
 
         for(int i = 0; i < pages; i++)
-            dots[i].setIcon(i == currentPage ? dotSelected : dotDefault);
+            dots[i].setImage(i == currentPage ? dotSelected : dotDefault);
     }
 
     private ImageIcon createIcon(int size, BufferedImage image){

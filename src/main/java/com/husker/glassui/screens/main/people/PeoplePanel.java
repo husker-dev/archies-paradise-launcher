@@ -1,7 +1,6 @@
 package com.husker.glassui.screens.main.people;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.*;
 import com.husker.launcher.Resources;
@@ -10,6 +9,7 @@ import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.ui.components.LabelButton;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.components.skin.SkinViewer;
@@ -38,7 +38,7 @@ public class PeoplePanel extends TransparentPanel {
 
     private Player selectedPlayer;
     private TransparentPanel infoPanel;
-    private WebLabel name, id, email, creationTime;
+    private MLabel name, id, email, creationTime;
     private SkinViewer skinViewer;
     private BlurButtonLineChooser status;
     private BlurButton resetPassword, resetEmail;
@@ -105,8 +105,9 @@ public class PeoplePanel extends TransparentPanel {
                                 {
                                     setLayout(new BorderLayout());
                                     add(new LabelButton(){{
-                                        setIcon(createIcon(Resources.Icon_Edit));
-                                        setSelectedIcon(createIcon(Resources.Icon_Edit_Selected));
+                                        setImageSize(25);
+                                        setImage(Resources.Icon_Edit);
+                                        setSelectedImage(Resources.Icon_Edit_Selected);
                                         addActionListener(() -> {
                                             File file = chooseSkin();
                                             if(file == null)
@@ -125,8 +126,9 @@ public class PeoplePanel extends TransparentPanel {
                                         });
                                     }}, BorderLayout.WEST);
                                     add(new LabelButton(){{
-                                        setIcon(createIcon(Resources.Icon_Reply));
-                                        setSelectedIcon(createIcon(Resources.Icon_Reply_Selected));
+                                        setImageSize(25);
+                                        setImage(Resources.Icon_Reply);
+                                        setSelectedImage(Resources.Icon_Reply_Selected);
                                         addActionListener(() -> {
                                             NetManager.openLink(API.getMethodUrl(ApiMethod.create("skins.getSkin").set("name", selectedPlayer.name)));
                                         });
@@ -177,7 +179,7 @@ public class PeoplePanel extends TransparentPanel {
 
                         add(new TransparentPanel(){{
                             setLayout(new BorderLayout(7, 0));
-                            WebLabel text = GlassUI.createSimpleLabel("Shift  + ");
+                            MLabel text = GlassUI.createSimpleLabel("Shift  + ");
 
                             text.setForeground(GlassUI.Colors.labelLightText);
                             text.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -288,7 +290,7 @@ public class PeoplePanel extends TransparentPanel {
 
     public static class PlayerPanel extends BlurList.ContentPanel<Player> {
 
-        private final WebLabel name, id;
+        private final MLabel name, id;
 
         public PlayerPanel(Screen screen) {
             super(screen);

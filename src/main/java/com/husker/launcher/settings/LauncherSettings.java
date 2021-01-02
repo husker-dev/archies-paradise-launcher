@@ -22,7 +22,7 @@ public class LauncherSettings extends SettingsFile {
         setDefault(WINDOWED, false);
         setDefault(CLIENT_TYPE, "any");
         setDefault(POTATO, false);
-        setDefault(RAM, 2048);
+        setDefault(RAM, 4096);
     }
 
     public static int getBackgroundIndex(){
@@ -62,7 +62,7 @@ public class LauncherSettings extends SettingsFile {
             Integer.parseInt(ram);
             INSTANCE.set(RAM, ram);
         }catch (Exception ex){
-            INSTANCE.set(RAM, 2048);
+            INSTANCE.set(RAM, 4096);
         }
     }
 

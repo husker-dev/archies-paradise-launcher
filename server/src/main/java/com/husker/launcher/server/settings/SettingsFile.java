@@ -1,6 +1,7 @@
 package com.husker.launcher.server.settings;
 
 
+
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
@@ -27,31 +28,29 @@ public class SettingsFile {
         yaml = new Yaml(options);
 
         this.path = path;
-        load();
+        reload();
     }
 
-    private void load(){
+    private void reload(){
         try {
             InputStream is;
             if (path.startsWith("/"))
                 is = getClass().getResourceAsStream(path);
             else {
-                if(!Files.exists(Paths.get(path)))
-                    Files.createFile(Paths.get(path));
-                is = new FileInputStream(new File(path));
+                Files.createDirectories(Paths.get(path).getParent());
+                File file = new File(path);
+                if(!file.exists())
+                    file.createNewFile();
+                is = new FileInputStream(file);
             }
 
             String text = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).lines().collect(Collectors.joining("\n"));
-            is.close();
             text = text.replace("\t", "  ");
             try {
                 map = yaml.load(text);
-            }catch (Exception ex){
-                ex.printStackTrace();
-            }
+            }catch (Exception ignored){ }
             if(map == null)
                 map = new LinkedHashMap<>();
-
         }catch (Exception ex){
             ex.printStackTrace();
         }
@@ -113,13 +112,15 @@ public class SettingsFile {
     }
 
     public String get(String varPath){
-        load();
+        reload();
         if(!containsVar(varPath))
             return null;
         return getMapByPath(getPathFromVarPath(varPath), false).get(getVarFromVarPath(varPath)).toString();
     }
 
     public void set(String varPath, Object value){
+        if(value == null)
+            value = "";
         if(path.startsWith("/"))
             return;
         getMapByPath(getPathFromVarPath(varPath), true).put(getVarFromVarPath(varPath), value);

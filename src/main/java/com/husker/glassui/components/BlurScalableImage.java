@@ -6,12 +6,20 @@ import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.utils.ShapeUtils;
+import com.husker.launcher.utils.SystemUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
@@ -140,8 +148,12 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
     private void updateImage(){
         if(getWidth() <= 0 || getHeight() <= 0)
             return;
-        showingImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-        super.paint(showingImage.createGraphics());
+        int scaledWidth = (int)((double)getWidth() * SystemUtils.getWindowScaleFactor());
+        int scaledHeight = (int)(getHeight() * SystemUtils.getWindowScaleFactor());
+        showingImage = new BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = showingImage.createGraphics();
+        super.drawImage(graphics, scaledWidth, scaledHeight);
+        graphics.transform(AffineTransform.getScaleInstance(SystemUtils.getWindowScaleFactor(), SystemUtils.getWindowScaleFactor()));
     }
 
     public void setImage(BufferedImage image){

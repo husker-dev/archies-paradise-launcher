@@ -54,7 +54,7 @@ public class Main extends JavaPlugin {
             setGameMode(GameMode.ADVENTURE);
             setGroup("default");
         }});
-        put("Администратор", get("Модератор").clone());
+        put("Администратор", get("Модератор").setGameMode(GameMode.SURVIVAL).clone());
     }};
 
     private HashMap<String, PlayerRole> cachedStates = new HashMap<>();
@@ -76,10 +76,6 @@ public class Main extends JavaPlugin {
         timer = new CoolTimer(() -> updatePlayers(false), 2 * 1000);
 
         getCommand("id").setExecutor((commandSender, command, s, strings) -> {
-            if(commandSender.hasPermission("aauth.id")){
-                commandSender.sendMessage("У вас недостаточно прав, что бы использовать эту команду");
-                return true;
-            }
             try {
                 Get get = new Get(new HttpUrlBuilder(getMethodUrl("profiles.getId")).set("name", strings[0]));
                 JSONObject json = new JSONObject(get.getHtmlContent());
@@ -93,10 +89,6 @@ public class Main extends JavaPlugin {
         });
 
         CommandExecutor moderatorMode = (commandSender, command, s, strings) -> {
-            if(commandSender.hasPermission("aauth.moderatormode")){
-                commandSender.sendMessage("У вас недостаточно прав, что бы использовать эту команду");
-                return true;
-            }
             if(!(commandSender instanceof Player)){
                 commandSender.sendMessage("Консоль не может выполнить эту команду");
                 return true;

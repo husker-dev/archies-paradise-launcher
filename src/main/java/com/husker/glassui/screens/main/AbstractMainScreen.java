@@ -1,11 +1,11 @@
 package com.husker.glassui.screens.main;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -19,7 +19,7 @@ import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 
 public abstract class AbstractMainScreen extends Screen {
 
-    private WebLabel statusLabel;
+    private MLabel statusLabel;
 
     abstract void onMenuInit(TransparentPanel menu);
     abstract void onRightMenuInit(TransparentPanel menu);
@@ -62,12 +62,12 @@ public abstract class AbstractMainScreen extends Screen {
                                 }
                             }, 0, 500);
 
-                            add(new WebLabel("Статус: "){{
+                            add(new MLabel("Статус: "){{
                                 setForeground(new Color(70, 70, 70));
                                 setPreferredHeight(15);
                                 setFont(Resources.Fonts.getChronicaProExtraBold());
                             }});
-                            add(statusLabel = new WebLabel("Обновление..."){{
+                            add(statusLabel = new MLabel("Обновление..."){{
                                 setForeground(new Color(120, 120, 120));
                                 setPreferredHeight(15);
                                 setFont(Resources.Fonts.getChronicaProExtraBold());

@@ -5,6 +5,7 @@ import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.utils.ImageUtils;
 
@@ -30,8 +31,8 @@ public class ScreenshotsPanel extends TransparentPanel {
 
     private int selectedIndex = 0;
 
-    private final Icon dotDefault = createIcon(13, ImageUtils.applyDefaultShadow(Resources.Icon_Dot));
-    private final Icon dotSelected = createIcon(13, ImageUtils.applyDefaultShadow(Resources.Icon_Dot_Selected));
+    private final BufferedImage dotDefault = ImageUtils.applyDefaultShadow(Resources.Icon_Dot);
+    private final BufferedImage dotSelected = ImageUtils.applyDefaultShadow(Resources.Icon_Dot_Selected);
 
     private final long timer = 8 * 1000;
     private long currentDelay = 0;
@@ -72,9 +73,11 @@ public class ScreenshotsPanel extends TransparentPanel {
             add(new ArrowButton(ImageUtils.applyDefaultShadow(Resources.Icon_Arrow_Right), false, ScreenshotsPanel.this::nextPage), BorderLayout.EAST);
             add(new TransparentPanel(){{
                 setLayout(new FlowLayout(FlowLayout.RIGHT));
-                add(new JLabel(createIcon(25, ImageUtils.applyDefaultShadow(Resources.Icon_Fullscreen))){
+                add(new MLabel(){
                     boolean hovered = false;
                     {
+                        setImageSize(25);
+                        setImage(Resources.Icon_Fullscreen);
                         addMouseListener(new MouseAdapter() {
                             public void mouseEntered(MouseEvent e) {
                                 hovered = true;
@@ -110,16 +113,16 @@ public class ScreenshotsPanel extends TransparentPanel {
             if(count != pages.getComponentCount()) {
                 pages.removeAll();
                 for (int i = 0; i < count; i++)
-                    pages.add(new JLabel(selected == i ? dotSelected : dotDefault));
+                    pages.add(new MLabel(selected == i ? dotSelected : dotDefault, 13));
             }else{
                 for(int i = 0; i < pages.getComponentCount(); i++){
-                    JLabel dot = (JLabel)pages.getComponent(i);
-                    if(dot.getIcon() == dotSelected){
-                        dot.setIcon(dotDefault);
+                    MLabel dot = (MLabel)pages.getComponent(i);
+                    if(dot.getImage() == dotSelected){
+                        dot.setImage(dotDefault);
                         break;
                     }
                 }
-                ((JLabel)pages.getComponent(selected)).setIcon(dotSelected);
+                ((MLabel)pages.getComponent(selected)).setImage(dotSelected);
             }
         });
     }
@@ -200,17 +203,16 @@ public class ScreenshotsPanel extends TransparentPanel {
         }).start();
     }
 
-    private static ImageIcon createIcon(int size, BufferedImage image){
-        return new ImageIcon(image.getScaledInstance(size, size, Image.SCALE_SMOOTH));
-    }
-
     private static class ArrowButton extends TransparentPanel {
 
         boolean hovered = false;
 
         public ArrowButton(BufferedImage icon, boolean way, Runnable action){
             setPreferredWidth(100);
-            add(new JLabel(createIcon(50, icon)), way ? BorderLayout.WEST : BorderLayout.EAST);
+            add(new MLabel(){{
+                setImageSize(50);
+                setImage(icon);
+            }}, way ? BorderLayout.WEST : BorderLayout.EAST);
             addMouseListener(new MouseAdapter() {
                 public void mouseEntered(MouseEvent e) {
                     hovered = true;

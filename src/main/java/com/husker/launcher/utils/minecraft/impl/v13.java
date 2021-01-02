@@ -6,8 +6,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class v13 extends MinecraftClientInfo {
@@ -60,6 +62,9 @@ public class v13 extends MinecraftClientInfo {
         map.forEach((key, val) -> builder.append(" ").append(key).append("=\"").append(val).append("\""));
         builder.append(" -Xmx").append(parameters.getRam()).append("m");
         builder.append(" -classpath \"").append(String.join(";", getLibraries())).append("\" ");
+        if(getType() == ClientType.FORGE)
+            builder.append("-Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true ");
+
         builder.append(getMainClass());
         return builder.toString().trim();
     }
@@ -77,6 +82,20 @@ public class v13 extends MinecraftClientInfo {
 
             if(instance.has("artifact"))
                 libraries.add(instance.getJSONObject("artifact").getString("path"));
+            else if(instance.has("name")){
+                try {
+                    String name = instance.getString("name");
+                    String path = name.split(":")[0].replace(".", "/") + "/";
+                    path += name.split(":")[1] + "/";
+                    path += name.split(":")[2];
+
+                    File file = Objects.requireNonNull(new File(getClientFolder() + "/libraries/" + path).listFiles((dir, name1) -> name1.endsWith(".jar")))[0];
+                    path += "/" + file.getName();
+                    libraries.add(path);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+            }
 
             if(instance.has("classifies")){
                 if(instance.getJSONObject("classifies").has(SystemUtils.getOSName()))

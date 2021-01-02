@@ -163,6 +163,11 @@ public class SystemUtils {
         return context.getGraphicsConfiguration().getDevice().getDisplayMode().getRefreshRate();
     }
 
+    public static double getWindowScaleFactor(GraphicsConfiguration configuration){
+        AffineTransform transform = configuration.getDefaultTransform();
+        return transform.getScaleX();
+    }
+
     public static double getWindowScaleFactor(){
         if (GraphicsEnvironment.isHeadless())
             return 1.0;
@@ -170,7 +175,6 @@ public class SystemUtils {
             .getLocalGraphicsEnvironment()
             .getDefaultScreenDevice()
             .getDefaultConfiguration();
-        AffineTransform transform = gc.getDefaultTransform();
-        return transform.getScaleX();
+        return getWindowScaleFactor(gc);
     }
 }

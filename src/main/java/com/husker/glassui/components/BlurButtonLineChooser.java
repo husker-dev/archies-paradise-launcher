@@ -1,7 +1,7 @@
 package com.husker.glassui.components;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -24,7 +24,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
 
     private final Screen screen;
     private int selected = 0;
-    private final HashMap<WebLabel, Boolean> active = new HashMap<>();
+    private final HashMap<MLabel, Boolean> active = new HashMap<>();
     private final ArrayList<Consumer<Integer>> selectedListeners = new ArrayList<>();
     private boolean disposed = false;
 
@@ -109,7 +109,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
     }
 
     public void addButton(String text){
-        WebLabel label = createLabel();
+        MLabel label = createLabel();
         int index = getComponentCount();
         label.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -128,7 +128,7 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
     }
 
     public void setEnabled(int index, boolean isEnabled){
-        WebLabel label = (WebLabel)getComponent(index);
+        MLabel label = (MLabel)getComponent(index);
         active.put(label, isEnabled);
 
         if(isEnabled)
@@ -150,8 +150,8 @@ public class BlurButtonLineChooser extends TransparentPanel implements BlurCompo
         return selected;
     }
 
-    public WebLabel createLabel(){
-        return new WebLabel(){{
+    public MLabel createLabel(){
+        return new MLabel(){{
             setHorizontalAlignment(CENTER);
             setVerticalAlignment(CENTER);
             setPreferredHeight(30);

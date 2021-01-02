@@ -58,10 +58,10 @@ public abstract class MinecraftClientInfo {
     }
 
     public ClientType getType(){
-        String id = getJSON().getString("id");
-        if(id.contains("Forge"))
+        String id = getJSON().getString("id").toLowerCase();
+        if(id.contains("forge"))
             return ClientType.FORGE;
-        if(id.contains("OptiFine"))
+        if(id.contains("optifine"))
             return ClientType.OPTIFINE;
         return ClientType.VANILLA;
     }

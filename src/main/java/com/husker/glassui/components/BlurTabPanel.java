@@ -1,7 +1,7 @@
 package com.husker.glassui.components;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,10 +30,10 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
     private final TransparentPanel bottomTabPanel;
     private TransparentPanel contentPanel = null;
     private String selectedTab = null;
-    private final LinkedHashMap<String, WebLabel> tabLabels = new LinkedHashMap<>();
+    private final LinkedHashMap<String, MLabel> tabLabels = new LinkedHashMap<>();
     private final LinkedHashMap<String, Component> tabContent = new LinkedHashMap<>();
 
-    private final LinkedHashMap<WebLabel, String> tabText = new LinkedHashMap<>();
+    private final LinkedHashMap<MLabel, String> tabText = new LinkedHashMap<>();
 
     private final ArrayList<Consumer<String>> listeners = new ArrayList<>();
 
@@ -53,7 +54,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
                 g.setColor(new Color(100, 100, 100, 100));
 
                 int selected = -1;
-                WebLabel selectedLabel = getSelectedTabLabel();
+                MLabel selectedLabel = getSelectedTabLabel();
                 for(int i = 0; i < topTabPanel.getComponentCount(); i++)
                     if(selectedLabel == topTabPanel.getComponent(i))
                         selected = i;
@@ -79,7 +80,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
                 g.setColor(new Color(100, 100, 100, 100));
 
                 int selected = -1;
-                WebLabel selectedLabel = getSelectedTabLabel();
+                MLabel selectedLabel = getSelectedTabLabel();
                 for(int i = 0; i < bottomTabPanel.getComponentCount(); i++)
                     if(selectedLabel == bottomTabPanel.getComponent(i))
                         selected = i;
@@ -105,18 +106,18 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
         addTab(id, title, null, component, true);
     }
 
-    public void addTab(String id, Icon icon, Component component){
+    public void addTab(String id, BufferedImage icon, Component component){
         addTab(id, "", icon, component, true);
     }
 
-    public void addTab(String id, String title, Icon icon, Component component){
+    public void addTab(String id, String title, BufferedImage icon, Component component){
         addTab(id, title, icon, component, true);
     }
 
-    public void addTab(String id, String title, Icon icon, Component component, boolean isTop){
+    public void addTab(String id, String title, BufferedImage icon, Component component, boolean isTop){
         tabContent.put(id, component);
 
-        WebLabel tabLabel = createLabel(icon);
+        MLabel tabLabel = createLabel(icon);
         tabLabel.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 setSelectedTab(id);
@@ -148,7 +149,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             return;
 
         tabContent.remove(id);
-        WebLabel label = tabLabels.remove(id);
+        MLabel label = tabLabels.remove(id);
         tabText.remove(label);
 
         if(topTabPanel.contains(label))
@@ -157,9 +158,10 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             bottomTabPanel.remove(label);
     }
 
-    protected WebLabel createLabel(Icon icon){
-        return new WebLabel(){{
-            setIcon(icon);
+    protected MLabel createLabel(BufferedImage icon){
+        return new MLabel(){{
+            setImage(icon);
+            setImageSize(25);
 
             setForeground(GlassUI.Colors.labelText);
             setFont(Resources.Fonts.getChronicaProExtraBold());
@@ -172,11 +174,11 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
         addTab(id, title, null, component, false);
     }
 
-    public void addBottomTab(String id, Icon icon, Component component){
+    public void addBottomTab(String id, BufferedImage icon, Component component){
         addTab(id, "", icon, component, false);
     }
 
-    public void addBottomTab(String id, String title, Icon icon, Component component){
+    public void addBottomTab(String id, String title, BufferedImage icon, Component component){
         addTab(id, title, icon, component, false);
     }
 
@@ -188,7 +190,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
         return selectedTab;
     }
 
-    public WebLabel getSelectedTabLabel(){
+    public MLabel getSelectedTabLabel(){
         return getTabLabel(selectedTab);
     }
 
@@ -198,7 +200,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
 
     public String getId(int index){
         int selectedIndex = 0;
-        for(Map.Entry<String, WebLabel> components : tabLabels.entrySet()){
+        for(Map.Entry<String, MLabel> components : tabLabels.entrySet()){
             if(selectedIndex != index)
                 selectedIndex ++;
             else
@@ -209,7 +211,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
 
     public int getIndex(String id){
         int selectedIndex = 0;
-        for(Map.Entry<String, WebLabel> components : tabLabels.entrySet()){
+        for(Map.Entry<String, MLabel> components : tabLabels.entrySet()){
             if(!components.getKey().equals(id))
                 selectedIndex ++;
             else
@@ -218,11 +220,11 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
         return -1;
     }
 
-    public WebLabel getTabLabel(int index){
+    public MLabel getTabLabel(int index){
         return tabLabels.get(getId(index));
     }
 
-    public WebLabel getTabLabel(String id){
+    public MLabel getTabLabel(String id){
         return tabLabels.get(id);
     }
 
@@ -261,7 +263,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
             return;
 
         // Tab
-        if(component instanceof WebLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component && ((WebLabel)component).getText().length() > 0){
+        if(component instanceof MLabel && (topTabPanel.contains(component) || bottomTabPanel.contains(component)) && getSelectedTabLabel() == component && ((MLabel)component).getText().length() > 0){
 
             Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), component);
             Area shape;
@@ -298,7 +300,7 @@ public class BlurTabPanel extends TransparentPanel implements BlurComponent {
         shadowArea.add(new Area(new Rectangle(x, y, width, topTabPanel.getHeight() + 25)));
         shadowArea.add(new Area(new Rectangle(x, y + height - (bottomTabPanel.getHeight() + 25), width, bottomTabPanel.getHeight() + 25)));
 
-        WebLabel selectedLabel = getSelectedTabLabel();
+        MLabel selectedLabel = getSelectedTabLabel();
 
         if(topTabPanel.contains(selectedLabel) && topTabPanel.getFirstComponent() == selectedLabel)
             shadowArea.subtract(new Area(new Rectangle(x, y, 25, topTabPanel.getHeight() + 25)));

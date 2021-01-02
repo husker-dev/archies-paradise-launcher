@@ -1,19 +1,18 @@
 package com.husker.glassui.screens.main.profile;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurButtonLineChooser;
 import com.husker.glassui.components.BlurComponent;
 import com.husker.glassui.components.BlurPanel;
-import com.husker.glassui.screens.Message;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.glassui.screens.main.profile.edit.InfoEdit;
 import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
 import com.husker.glassui.screens.reset.R_1_SendingCode;
 import com.husker.launcher.Resources;
 import com.husker.launcher.User;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.Screen;
@@ -26,6 +25,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
 import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
 import static java.awt.FlowLayout.LEFT;
@@ -35,7 +35,7 @@ public class ProfilePanel extends TransparentPanel {
     private final Screen screen;
     private SkinViewer skinViewer;
 
-    private WebLabel name, email, status, id, skinType;
+    private MLabel name, email, status, id, skinType;
 
     public ProfilePanel(Screen screen){
         this.screen = screen;
@@ -140,7 +140,7 @@ public class ProfilePanel extends TransparentPanel {
         TransparentPanel panel = new TransparentPanel(){{
             setLayout(new FlowLayout(LEFT));
         }};
-        panel.add(new WebLabel(text){{
+        panel.add(new MLabel(text){{
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(LEFT);
             setVerticalAlignment(CENTER);
@@ -159,22 +159,23 @@ public class ProfilePanel extends TransparentPanel {
             });
         }});
 
-        panel.add(new WebLabel(){
-            final ImageIcon defaultIcon = new ImageIcon(Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
-            final ImageIcon hoveredIcon = new ImageIcon(Resources.Icon_Edit_Selected.getScaledInstance(20,  20, Image.SCALE_SMOOTH));
+        panel.add(new MLabel(){
+            final BufferedImage defaultIcon = Resources.Icon_Edit;
+            final BufferedImage hoveredIcon = Resources.Icon_Edit_Selected;
 
             {
                 setMargin(0, 5, 0, 0);
                 setPreferredHeight(30);
                 setVerticalAlignment(CENTER);
-                setIcon(new ImageIcon(Resources.Icon_Edit.getScaledInstance(20,  20, Image.SCALE_SMOOTH)));
+                setImageSize(20);
+                setImage(defaultIcon);
 
                 addMouseListener(new MouseAdapter() {
                     public void mouseEntered(MouseEvent mouseEvent) {
-                        setIcon(hoveredIcon);
+                        setImage(hoveredIcon);
                     }
                     public void mouseExited(MouseEvent mouseEvent) {
-                        setIcon(defaultIcon);
+                        setImage(defaultIcon);
                     }
 
                     public void mousePressed(MouseEvent mouseEvent) {

@@ -1,6 +1,5 @@
 package com.husker.glassui;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurComponent;
 import com.husker.glassui.screens.confirm.C_1_Email;
 import com.husker.glassui.screens.confirm.C_2_SendingCode;
@@ -20,6 +19,7 @@ import com.husker.glassui.screens.reset.Reset;
 import com.husker.glassui.screens.reset.R_3_NewPassword;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.api.API;
 import com.husker.launcher.Resources;
@@ -28,7 +28,6 @@ import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.screens.main.profile.edit.InfoApplying;
 import com.husker.glassui.screens.main.profile.skin.SkinCategoriesLoading;
-import com.husker.launcher.ui.components.CLabel;
 import com.husker.launcher.ui.utils.ShapeUtils;
 
 import java.awt.*;
@@ -110,20 +109,20 @@ public class GlassUI extends LauncherUI {
         return new Dimension(1150, 750);
     }
 
-    public static WebLabel createTitleLabel(String text){
-        return new CLabel(text){{
+    public static MLabel createTitleLabel(String text){
+        return new MLabel(text){{
             setFont(Resources.Fonts.getChronicaProExtraBold(26));
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(CENTER);
         }};
     }
 
-    public static WebLabel createSimpleLabel(String text){
+    public static MLabel createSimpleLabel(String text){
         return createSimpleLabel(text, false);
     }
 
-    public static WebLabel createSimpleLabel(String text, boolean centered){
-        return new CLabel(text){{
+    public static MLabel createSimpleLabel(String text, boolean centered){
+        return new MLabel(text){{
             setForeground(Colors.labelText);
             setPreferredHeight(16);
             setFont(Resources.Fonts.getChronicaProExtraBold());
@@ -161,8 +160,8 @@ public class GlassUI extends LauncherUI {
         parameter.setShadowSize(4);
     }
 
-    public static WebLabel createTagLabel(Screen screen, String text){
-        return new WebLabel(text){{
+    public static MLabel createTagLabel(Screen screen, String text){
+        return new MLabel(text){{
             setForeground(Colors.labelText);
             setHorizontalAlignment(LEFT);
             setVerticalAlignment(CENTER);
@@ -185,7 +184,7 @@ public class GlassUI extends LauncherUI {
             {
                 setMargin(10, 20, 0, 10);
                 setLayout(new BorderLayout());
-                add(new WebLabel(name + ":"){{
+                add(new MLabel(name + ":"){{
                     setForeground(GlassUI.Colors.labelText);
                     setFont(Resources.Fonts.getChronicaProExtraBold(18));
                     setMargin(0, 0, 0, 10);
@@ -202,15 +201,15 @@ public class GlassUI extends LauncherUI {
         };
     }
 
-    public static WebLabel createParameterLineValueLabel(){
+    public static MLabel createParameterLineValueLabel(){
         return createParameterLineValueLabel(false);
     }
 
-    public static WebLabel createParameterLineValueLabel(boolean main){
+    public static MLabel createParameterLineValueLabel(boolean main){
         float minFontSize = 14;
         float maxFontSize = main ? 18 : 16;
 
-        return new WebLabel(){
+        return new MLabel(){
             {
                 setForeground(GlassUI.Colors.labelLightText);
                 setFont(Resources.Fonts.getChronicaProExtraBold(maxFontSize));

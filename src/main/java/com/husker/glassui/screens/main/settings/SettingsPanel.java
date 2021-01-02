@@ -1,10 +1,10 @@
 package com.husker.glassui.screens.main.settings;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.*;
 import com.husker.launcher.Resources;
 import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.glassui.GlassUI;
@@ -72,7 +72,7 @@ public class SettingsPanel extends TransparentPanel {
             }});
 
             add(Box.createRigidArea(new Dimension(0, 0)));
-            add(new WebLabel("Выделяемая память"){{
+            add(new MLabel("Выделяемая память"){{
                 setForeground(GlassUI.Colors.labelText);
                 setFont(Resources.Fonts.getChronicaProExtraBold());
             }});
@@ -172,7 +172,7 @@ public class SettingsPanel extends TransparentPanel {
         TransparentPanel panel = new TransparentPanel(){{
             setLayout(new FlowLayout(LEFT));
         }};
-        panel.add(new WebLabel(text){{
+        panel.add(new MLabel(text){{
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(LEFT);
             setVerticalAlignment(CENTER);

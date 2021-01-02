@@ -1,10 +1,10 @@
 package com.husker.glassui.components;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.utils.ComponentUtils;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 
-public class BlurCheckbox extends WebLabel implements BlurComponent {
+public class BlurCheckbox extends MLabel implements BlurComponent {
 
     private final Screen screen;
     private boolean checked = false;
@@ -40,6 +40,7 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
         setForeground(GlassUI.Colors.labelText);
         setFont(Resources.Fonts.getChronicaProExtraBold());
         screen.addBlurSegment("Checkbox", parameter -> onBlurApply(parameter, this));
+        setImageSize(25);
 
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
@@ -96,8 +97,8 @@ public class BlurCheckbox extends WebLabel implements BlurComponent {
         this.checked = checked;
 
         if(checked)
-            setIcon(new ImageIcon(Resources.Icon_Checkbox_On.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
+            setImage(Resources.Icon_Checkbox_On);
         else
-            setIcon(new ImageIcon(Resources.Icon_Checkbox_Off.getScaledInstance(25, 25, Image.SCALE_SMOOTH)));
+            setImage(Resources.Icon_Checkbox_Off);
     }
 }

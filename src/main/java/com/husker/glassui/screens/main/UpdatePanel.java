@@ -1,12 +1,11 @@
 package com.husker.glassui.screens.main;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
-import com.husker.launcher.managers.UpdateManager;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import org.apache.log4j.LogManager;
@@ -17,8 +16,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -29,7 +26,7 @@ public class UpdatePanel extends BlurPanel {
 
     private static final Logger log = LogManager.getLogger(UpdatePanel.class);
 
-    private final WebLabel[] labels = new WebLabel[2];
+    private final MLabel[] labels = new MLabel[2];
 
     public UpdatePanel(Screen screen){
         super(screen, true);
@@ -37,8 +34,9 @@ public class UpdatePanel extends BlurPanel {
 
         setLayout(new BorderLayout());
 
-        add(new WebLabel(){{
-            setIcon(new ImageIcon(Resources.Icon_Download.getScaledInstance(40, 40, Image.SCALE_SMOOTH)));
+        add(new MLabel(){{
+            setImageSize(40);
+            setImage(Resources.Icon_Download);
             setMargin(0, 10, 0, 10);
         }}, BorderLayout.WEST);
 
@@ -48,13 +46,13 @@ public class UpdatePanel extends BlurPanel {
             add(labels[0] = GlassUI.createSimpleLabel("Доступно новое"), BorderLayout.NORTH);
             add(labels[1] = GlassUI.createSimpleLabel("обновление!"));
 
-            for(WebLabel label : labels)
+            for(MLabel label : labels)
                 label.setForeground(GlassUI.Colors.labelLightText);
         }});
 
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent mouseEvent) {
-                for(WebLabel label : labels){
+                for(MLabel label : labels){
                     Font font = label.getFont();
                     Map attributes = font.getAttributes();
                     attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
@@ -63,7 +61,7 @@ public class UpdatePanel extends BlurPanel {
             }
 
             public void mouseExited(MouseEvent mouseEvent) {
-                for(WebLabel label : labels){
+                for(MLabel label : labels){
                     Font font = label.getFont();
                     Map attributes = font.getAttributes();
                     attributes.put(TextAttribute.UNDERLINE, -1);

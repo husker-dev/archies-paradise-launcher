@@ -1,36 +1,29 @@
 package com.husker.launcher.ui.components;
 
-import com.alee.laf.label.WebLabel;
-
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
-public class LabelButton extends WebLabel {
+public class LabelButton extends MLabel {
 
-    private Icon def;
-    private Icon selected;
+    private BufferedImage def;
+    private BufferedImage selected;
 
     public LabelButton(){
-        this((ImageIcon)null, null);
+        this(null, null);
     }
 
-    public LabelButton(Image def, Image selected){
-        this(new ImageIcon(def), new ImageIcon(selected));
+    public LabelButton(BufferedImage def, BufferedImage selected, int width, int height){
+        this(def, selected);
+        setImageSize(width, height);
     }
 
-    public LabelButton(Image def, Image selected, int width, int height){
-        this(new ImageIcon(def.getScaledInstance(width, height, Image.SCALE_SMOOTH)), new ImageIcon(selected.getScaledInstance(width, height, Image.SCALE_SMOOTH)));
-    }
-
-    public LabelButton(ImageIcon def, ImageIcon selected){
-        super(def);
+    public LabelButton(BufferedImage def, BufferedImage selected){
+        setImage(def);
         this.def = def;
         this.selected = selected;
-        setIcon(def);
 
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent mouseEvent) {
@@ -66,15 +59,15 @@ public class LabelButton extends WebLabel {
 
     private void updateState(){
         boolean hovered = getMousePosition() != null;
-        super.setIcon(hovered ? selected : def);
+        super.setImage(hovered ? selected : def);
     }
 
-    public void setIcon(Icon icon){
-        super.setIcon(icon);
+    public void setImage(BufferedImage icon){
+        super.setImage(icon);
         this.def = icon;
     }
 
-    public void setSelectedIcon(Icon icon){
+    public void setSelectedImage(BufferedImage icon){
         selected = icon;
     }
 }

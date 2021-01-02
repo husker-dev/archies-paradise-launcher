@@ -1,6 +1,5 @@
 package com.husker.glassui.screens.main.social;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.components.social.SocialLoadGrid;
@@ -8,6 +7,7 @@ import com.husker.glassui.components.social.SocialPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.components.LabelButton;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -25,7 +25,7 @@ public abstract class SocialTabPanel extends TransparentPanel {
     private final SocialLoadGrid socialGrid;
     private boolean loaded = false;
 
-    private WebLabel title, description;
+    private MLabel title, description;
     private BlurScalableImage logo;
     private String link;
 
@@ -69,12 +69,12 @@ public abstract class SocialTabPanel extends TransparentPanel {
                 add(Box.createRigidArea(new Dimension(10, 10)));
                 add(new TransparentPanel(){{
                     setLayout(new BorderLayout());
-                    add(title = new WebLabel(){{
+                    add(title = new MLabel(){{
                         setForeground(GlassUI.Colors.labelText);
                         setFont(Resources.Fonts.getChronicaProExtraBold(20));
                     }}, BorderLayout.NORTH);
 
-                    add(description = new WebLabel(){{
+                    add(description = new MLabel(){{
                         setForeground(GlassUI.Colors.labelLightText);
                         setFont(Resources.Fonts.getChronicaProExtraBold(13));
                     }}, BorderLayout.SOUTH);
@@ -95,7 +95,6 @@ public abstract class SocialTabPanel extends TransparentPanel {
             onLoad();
             socialGrid.updatePanels();
         }).start();
-
     }
 
 

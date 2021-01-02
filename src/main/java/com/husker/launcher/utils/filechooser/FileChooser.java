@@ -58,7 +58,7 @@ public class FileChooser {
         try {
             JnaFileChooser fc = new JnaFileChooser();
             fc.setMultiSelectionEnabled(multiSelectionEnabled);
-            HashMap<Mode, JnaFileChooser.Mode> modes = new HashMap<>() {{
+            HashMap<Mode, JnaFileChooser.Mode> modes = new HashMap<Mode, JnaFileChooser.Mode>() {{
                 put(Mode.FILES_ONLY, JnaFileChooser.Mode.Files);
                 put(Mode.DIRECTORIES_ONLY, JnaFileChooser.Mode.Directories);
                 put(Mode.FILES_AND_DIRECTORIES, JnaFileChooser.Mode.FilesAndDirectories);

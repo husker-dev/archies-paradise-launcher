@@ -63,7 +63,7 @@ public class BlurTextField extends WebTextField implements BlurComponent{
             Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
 
             shape = new RoundRectangle2D.Double(location.getX(), location.getY(), getWidth(), getHeight(), 15, 15);
-        }catch (Exception ex){
+        }catch (Exception ignored){
         }
     }
 

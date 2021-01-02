@@ -61,12 +61,12 @@ public class MainScreen extends AbstractMainScreen {
 
             menu.add(tabPanel = new BlurTabPanel(this) {{
                 setPreferredHeight(450);
-                addTab("play", "Игра", getIcon(Resources.Icon_Play), playPanel = new PlayPanel(MainScreen.this));
-                addTab("profile", "Профиль", getIcon(Resources.Icon_Profile), profilePanel = new ProfilePanel(MainScreen.this));
-                addTab("news", "Новости", getIcon(Resources.Icon_Book), vkPanel = new VkGroupPanel(MainScreen.this));
-                addTab("videos", "Видео", getIcon(Resources.Icon_Videos), youtubePanel = new YoutubePanel(MainScreen.this));
-                addBottomTab("settings", "Настройки", getIcon(Resources.Icon_Settings), new SettingsPanel(MainScreen.this));
-                addBottomTab("info", "Информация", getIcon(Resources.Icon_Info), infoPanel = new InfoPanel(MainScreen.this));
+                addTab("play", "Игра", Resources.Icon_Play, playPanel = new PlayPanel(MainScreen.this));
+                addTab("profile", "Профиль", Resources.Icon_Profile, profilePanel = new ProfilePanel(MainScreen.this));
+                addTab("news", "Новости", Resources.Icon_Book, vkPanel = new VkGroupPanel(MainScreen.this));
+                addTab("videos", "Видео", Resources.Icon_Videos, youtubePanel = new YoutubePanel(MainScreen.this));
+                addBottomTab("settings", "Настройки", Resources.Icon_Settings, new SettingsPanel(MainScreen.this));
+                addBottomTab("info", "Информация", Resources.Icon_Info, infoPanel = new InfoPanel(MainScreen.this));
 
                 addTabChangedListener(id -> onShowPanelEvent());
             }});
@@ -87,9 +87,9 @@ public class MainScreen extends AbstractMainScreen {
             tabPanel.removeTab("keys");
             tabPanel.removeTab("people");
             if(getLauncher().User.getStatus().equals("Администратор")){
-                tabPanel.addTab("control", "Управление", getIcon(Resources.Icon_Folder), controlPanel);
-                tabPanel.addBottomTab("keys", "Ссылки", getIcon(Resources.Icon_Code), keysPanel);
-                tabPanel.addBottomTab("people", "Пользователи", getIcon(Resources.Icon_People), peoplePanel);
+                tabPanel.addTab("control", "Управление", Resources.Icon_Folder, controlPanel);
+                tabPanel.addBottomTab("keys", "Ссылки", Resources.Icon_Code, keysPanel);
+                tabPanel.addBottomTab("people", "Пользователи", Resources.Icon_People, peoplePanel);
             }
             onShowPanelEvent();
         }catch (Exception ex){

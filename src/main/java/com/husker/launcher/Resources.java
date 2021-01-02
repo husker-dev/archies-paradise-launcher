@@ -2,7 +2,6 @@ package com.husker.launcher;
 
 import com.husker.launcher.ui.utils.ImageUtils;
 import com.husker.launcher.utils.SystemUtils;
-import com.husker.launcher.utils.minecraft.MinecraftClientInfo;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -11,22 +10,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.awt.image.AbstractMultiResolutionImage;
-import java.awt.image.BaseMultiResolutionImage;
 import java.awt.image.BufferedImage;
-import java.awt.image.MultiResolutionImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class Resources {
 
@@ -54,15 +45,8 @@ public class Resources {
 
     public static Image getImage(String file){
         try {
-            List<Image> imgList = new ArrayList<Image>();
-            BufferedImage img = ImageIO.read(get(file));
-            imgList.add(img);
-            double scale = SystemUtils.getWindowScaleFactor();
-            imgList.add(img.getScaledInstance((int)((double)img.getWidth() * scale), (int)((double)img.getHeight() * scale), Image.SCALE_SMOOTH));
-            AbstractMultiResolutionImage mrImage = new BaseMultiResolutionImage(imgList.toArray(new Image[0]));
-            return mrImage;
-            //return ImageIO.read(get(file));
-        } catch (IOException e) {
+            return ImageIO.read(get(file));
+        } catch (IOException ignored) {
         }
         return null;
     }

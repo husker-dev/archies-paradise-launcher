@@ -1,17 +1,16 @@
 package com.husker.glassui.screens.main.info;
 
 import com.alee.extended.label.WebStyledLabel;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.managers.NetManager;
-import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.settings.LauncherConfig;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.utils.ComponentUtils;
 
@@ -83,8 +82,8 @@ public class LauncherInfo extends TransparentPanel {
         }).start();
     }
 
-    public WebLabel createLightText(String text){
-        return new WebLabel(text){{
+    public MLabel createLightText(String text){
+        return new MLabel(text){{
             setForeground(new Color(170, 170, 170));
             setHorizontalAlignment(LEFT);
             setPreferredHeight(16);
@@ -92,8 +91,8 @@ public class LauncherInfo extends TransparentPanel {
         }};
     }
 
-    public WebLabel createTitleLabel(String text){
-        return new WebLabel(text){{
+    public MLabel createTitleLabel(String text){
+        return new MLabel(text){{
             setForeground(new Color(50, 50, 50));
             setHorizontalAlignment(CENTER);
             setPreferredHeight(28);
@@ -119,7 +118,7 @@ public class LauncherInfo extends TransparentPanel {
             setPreferredWidth(135);
             setLayout(new BorderLayout());
 
-            WebLabel titleLabel = createTitleLabel(title);
+            MLabel titleLabel = createTitleLabel(title);
             valueLabel = new WebStyledLabel(){
                 {
                     setHorizontalAlignment(CENTER);

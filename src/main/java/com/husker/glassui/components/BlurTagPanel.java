@@ -1,20 +1,19 @@
 package com.husker.glassui.components;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.components.LabelButton;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class BlurTagPanel extends TransparentPanel {
 
-    private final Screen screen;
-    private final WebLabel tag;
+
+    private final MLabel tag;
     private final LabelButton button;
     private final TransparentPanel content;
 
@@ -24,9 +23,9 @@ public class BlurTagPanel extends TransparentPanel {
     }
 
     public BlurTagPanel(Screen screen){
-        this.screen = screen;
         tag = GlassUI.createTagLabel(screen, "Tag");
         button = new LabelButton();
+        button.setImageSize(20);
         button.setVisible(false);
 
         setLayout(new BorderLayout());
@@ -64,11 +63,11 @@ public class BlurTagPanel extends TransparentPanel {
     public void setButtonIcons(BufferedImage def, BufferedImage selected){
         button.setVisible(def != null);
         if(def == null){
-            button.setIcon(null);
-            button.setSelectedIcon(null);
+            button.setImage(null);
+            button.setSelectedImage(null);
         }else {
-            button.setIcon(new ImageIcon(def.getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
-            button.setSelectedIcon(new ImageIcon(selected.getScaledInstance(20, 20, Image.SCALE_SMOOTH)));
+            button.setImage(def);
+            button.setSelectedImage(selected);
         }
     }
 }

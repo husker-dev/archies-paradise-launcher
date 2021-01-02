@@ -5,6 +5,7 @@ import com.husker.launcher.Launcher;
 import com.husker.launcher.ui.blur.impl.GaussianBlur;
 import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
+import com.husker.launcher.utils.SystemUtils;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -182,12 +183,17 @@ public class BlurPainter {
                     Area toRender = new Area(new Rectangle(0, 0, launcher.getActualWidth(), launcher.getActualHeight()));
                     toRender.intersect(new Area(translatedShape));
 
-                    texture = ImageUtils.createVolatileImage(launcher, translatedShape.getBounds().width, translatedShape.getBounds().height);
+                    int scaledW = (int)(translatedShape.getBounds().width * SystemUtils.getWindowScaleFactor());
+                    int scaledH = (int)(translatedShape.getBounds().height * SystemUtils.getWindowScaleFactor());
+
+                    texture = ImageUtils.createVolatileImage(launcher, scaledW, scaledH);
                     Graphics2D g2d = texture.createGraphics();
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)parameter.getTextureAlpha()));
+
                     g2d.setPaint(new TexturePaint(parameter.getTexture(), toRender.getBounds()));
                     RenderUtils.enableAntialiasing(g2d);
-
+                    if(SystemUtils.getWindowScaleFactor(lastConfiguration) == 1)
+                        RenderUtils.enableInterpolation(g2d);
                     g2d.fill(translatedShape);
                     g2d.dispose();
                 } else

@@ -1,6 +1,5 @@
 package com.husker.glassui.screens.main.settings;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurButton;
 import com.husker.glassui.components.BlurPagePanel;
@@ -9,6 +8,7 @@ import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.Resources;
 import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
 
@@ -29,7 +29,7 @@ public class BackgroundSelection extends SimpleTitledScreen {
 
     public void onMenuInit(TransparentPanel panel) {
         panel.setLayout(new BorderLayout());
-        panel.add(new WebLabel("Выберите фон"){{
+        panel.add(new MLabel("Выберите фон"){{
             setMargin(15, 0, 0, 0);
             setForeground(GlassUI.Colors.labelLightText);
             setVerticalAlignment(CENTER);

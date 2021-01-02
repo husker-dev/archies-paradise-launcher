@@ -233,7 +233,7 @@ public class Social {
 
                     for (int i = 0; i < Math.min(4, json_videos.length()); i++) {
                         String previewUrl = json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("thumbnail").getJSONArray("thumbnails").getJSONObject(3).getString("url");
-                        //previewUrl = previewUrl.replace("hqdefault", "maxresdefault");
+                        previewUrl = previewUrl.replace("hqdefault", "maxresdefault");
                         String title = json_videos.getJSONObject(i).getJSONObject("gridVideoRenderer").getJSONObject("title").getString("simpleText");
                         if(title.substring(0, 1).getBytes()[0] == 63)
                             title = "●" + title.substring(2);

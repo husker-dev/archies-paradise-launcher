@@ -1,11 +1,11 @@
 package com.husker.glassui.screens.main.info;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.components.BlurTagPanel;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.ui.Screen;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 
 import java.awt.*;
@@ -13,8 +13,8 @@ import java.awt.*;
 public class ClientInfoPanel extends TransparentPanel {
 
     private ServerInfoPanel serverInfo;
-    private WebLabel versionLabel;
-    private WebLabel buildVersionLabel;
+    private MLabel versionLabel;
+    private MLabel buildVersionLabel;
     private final ModPanel[] modPanels = new ModPanel[5];
 
     private final String clientId;

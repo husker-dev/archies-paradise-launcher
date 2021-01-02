@@ -1,8 +1,8 @@
 package com.husker.glassui.screens;
 
-import com.alee.laf.label.WebLabel;
 import com.husker.launcher.ui.CenteredMenuScreen;
 import com.husker.glassui.GlassUI;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.utils.UIUtils;
 
 import javax.swing.*;
@@ -12,8 +12,8 @@ import static com.husker.launcher.ui.utils.UIUtils.ShadowSide.BOTTOM;
 
 public abstract class SimpleLoadingScreen extends CenteredMenuScreen {
     private final int title_size = 50;
-    private WebLabel title;
-    private WebLabel text;
+    private MLabel title;
+    private MLabel text;
 
     public void onMenuInit() {
         addBlurSegment("LoadingScreen.Menu", parameter -> {

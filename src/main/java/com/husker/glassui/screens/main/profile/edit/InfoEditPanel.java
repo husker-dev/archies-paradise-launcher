@@ -1,12 +1,11 @@
 package com.husker.glassui.screens.main.profile.edit;
 
 import com.alee.extended.layout.VerticalFlowLayout;
-import com.alee.laf.label.WebLabel;
 import com.husker.glassui.components.BlurPanel;
 import com.husker.glassui.components.BlurPasswordField;
 import com.husker.glassui.components.BlurTextField;
 import com.husker.launcher.Resources;
-import com.husker.launcher.api.API;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -24,8 +23,8 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
 
     private SkinViewer viewer;
 
-    private WebLabel titleLabel;
-    private WebLabel subTitleLabel;
+    private MLabel titleLabel;
+    private MLabel subTitleLabel;
 
     public void onInit() {
         add(new BlurPanel(this, false){
@@ -69,7 +68,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                                 setLayout(new VerticalFlowLayout(0, 0));
                                 setMargin(10, 0, 0, 0);
 
-                                add(subTitleLabel = new WebLabel("Информация"){{
+                                add(subTitleLabel = new MLabel("Информация"){{
                                     setHorizontalAlignment(CENTER);
                                     setForeground(GlassUI.Colors.labelText);
                                     setFont(Resources.Fonts.getChronicaProExtraBold(25));
@@ -146,7 +145,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
         return new TransparentPanel(){{
             setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 
-            add(new WebLabel(text){{
+            add(new MLabel(text){{
                 setForeground(GlassUI.Colors.labelText);
                 setFont(Resources.Fonts.getChronicaProExtraBold());
             }});

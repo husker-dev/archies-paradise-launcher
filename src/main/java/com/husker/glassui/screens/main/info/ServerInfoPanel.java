@@ -8,6 +8,7 @@ import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.settings.LauncherConfig;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.ui.Screen;
@@ -20,10 +21,10 @@ import java.io.IOException;
 
 public class ServerInfoPanel extends BlurPanel {
 
-    private final WebLabel title;
-    private WebLabel status;
-    private WebLabel maxPlayers, players;
-    private WebLabel ping;
+    private final MLabel title;
+    private MLabel status;
+    private MLabel maxPlayers, players;
+    private MLabel ping;
 
     public ServerInfoPanel(Screen screen) {
         super(screen, true);
@@ -95,7 +96,7 @@ public class ServerInfoPanel extends BlurPanel {
             {
                 setLayout(new BorderLayout());
 
-                WebLabel nameLabel = GlassUI.createSimpleLabel(name + ":");
+                MLabel nameLabel = GlassUI.createSimpleLabel(name + ":");
 
                 add(nameLabel, BorderLayout.WEST);
                 add(parameter, BorderLayout.EAST);
@@ -110,12 +111,12 @@ public class ServerInfoPanel extends BlurPanel {
         };
     }
 
-    public WebLabel createParameterLabel(){
+    public MLabel createParameterLabel(){
         return createParameterLabel(" ");
     }
 
-    public WebLabel createParameterLabel(String text){
-        return new WebLabel(text){{
+    public MLabel createParameterLabel(String text){
+        return new MLabel(text){{
             setForeground(GlassUI.Colors.labelLightText);
             setFont(Resources.Fonts.getChronicaProExtraBold());
             setHorizontalAlignment(RIGHT);

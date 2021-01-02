@@ -118,6 +118,8 @@ public class SettingsFile {
     }
 
     public void set(String varPath, Object value){
+        if(value == null)
+            value = "";
         if(path.startsWith("/"))
             return;
         getMapByPath(getPathFromVarPath(varPath), true).put(getVarFromVarPath(varPath), value);
