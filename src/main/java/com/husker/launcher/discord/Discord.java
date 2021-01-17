@@ -44,17 +44,17 @@ public class Discord {
     }
 
     public static void init(){
-        time = OffsetDateTime.now();
-        client = new IPCClient(788855948826378271L);
-        client.setListener(new IPCListener(){
-            public void onReady(IPCClient client) {
-                startMinecraftServerTimer();
-                startDiscordTimer();
-            }
-        });
         try {
+            time = OffsetDateTime.now();
+            client = new IPCClient(788855948826378271L);
+            client.setListener(new IPCListener(){
+                public void onReady(IPCClient client) {
+                    startMinecraftServerTimer();
+                    startDiscordTimer();
+                }
+            });
             client.connect();
-        } catch (NoDiscordClientException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -82,7 +82,7 @@ public class Discord {
 
                     client.sendRichPresence(builder.build());
                 }catch (Exception ex){
-                    ex.printStackTrace();
+                    //ex.printStackTrace();
                 }
             }
         }, 0, 1000);

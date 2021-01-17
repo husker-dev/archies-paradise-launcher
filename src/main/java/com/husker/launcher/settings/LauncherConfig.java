@@ -1,6 +1,8 @@
 package com.husker.launcher.settings;
 
 
+import java.io.File;
+
 public class LauncherConfig extends SettingsFile{
 
     public static final LauncherConfig INSTANCE = new LauncherConfig();
@@ -11,7 +13,7 @@ public class LauncherConfig extends SettingsFile{
     private static final String AUTH_PORT = "auth.port";
 
     private LauncherConfig(){
-        super("/launcher_config.yaml");
+        super("/launcher_config.yaml", true);
         setDefault(TITLE, "Archie's Paradise Launcher");
         setDefault(FOLDER, "Archie's Paradise");
         setDefault(AUTH_IP, "127.0.0.1");

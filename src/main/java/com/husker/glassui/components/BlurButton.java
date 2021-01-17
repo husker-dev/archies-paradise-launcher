@@ -28,7 +28,12 @@ public class BlurButton extends WebButton implements BlurComponent{
     private BufferedImage image;
 
     public BlurButton(Screen screen){
-        this(screen, "");
+        this(screen, (String)null);
+    }
+
+    public BlurButton(Screen screen, BufferedImage image){
+        this(screen, (String)null);
+        setImage(image);
     }
 
     public BlurButton(Screen screen, String text){
@@ -70,9 +75,8 @@ public class BlurButton extends WebButton implements BlurComponent{
     private void updateShape(){
         try {
             Point location = ComponentUtils.getComponentLocationOnScreen(screen.getLauncher(), this);
-
             shape = new RoundRectangle2D.Double(location.getX(), location.getY(), getWidth(), getHeight(), 25, 25);
-        }catch (Exception ex){}
+        }catch (Exception ignored){}
     }
 
     public void paint(Graphics g) {
@@ -87,7 +91,7 @@ public class BlurButton extends WebButton implements BlurComponent{
 
             Rectangle iconBounds = getIconBounds();
             if (iconBounds != null)
-                g2d.drawImage(image, iconBounds.x, iconBounds.y, iconBounds.width, iconBounds.height, null);
+                g2d.drawImage(image, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
         }
     }
 
@@ -151,8 +155,8 @@ public class BlurButton extends WebButton implements BlurComponent{
 
     public void setImage(BufferedImage image){
         this.image = image;
-        if(image == null)
-            super.setIcon(null);
+        //if(image == null)
+        //    super.setIcon(null);
     }
 
     public void setImage(BufferedImage image, int size){

@@ -5,13 +5,19 @@ import com.husker.glassui.components.BlurButton;
 import com.husker.launcher.Resources;
 import com.husker.launcher.api.API;
 import com.husker.launcher.discord.Discord;
-import com.husker.launcher.managers.LaunchManager;
+import com.husker.launcher.minecraft.LaunchManager;
 import com.husker.launcher.settings.LauncherSettings;
+import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.ProgressBar;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.ui.Screen;
-import com.husker.launcher.ui.utils.ImageUtils;
+import com.husker.launcher.utils.SystemUtils;
+import com.husker.mio.ProgressArguments;
+import com.husker.mio.processes.CopyingProcess;
+import com.husker.mio.processes.DeletingProcess;
+import com.husker.mio.processes.DownloadingProcess;
+import com.husker.mio.processes.UnzippingProcess;
 import org.bridj.Pointer;
 import org.bridj.cpp.com.COMRuntime;
 import org.bridj.cpp.com.shell.ITaskbarList3;
@@ -19,32 +25,47 @@ import org.bridj.jawt.JAWTUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PlayPanel extends TransparentPanel {
 
+    public static class ButtonStates{
+        public static final String Loading = "Загрузка...";
+        public static final String Play = "Играть";
+        public static final String Update = "Обновить";
+        public static final String Download = "Скачать";
+        public static final String Updating = "Обновляется...";
+        public static final String Unavailable = "Недоступно";
+    }
 
     private final Screen screen;
     private final ScreenshotsPanel screenshots;
 
     private TransparentPanel playPanel;
     private BlurButton playBtn;
+    private MLabel vrMode;
 
     private TransparentPanel loadingPanel;
     private ProgressBar progressBar;
 
-    private final static String[] clients = {
-            "vr",
-            "non_vr"
-    };
-    private boolean vr = false;
-    private BlurButton clientBtn;
-    int btnSize = 40;
+    private final int btnSize = 40;
 
     public PlayPanel(Screen screen){
         this.screen = screen;
+
+        // Auto status updating
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                if(!screen.getLauncher().isVisible())
+                    return;
+
+                if(playBtn.getText().equals(ButtonStates.Updating) || playBtn.getText().equals(ButtonStates.Unavailable))
+                    updateStatus(true);
+            }
+        }, 0, 3000);
 
         setLayout(new BorderLayout());
         setMargin(10, 10, 0, 10);
@@ -60,8 +81,9 @@ public class PlayPanel extends TransparentPanel {
                 setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
                 setMargin(5, 0, 5, 0);
 
-                add(new TransparentPanel(){{
+                add(vrMode = new MLabel(){{
                     setPreferredSize(btnSize, btnSize);
+                    setImageSize((int)(btnSize * 0.8));
                 }});
                 add(playBtn = new BlurButton(screen, "Загрузка..."){{
                     setPreferredHeight(btnSize);
@@ -70,10 +92,10 @@ public class PlayPanel extends TransparentPanel {
                     setImageSize(27);
                     addActionListener(e -> onPlayClick());
                 }});
-                add(clientBtn = new BlurButton(screen, ""){{
+                add(new BlurButton(screen, Resources.Icon_Subject){{
                     setImageSize((int)(btnSize * 0.8));
                     setPreferredHeight(btnSize);
-                    addActionListener(e -> setClient(!vr));
+                    addActionListener(e -> screen.getLauncherUI().setScreen(ClientSettings.class));
                 }});
             }});
 
@@ -88,109 +110,166 @@ public class PlayPanel extends TransparentPanel {
         }}, BorderLayout.SOUTH);
 
         setProcessVisible(false);
-        if(Arrays.asList(clients).contains(LauncherSettings.getClientType()))
-            setClient(LauncherSettings.getClientType().equals("vr"));
-        else
-            setClient(false);
     }
 
     public void onPlayClick(){
-        updateStatus();
+        updateStatus(false);
         if(!playBtn.isEnabled())
             return;
         setProcessVisible(true);
-        LaunchManager.playOrDownload(clients[vr ? 0:1], screen.getLauncher().User, args -> {
-            int id = args.getProcessId();
-            double percent = args.getPercent();
-
-            if(id == -1 || id == -2) {
+        LaunchManager.playOrDownload(LauncherSettings.getClientType(), screen.getLauncher().User, new LaunchManager.LaunchListener() {
+            private void reset(){
                 Discord.setState(Discord.Texts.InMainMenu);
                 screen.getLauncher().setVisible(true);
                 setProcessVisible(false);
-                updateStatus();
+                updateStatus(false);
 
-                TaskBar.setProgress(screen.getLauncher(), -1);
+                applyEmptyProgress("Загрузка...", 0);
             }
-            if(id == 0){
-                progressBar.setText("Удаление...");
-                progressBar.setValue(percent);
-                progressBar.setSpeedText("");
-                progressBar.setValueText("");
-            }
-            if(id == 1){
-                progressBar.setText("Скачивание...");
-                progressBar.setValue(percent);
 
-                int current = (int)(args.getCurrentSize() / 1000000d);
-                int full = (int)(args.getFullSize() / 1000000d);
-                progressBar.setSpeedText(current + "/" + full + " Мб");
-                progressBar.setValueText(new DecimalFormat("#0").format(args.getSpeed()) + " Мб/сек");
+            public void onConfigSave() {
+                applyEmptyProgress("Сохранение настроек...", 0);
+            }
 
-                TaskBar.setProgress(screen.getLauncher(), (int)percent);
+            public void onConfigApply() {
+                applyEmptyProgress("Применение настроек...", 100);
             }
-            if(id == 2){
-                progressBar.setText("Распаковка клиента...");
-                progressBar.setValue(percent);
-                progressBar.setSpeedText("");
-                progressBar.setValueText((int)percent + "%");
 
-                TaskBar.setProgress(screen.getLauncher(), (int)percent);
+            public void onError() {
+                reset();
             }
-            if(id == 3){
-                progressBar.setText("Перемещение...");
-                progressBar.setValue(percent);
-                progressBar.setSpeedText("");
-                progressBar.setValueText((int)percent + "%");
 
-                TaskBar.setProgress(screen.getLauncher(), (int)percent);
+            public void onRemoveOld(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление старых файлов...", event);
             }
-            if(id == 4){
-                progressBar.setText("Удаление временных файлов...");
-                progressBar.setValue(percent);
-                progressBar.setSpeedText("");
-                progressBar.setValueText((int)percent + "%");
 
-                TaskBar.setProgress(screen.getLauncher(), (int)percent);
+            public void onVersionsDownloading(ProgressArguments<DownloadingProcess> event) {
+                applyDownloadingProgress("Скачивание версий...", event);
             }
-            if(id == 5){
-                progressBar.setText("Запуск...");
-                progressBar.setValue(100);
-                progressBar.setSpeedText("");
-                progressBar.setValueText("");
+
+            public void onModsDownloading(ProgressArguments<DownloadingProcess> event) {
+                applyDownloadingProgress("Скачивание модов...", event);
             }
-            if(id == 6){
+
+            public void onOtherDownloading(ProgressArguments<DownloadingProcess> event) {
+                applyDownloadingProgress("Скачивание клиента...", event);
+            }
+
+            public void onModsUnzipping(ProgressArguments<UnzippingProcess> event) {
+                applyUnzippingProgress("Распаковка модов...", event);
+            }
+
+            public void onModsZipRemoving(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление архива с модами...", event);
+            }
+
+            public void onVersionsUnzipping(ProgressArguments<UnzippingProcess> event) {
+                applyUnzippingProgress("Распаковка версий...", event);
+            }
+
+            public void onVersionsZipRemoving(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление архива с версиями...", event);
+            }
+
+            public void onOtherUnzipping(ProgressArguments<UnzippingProcess> event) {
+                applyUnzippingProgress("Распаковка клиента...", event);
+            }
+
+            public void onOtherZipRemoving(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление архива с клиентом...", event);
+            }
+
+            public void onOldCopying(ProgressArguments<CopyingProcess> event) {
+                applyCopyingProgress("Перемещение клиента в новую папку...", event);
+            }
+
+            public void onClientUpdated() {
+                reset();
+            }
+
+            public void onClientChecking() {
+                applyEmptyProgress("Проверка клиента...", 50);
+            }
+
+            public void onClientStarting() {
+                applyEmptyProgress("Запуск...", 100);
+            }
+
+            public void onClientStarted() {
+                applyEmptyProgress("Запущен", 100);
                 Discord.setState(Discord.Texts.InGame);
-                progressBar.setText("Запущено");
-                progressBar.setValue(100);
-                progressBar.setSpeedText("");
-                progressBar.setValueText("");
                 screen.getLauncher().setVisible(false);
+            }
+
+            public void onClientClosed() {
+                reset();
+            }
+
+            public void onModsRemoving(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление модов...", event);
+            }
+
+            public void onVersionsRemoving(ProgressArguments<DeletingProcess> event) {
+                applyDeletingProgress("Удаление версий...", event);
             }
         });
     }
 
-    public void setClient(boolean vr){
-        this.vr = vr;
-        LauncherSettings.setClientType(clients[vr ? 0:1]);
-        double scale = 0.8;
-        if(vr)
-            clientBtn.setImage(Resources.Icon_VR);
-        else
-            clientBtn.setImage(Resources.Icon_VR_Disabled);
-        updateStatus();
+    public void applyEmptyProgress(String text, int percent){
+        progressBar.setText(text);
+        progressBar.setValue(percent);
+        progressBar.setSpeedText("");
+        progressBar.setValueText("");
+        TaskBar.setProgress(screen.getLauncher(), -1);
     }
+
+    public void applyDeletingProgress(String text, ProgressArguments<DeletingProcess> arguments){
+        progressBar.setText(text);
+        progressBar.setValue(arguments.getPercent());
+        progressBar.setSpeedText("");
+        progressBar.setValueText((int) arguments.getPercent() + "%");
+        TaskBar.setProgress(screen.getLauncher(), (int) arguments.getPercent());
+    }
+
+    public void applyDownloadingProgress(String text, ProgressArguments<DownloadingProcess> arguments){
+        progressBar.setText(text);
+        progressBar.setValue(arguments.getPercent());
+
+        int current = (int) (arguments.getCurrentSize() / 1000000d);
+        int full = (int) (arguments.getFullSize() / 1000000d);
+        double speed = (double)arguments.getSpeed() / 1000000d;
+        progressBar.setSpeedText(current + "/" + full + " Мб");
+        progressBar.setValueText(new DecimalFormat("#0").format(speed) + " Мб/сек");
+        TaskBar.setProgress(screen.getLauncher(), (int) arguments.getPercent());
+    }
+
+    public void applyUnzippingProgress(String text, ProgressArguments<UnzippingProcess> arguments){
+        progressBar.setText(text);
+        progressBar.setValue(arguments.getPercent());
+        progressBar.setSpeedText("");
+        progressBar.setValueText((int) arguments.getPercent() + "%");
+        TaskBar.setProgress(screen.getLauncher(), (int) arguments.getPercent());
+    }
+
+    public void applyCopyingProgress(String text, ProgressArguments<CopyingProcess> arguments){
+        progressBar.setText(text);
+        progressBar.setValue(arguments.getPercent());
+        progressBar.setSpeedText("");
+        progressBar.setValueText((int) arguments.getPercent() + "%");
+        TaskBar.setProgress(screen.getLauncher(), (int) arguments.getPercent());
+    }
+
 
     public void setProcessVisible(boolean visible){
         playPanel.setVisible(!visible);
         playBtn.setVisible(!visible);
-        clientBtn.setVisible(!visible);
         loadingPanel.setVisible(visible);
         progressBar.setVisible(visible);
     }
 
     public void onShow(){
         updateScreenshots();
-        updateStatus();
+        updateStatus(false);
     }
 
     public void updateScreenshots(){
@@ -212,38 +291,38 @@ public class PlayPanel extends TransparentPanel {
         }).start();
     }
 
-    public void updateStatus(){
+    public void updateStatus(boolean silent){
         new Thread(() -> {
-            playBtn.setText("Загрузка...");
-            playBtn.setEnabled(false);
+            if(!silent) {
+                playBtn.setText(ButtonStates.Loading);
+                playBtn.setEnabled(false);
+            }
+            LaunchManager.ClientState state = LaunchManager.getClientState(LauncherSettings.getClientType());
 
-            LaunchManager.ClientState lastState = LaunchManager.getClientState(clients[vr ? 0:1]);
-
-            playBtn.setEnabled(lastState != LaunchManager.ClientState.ERROR && lastState != LaunchManager.ClientState.UPDATING);
-            switch (lastState){
+            vrMode.setImage(LauncherSettings.getClientType().equals("vr") ? Resources.Icon_VR : null);
+            playBtn.setEnabled(state != LaunchManager.ClientState.ERROR && state != LaunchManager.ClientState.UPDATING);
+            switch (state){
                 case PLAY:
                     playBtn.setImage(Resources.Icon_Play);
-                    playBtn.setText("Играть");
+                    playBtn.setText(ButtonStates.Play);
                     break;
                 case UPDATING:
-                    playBtn.setImage(Resources.Icon_Dot_Selected);
-                    playBtn.setText("Обновляется");
+                    playBtn.setImage(null);
+                    playBtn.setText(ButtonStates.Updating);
                     break;
                 case DOWNLOAD:
                     playBtn.setImage(Resources.Icon_Download);
-                    playBtn.setText("Скачать");
+                    playBtn.setText(ButtonStates.Download);
                     break;
                 case UPDATE:
                     playBtn.setImage(Resources.Icon_Download);
-                    playBtn.setText("Обновить");
+                    playBtn.setText(ButtonStates.Update);
                     break;
                 case ERROR:
                     playBtn.setImage(Resources.Icon_Dot_Selected);
-                    playBtn.setText("Недоступно");
+                    playBtn.setText(ButtonStates.Unavailable);
                     break;
             }
-
-
         }).start();
     }
 
@@ -252,14 +331,18 @@ public class PlayPanel extends TransparentPanel {
         static Pointer<?> hwnd;
         static int lastVal = -1;
         static {
-            try {
-                list = COMRuntime.newInstance(ITaskbarList3.class);
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+            if(SystemUtils.isWindows()) {
+                try {
+                    list = COMRuntime.newInstance(ITaskbarList3.class);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         public static void setProgress(JFrame frame, int progress){
+            if(!SystemUtils.isWindows())
+                return;
             if(progress == lastVal)
                 return;
             lastVal = progress;

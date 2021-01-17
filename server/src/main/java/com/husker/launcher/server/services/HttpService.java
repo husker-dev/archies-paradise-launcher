@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.BindException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -140,6 +141,9 @@ public class HttpService implements Runnable {
             });
 
             server.start();
+        }catch (BindException ex){
+            log.info("Server is already opened!");
+            System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
         }

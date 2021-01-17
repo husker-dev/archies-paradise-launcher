@@ -47,7 +47,7 @@ public abstract class TitledLogoScreen extends CenteredMenuScreen {
 
         new Timer().schedule(new TimerTask() {
             public void run() {
-                NetManager.updateStatusLabel(statusLabel);
+                NetManager.updateStatusLabel(getLauncher(), statusLabel);
             }
         }, 0, 500);
 

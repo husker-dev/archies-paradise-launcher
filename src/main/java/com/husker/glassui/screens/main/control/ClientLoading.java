@@ -5,9 +5,15 @@ import com.husker.glassui.screens.SimpleLoadingScreen;
 import com.husker.glassui.screens.main.MainScreen;
 import com.husker.launcher.api.API;
 import com.husker.launcher.ui.Screen;
+import com.husker.mio.FSUtils;
+import com.husker.mio.MIO;
+import com.husker.mio.processes.DeletingProcess;
+import com.husker.mio.processes.ZippingProcess;
 
+import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -29,14 +35,26 @@ public class ClientLoading extends SimpleLoadingScreen {
     }
 
     public void process() {
-        setText("Добавление в архив...");
+        setText("Обработка...");
         try {
             File file = new File(getParameterValue("file"));
             String id = getParameterValue("id");
             String title = getParameterValue("title");
             String zipPath = "./" + file.getName() + ".zip";
 
-            zip(file.getAbsolutePath(), zipPath);
+            ArrayList<String> needs = new ArrayList<>(Arrays.asList("versions", "mods", "libraries"));
+            for(File content : FSUtils.getChildren(file))
+                needs.remove(content.getName());
+
+            if(needs.size() != 0){
+                JOptionPane.showMessageDialog(getLauncher(), "Данный клиент не подходит для установки, недостаёт обязательных папок: " + needs.toString(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+                getLauncherUI().setScreen(MainScreen.class);
+                return;
+            }
+
+            new ZippingProcess(FSUtils.getChildren(file).toArray(new File[0]), new File(zipPath)).addProgressListener(e -> {
+                setText("Добавление в архив... " + (int) e.getPercent() + "%");
+            }).startSync();
 
             setText("Соединение...");
             API.Client.update(getLauncher().User.getToken(), new File(zipPath), id, title, new API.Client.UpdatingActionListener() {
@@ -44,54 +62,22 @@ public class ClientLoading extends SimpleLoadingScreen {
                     setText("Отправка... " + progress + "%");
                 }
                 public void process() {
-                    setText("Обработка...");
-                    com.husker.launcher.utils.IOUtils.delete(zipPath);
+                    setText("Удаление временных файлов...");
+                    try {
+                        new DeletingProcess(zipPath).addProgressListener(e -> setText("Удаление временных файлов... " + (int) e.getPercent())).startSync();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    getLauncherUI().setScreen(MainScreen.class);
                 }
             });
 
-            getLauncherUI().setScreen(MainScreen.class);
+
         }catch (Exception ex){
             ex.printStackTrace();
             Message.showMessage(getLauncherUI(), "Ошибка", "Не удалось отправить клиент", MainScreen.class);
         }
     }
-
-    private static void zip(String file, String zip) throws IOException {
-        FileOutputStream fos = new FileOutputStream(new File(zip));
-        ZipOutputStream zipOut = new ZipOutputStream(fos);
-        zipFile(new File(file), new File(file).getName(), zipOut);
-        zipOut.close();
-        fos.close();
-    }
-
-    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
-        if (fileToZip.isHidden()) {
-            return;
-        }
-        if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/"))
-                zipOut.putNextEntry(new ZipEntry(fileName));
-            else
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-            zipOut.closeEntry();
-            File[] children = fileToZip.listFiles();
-            for (File childFile : children)
-                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
-            return;
-        }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0)
-            zipOut.write(bytes, 0, length);
-        fis.close();
-    }
-
-
-
-
 
 }
 

@@ -1,7 +1,7 @@
 package com.husker.glassui.components;
 
 import com.husker.launcher.Launcher;
-import com.husker.launcher.ui.AnimTimer;
+import com.husker.launcher.ui.AnimationTimer;
 import com.husker.launcher.ui.components.ScalableImage;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
@@ -10,16 +10,10 @@ import com.husker.launcher.utils.SystemUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
@@ -36,7 +30,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
 
 
     static{
-        new AnimTimer(delta -> {
+        new AnimationTimer(delta -> {
             boolean repaint = false;
             for(Predicate<Double> painter : painters)
                 if(painter.test(delta))
@@ -102,7 +96,7 @@ public class BlurScalableImage extends ScalableImage implements BlurComponent {
             return false;
         });
 
-        new AnimTimer(screen.getLauncher(), delta -> {
+        new AnimationTimer(screen.getLauncher(), delta -> {
             if(!isDisplayable())
                 return;
             if(getWidth() <= 0 || getHeight() <= 0)

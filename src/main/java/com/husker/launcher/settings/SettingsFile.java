@@ -19,8 +19,14 @@ public class SettingsFile {
     private Map<?, ?> map;
     private final String path;
     private final Yaml yaml;
+    private final boolean internal;
 
     public SettingsFile(String path){
+        this(path, false);
+    }
+
+    public SettingsFile(String path, boolean internal){
+        this.internal = internal;
         DumperOptions options = new DumperOptions();
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         options.setPrettyFlow(true);
@@ -32,9 +38,9 @@ public class SettingsFile {
     }
 
     private void reload(){
+        InputStream is = null;
         try {
-            InputStream is;
-            if (path.startsWith("/"))
+            if (internal)
                 is = getClass().getResourceAsStream(path);
             else {
                 Files.createDirectories(Paths.get(path).getParent());
@@ -54,11 +60,16 @@ public class SettingsFile {
         }catch (Exception ex){
             ex.printStackTrace();
         }
+        if(is != null) {
+            try {
+                is.close();
+            } catch (IOException ignored) {}
+        }
     }
 
     private void save(){
         try {
-            if(path.startsWith("/"))
+            if(internal)
                 return;
             if(!Files.exists(Paths.get(path)))
                 Files.createFile(Paths.get(path));
@@ -112,15 +123,19 @@ public class SettingsFile {
     }
 
     public String get(String varPath){
-        if(!containsVar(varPath))
-            return null;
-        return getMapByPath(getPathFromVarPath(varPath), false).get(getVarFromVarPath(varPath)).toString();
+        try {
+            if (!containsVar(varPath))
+                return null;
+            return getMapByPath(getPathFromVarPath(varPath), false).get(getVarFromVarPath(varPath)).toString();
+        }catch (Exception ex){
+            return "";
+        }
     }
 
     public void set(String varPath, Object value){
         if(value == null)
             value = "";
-        if(path.startsWith("/"))
+        if(internal)
             return;
         getMapByPath(getPathFromVarPath(varPath), true).put(getVarFromVarPath(varPath), value);
         save();

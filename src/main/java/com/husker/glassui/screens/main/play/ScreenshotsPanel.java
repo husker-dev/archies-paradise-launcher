@@ -8,6 +8,7 @@ import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.utils.ImageUtils;
+import com.husker.launcher.utils.SystemUtils;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -29,6 +30,8 @@ public class ScreenshotsPanel extends TransparentPanel {
     private BufferedImage[] urls_preview;
     private String[] urls_fullscreen;
 
+    private TransparentPanel nextBtn, prevBtn;
+
     private int selectedIndex = 0;
 
     private final BufferedImage dotDefault = ImageUtils.applyDefaultShadow(Resources.Icon_Dot);
@@ -45,11 +48,7 @@ public class ScreenshotsPanel extends TransparentPanel {
                     currentDelay = 0;
                     nextPage(false);
                 }
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                SystemUtils.sleep(100);
             }
         }).start();
         setLayout(new OverlayLayout(this));
@@ -69,8 +68,8 @@ public class ScreenshotsPanel extends TransparentPanel {
         // Buttons
         add(new TransparentPanel(){{
             setLayout(new BorderLayout());
-            add(new ArrowButton(ImageUtils.applyDefaultShadow(Resources.Icon_Arrow_Left), true, ScreenshotsPanel.this::prevPage), BorderLayout.WEST);
-            add(new ArrowButton(ImageUtils.applyDefaultShadow(Resources.Icon_Arrow_Right), false, ScreenshotsPanel.this::nextPage), BorderLayout.EAST);
+            add(prevBtn = new ArrowButton(ImageUtils.applyDefaultShadow(Resources.Icon_Arrow_Left), true, ScreenshotsPanel.this::prevPage), BorderLayout.WEST);
+            add(nextBtn = new ArrowButton(ImageUtils.applyDefaultShadow(Resources.Icon_Arrow_Right), false, ScreenshotsPanel.this::nextPage), BorderLayout.EAST);
             add(new TransparentPanel(){{
                 setLayout(new FlowLayout(FlowLayout.RIGHT));
                 add(new MLabel(){
@@ -136,9 +135,10 @@ public class ScreenshotsPanel extends TransparentPanel {
         updateDots(urls.length, index);
         new Thread(() -> {
             try {
-                boolean first = viewer.getImage() == null;
-                if(usePreview && !first)
-                    viewer.setImage(urls_preview[index]);
+                //boolean first = viewer.getImage() == null;
+
+                viewer.setImage(urls_preview[index]);
+                /*
                 BufferedImage loaded = ImageIO.read(new URL(urls[index]));
                 if(index == selectedIndex) {
                     if(usePreview) {
@@ -148,7 +148,9 @@ public class ScreenshotsPanel extends TransparentPanel {
                     }else
                         viewer.setImage(loaded);
                 }
-            } catch (IOException e) {
+
+                 */
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
@@ -161,7 +163,7 @@ public class ScreenshotsPanel extends TransparentPanel {
     public void nextPage(boolean usePreview){
         currentDelay = 0;
 
-        if(urls == null || urls.length == 0)
+        if(urls == null || urls.length < 2)
             return;
         if (selectedIndex == urls.length - 1)
             setPage(0, usePreview);
@@ -175,6 +177,9 @@ public class ScreenshotsPanel extends TransparentPanel {
 
     public void prevPage(boolean usePreview){
         currentDelay = 0;
+
+        if(urls == null || urls.length < 2)
+            return;
         if(selectedIndex == 0)
             setPage(urls.length - 1, usePreview);
         else
@@ -188,15 +193,18 @@ public class ScreenshotsPanel extends TransparentPanel {
         this.urls = def;
         this.urls_fullscreen = full;
 
+        prevBtn.setVisible(preview.length > 1);
+        nextBtn.setVisible(preview.length > 1);
+
         new Thread(() -> {
             this.urls_preview = new BufferedImage[urls.length];
             try {
-                this.urls_preview[0] = ImageIO.read(new URL(preview[0]));
+                this.urls_preview[0] = ImageIO.read(new URL(full[0]));
                 setPage(0);
                 //updateDots(urls.length, 0);
 
                 for(int i = 1; i < urls.length; i++)
-                    this.urls_preview[i] = ImageIO.read(new URL(preview[i]));
+                    this.urls_preview[i] = ImageIO.read(new URL(full[i]));
             } catch (IOException e) {
                 e.printStackTrace();
             }

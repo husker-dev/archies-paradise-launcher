@@ -16,6 +16,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.font.TextAttribute;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -70,19 +71,23 @@ public class UpdatePanel extends BlurPanel {
             }
             public void mouseClicked(MouseEvent mouseEvent) {
                 try {
-                    String path = System.getProperty("user.dir") + "/launcher.jar";
+                    String path = new File("launcher.exe").getAbsolutePath();
                     if(!Files.exists(Paths.get(path)))
                         throw new NullPointerException("File doesn't exist");
-                    Runtime.getRuntime().exec("java -jar \"" + path + "\"");
+                    Runtime.getRuntime().exec(path);
                     System.exit(0);
                 } catch (Exception e) {
-                    JOptionPane.showMessageDialog(null, "Ошибка запуска приложения!", "Ошибка!", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Ошибка запуска приложения! Пожалуйста, перезапустите лаунчер", "Ошибка!", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
         new Timer().schedule(new TimerTask() {
             public void run() {
+                if(!screen.getLauncher().isVisible()) {
+                    setVisible(false);
+                    return;
+                }
                 try {
                     setVisible(!API.Launcher.getCurrentVersion().equals(Launcher.VERSION));
                 } catch (API.InternalAPIException e) {

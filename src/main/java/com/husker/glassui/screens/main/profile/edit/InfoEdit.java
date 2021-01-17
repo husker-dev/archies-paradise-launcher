@@ -51,12 +51,12 @@ public class InfoEdit extends InfoEditPanel {
 
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(InfoEdit.this, "Назад"){{
-            setPreferredWidth(120);
+            setPreferredWidth(130);
             addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
         }});
         panel.add(apply = new BlurButton(InfoEdit.this, "Применить"){{
             setEnabled(false);
-            setPreferredWidth(120);
+            setPreferredWidth(130);
             addActionListener(e -> event());
         }});
     }

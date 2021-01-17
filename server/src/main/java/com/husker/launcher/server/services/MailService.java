@@ -5,6 +5,8 @@ import com.husker.launcher.server.ServerMain;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 public class MailService implements Runnable {
@@ -13,7 +15,7 @@ public class MailService implements Runnable {
 
     public void run() {
         properties = System.getProperties();
-        properties.put("mail.smtp.host", "smtp.gmail.com");
+        properties.put("mail.smtp.host", ServerMain.Settings.getEmailHost());
         properties.put("mail.smtp.port", "465");
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.auth", "true");

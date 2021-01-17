@@ -1,6 +1,7 @@
 package com.husker.launcher.server.core;
 
 import com.husker.launcher.server.ServerMain;
+import com.husker.mio.FSUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -78,8 +79,14 @@ public class ClientManager {
     }
 
     public String getModsMD5(){
+        ArrayList<File> mods = new ArrayList<>(FSUtils.getChildren(new File(clientPath + "/mods")));
+        mods = mods.stream()
+                .filter(file -> file.getName().endsWith(".jar"))
+                .sorted(Comparator.comparing(File::getName))
+                .collect(Collectors.toCollection(ArrayList::new));
+
         Vector<FileInputStream> streams = new Vector<>();
-        for(File file : new File(clientPath + "/mods").listFiles(file -> file.getName().endsWith(".jar"))){
+        for(File file : mods){
             try {
                 streams.add(new FileInputStream(file));
             }catch (Exception ignored){}
@@ -122,17 +129,25 @@ public class ClientManager {
     private static InputStream readZipFile(String zipFilePath, String relativeFilePath) {
         if(zipFilePath == null || relativeFilePath == null)
             return null;
+        ZipFile zipFile = null;
         try {
-            ZipFile zipFile = new ZipFile(zipFilePath);
+            zipFile = new ZipFile(zipFilePath);
             Enumeration<? extends ZipEntry> e = zipFile.entries();
 
             while (e.hasMoreElements()) {
                 ZipEntry entry = e.nextElement();
-                if (!entry.isDirectory() && entry.getName().equals(relativeFilePath))
+                if (!entry.isDirectory() && entry.getName().equals(relativeFilePath)) {
+                    zipFile.close();
                     return zipFile.getInputStream(entry);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if(zipFile != null) {
+            try {
+                zipFile.close();
+            } catch (IOException ignored) {}
         }
         return null;
     }
@@ -299,9 +314,7 @@ public class ClientManager {
                     if(icons.containsKey(getID()))
                         return ImageIO.read(ServerMain.class.getResourceAsStream("/" + icons.get(getID())));
                 }
-            }catch (Exception ex){
-
-            }
+            }catch (Exception ignored){ }
             return null;
         }
     }

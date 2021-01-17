@@ -5,6 +5,12 @@ import com.husker.launcher.api.API;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.utils.IOUtils;
+import com.husker.mio.MIO;
+import com.husker.mio.ProgressArguments;
+import com.husker.mio.processes.DeletingProcess;
+import com.husker.mio.processes.DownloadingProcess;
+import com.husker.mio.processes.UnzippingProcess;
+import com.husker.mio.processes.ZippingProcess;
 import com.husker.net.Get;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -27,7 +33,13 @@ public class UpdateManager {
 
     static{
         log.info("Current launcher version: " + Launcher.VERSION);
-        IOUtils.delete(UpdateFolder);
+        new Thread(() -> {
+            try {
+                MIO.delete(UpdateFolder);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public static String getLatestVersion() throws UpdateException{
@@ -56,19 +68,19 @@ public class UpdateManager {
                 return;
             }
 
-            IOUtils.delete(UpdateFolder, processor::onRemoveOld);
+            new DeletingProcess(UpdateFolder).addProgressListener(processor::onRemoveOld).startSync();
             Files.createDirectories(Paths.get(UpdateFolder));
 
             processor.onConnecting();
             log.info("Update URL: " + getDownloadLink());
-            IOUtils.receiveFile(getDownloadLink(), UpdateFolder + "/update_archive.zip", processor::onDownloading);
+            new DownloadingProcess(getDownloadLink(), UpdateFolder + "/update_archive.zip").addProgressListener(processor::onDownloading).startSync();
 
-            IOUtils.unzip(UpdateFolder + "/update_archive.zip", UpdateFolder, processor::onUnzipping);
-            IOUtils.delete(UpdateFolder + "/update_archive.zip", processor::onZipRemoving);
-            if(Files.exists(Paths.get(UpdateFolder + "/updater.jar")))
-                IOUtils.delete(UpdateFolder + "/updater.jar");
-
-            //IOUtils.move(UpdateFolder + "/updater.jar", "./updater.jar");
+            new UnzippingProcess(UpdateFolder + "/update_archive.zip", UpdateFolder).addProgressListener(processor::onUnzipping).startSync();
+            new DeletingProcess(UpdateFolder + "/update_archive.zip").addProgressListener(processor::onZipRemoving).startSync();
+            if(Files.exists(Paths.get("./updater.jar")))
+                MIO.delete("./updater.jar");
+            MIO.copy(UpdateFolder + "/updater.jar", "./");
+            MIO.delete(UpdateFolder + "/updater.jar");
 
             processor.onReboot();
             applyUpdate();
@@ -78,11 +90,11 @@ public class UpdateManager {
     }
 
     public interface UpdateProcessor{
-        void onRemoveOld(double percent);
+        void onRemoveOld(ProgressArguments<DeletingProcess> arguments);
         void onConnecting();
-        void onDownloading(IOUtils.FileReceivingArguments arguments);
-        void onUnzipping(IOUtils.ZipArguments arguments);
-        void onZipRemoving(double percent);
+        void onDownloading(ProgressArguments<DownloadingProcess> arguments);
+        void onUnzipping(ProgressArguments<UnzippingProcess> arguments);
+        void onZipRemoving(ProgressArguments<DeletingProcess> arguments);
         void onUnpack(double percent);
         void onReboot();
     }

@@ -10,6 +10,7 @@ public class ServerSettingsFile extends SettingsFile {
     private static final String EMAIL = "mail.login";
     private static final String EMAIL_PASSWORD = "mail.password";
 
+    private static final String EMAIL_HOST = "mail.host";
     private static final String EMAIL_CODE_TITLE = "mail.code.title";
     private static final String EMAIL_CODE_TEXT = "mail.code.text";
     private static final String EMAIL_PASSWORD_RESET_TITLE = "mail.password_reset.title";
@@ -41,6 +42,7 @@ public class ServerSettingsFile extends SettingsFile {
 
         setDefault(EMAIL, "example@mail.com");
         setDefault(EMAIL_PASSWORD, "password");
+        setDefault(EMAIL_HOST, "smtp.gmail.com");
 
         setDefault(EMAIL_CODE_TITLE, "Email title");
         setDefault(EMAIL_CODE_TEXT, "Dear {name}, here is your code: {code}");
@@ -67,6 +69,9 @@ public class ServerSettingsFile extends SettingsFile {
     }
 
     // Email sending
+    public String getEmailHost(){
+        return get(EMAIL_HOST);
+    }
     public String getEmail(){
         return get(EMAIL);
     }
@@ -161,6 +166,7 @@ public class ServerSettingsFile extends SettingsFile {
     }
 
     // Mail
+
     public String getEmailPasswordTitle(){
         return get(EMAIL_PASSWORD_RESET_TITLE);
     }

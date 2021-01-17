@@ -8,6 +8,7 @@ import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import java.io.InputStream;
+import java.util.Random;
 
 import static com.jogamp.opengl.GL.*;
 import static com.jogamp.opengl.GL2ES1.*;
@@ -35,9 +36,14 @@ public class SkinViewerRenderer implements GLEventListener {
     private int[] rightHand_layer = new int[6];
     private int[] head_layer = new int[6];
 
+    private int[] cape = new int[6];
+    private int[] elytra = new int[6];
+
     private static final float maxAngle = 40;
     private float angle = 0;
     private boolean animType = true;
+
+    private float capeAnim = new Random().nextInt(1000);
 
     private float currentRotateX = 0;
     private float currentRotateY = 0;
@@ -74,88 +80,97 @@ public class SkinViewerRenderer implements GLEventListener {
 
         checkForTextureChanges(gl);
 
-        if(viewer.getPlayerTexture() != null && !disposed && viewer.getTexturesId() == textureId) {
-            gl.glTranslatef(0f, 0, -currentZoom);
-            gl.glRotatef(currentRotateY, 1, 0, 0);
-            gl.glRotatef(currentRotateX, 0, 1, 0);
-            gl.glTranslatef(0, -currentCamY, -0);
+        gl.glTranslatef(0f, 0, -currentZoom);
+        gl.glRotatef(currentRotateY, 1, 0, 0);
+        gl.glRotatef(currentRotateX, 0, 1, 0);
+        gl.glTranslatef(0, -currentCamY, -0);
 
-            if (alpha < 1)
-                alpha += 0.25 * delta;
-            if (alpha > 1)
-                alpha = 1;
+        if(!disposed && viewer.getTexturesId() == textureId){
+            if(viewer.getPlayerTexture() != null || viewer.getCapeTexture() != null || viewer.getElytraTexture() != null){
+                if (alpha < 1)
+                    alpha += 0.25 * delta;
+                if (alpha > 1)
+                    alpha = 1;
+            }
             gl.glColor4f(1, 1, 1, alpha);
 
-            drawLeg(gl, new Point3D(0, 0, -2), angle, rightLeg);
-            drawLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg);
-            drawHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, leftHand);
-            drawHand(gl, new Point3D(4, 12, -2), -angle, rightHand);
-            drawCuboid(gl, new Point3D(-4, 12, -2), 8, 12, 4, body);
-            drawCuboid(gl, new Point3D(-4, 24, -4), 8, 8, 8, head);
+            if(viewer.getPlayerTexture() != null) {
+                drawLeg(gl, new Point3D(0, 0, -2), angle, rightLeg);
+                drawLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg);
+                drawCuboid(gl, new Point3D(-4, 12, -2), 8, 12, 4, body);
+                drawCuboid(gl, new Point3D(-4, 24, -4), 8, 8, 8, head);
 
-            drawFatLeg(gl, new Point3D(0, 0, -2), angle, rightLeg_layer);
-            drawFatLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg_layer);
-            drawFatHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, leftHand_layer);
-            drawFatHand(gl, new Point3D(4, 12, -2), -angle, rightHand_layer);
-            drawCuboid(gl, new Point3D(-4 - layerIndent, 12 - layerIndent, -2 - layerIndent), 8 + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, body_layer);
-            drawCuboid(gl, new Point3D(-4 - layerIndent, 24 - layerIndent, -4 - layerIndent), 8 + layerIndent * 2f, 8 + layerIndent * 2f, 8 + layerIndent * 2f, head_layer);
+                drawFatLeg(gl, new Point3D(0, 0, -2), angle, rightLeg_layer);
+                drawFatLeg(gl, new Point3D(-4, 0, -2), -angle, leftLeg_layer);
+                drawCuboid(gl, new Point3D(-4 - layerIndent, 12 - layerIndent, -2 - layerIndent), 8 + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, body_layer);
+                drawCuboid(gl, new Point3D(-4 - layerIndent, 24 - layerIndent, -4 - layerIndent), 8 + layerIndent * 2f, 8 + layerIndent * 2f, 8 + layerIndent * 2f, head_layer);
+
+                drawHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, true, leftHand);
+                drawHand(gl, new Point3D(4, 12, -2), -angle, false, rightHand);
+                drawFatHand(gl, new Point3D(viewer.isMaleSkin() ? -8 : -7, 12, -2), angle, true, leftHand_layer);
+                drawFatHand(gl, new Point3D(4, 12, -2), -angle, false, rightHand_layer);
+            }
+
+
+
+            if(viewer.getCapeTexture() != null) {
+                rotateXByPoint(gl, 2 * (1 + Math.sin(capeAnim)), 0, 24, -3);
+                drawCuboid(gl, new Point3D(-5, 8, -3), 10, 16, 1, cape);
+                resetMatrix(gl);
+            }
+            if(viewer.getElytraTexture() != null){
+                gl.glPushMatrix();
+                gl.glTranslated(0, 24, -3);
+                gl.glRotated(8, 1, 0, 0);
+                gl.glTranslated(0, -24, 3);
+                drawCuboid(gl, new Point3D(-5, 8, -3), 10, 16, 1, elytra);
+                gl.glPopMatrix();
+            }
         }
 
         gl.glFlush();
     }
 
     public void drawFatLeg(GL2 gl, Point3D point, float rotation, int... textures){
-        gl.glPushMatrix();
-        gl.glTranslated(point.x + 2, point.y + 12, point.z + 2);
-        gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + 2), -(point.y + 12), -(point.z + 2));
+        rotateXByPoint(gl, rotation, point.x + 2, point.y + 12, point.z + 2);
+
 
         point.x -= layerIndent;
         point.y -= layerIndent;
         point.z -= layerIndent;
         drawCuboid(gl, point, 4 + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, textures);
 
-        gl.glPopMatrix();
+        resetMatrix(gl);
     }
 
-    public void drawFatHand(GL2 gl, Point3D point, float rotation, int... textures){
+    public void drawFatHand(GL2 gl, Point3D point, float rotation, boolean isLeft, int... textures){
         int size = viewer.isMaleSkin() ? 4 : 3;
 
-        gl.glPushMatrix();
-        gl.glTranslated(point.x + (size / 2d), point.y + 10, point.z + 2);
-        gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + (size / 2d)), -(point.y + 10), -(point.z + 2));
+        rotateXByPoint(gl, rotation, point.x + (size / 2d), point.y + 10, point.z + 2);
+        rotateXByPoint(gl, (isLeft ? -1 : 1) * 3 * Math.sin(capeAnim), point.x + (size / 2d), point.y + 10, point.z + 2);
+        rotateZByPoint(gl, (isLeft ? -1 : 1) * (1 + Math.sin(capeAnim)), point.x + (size / 2d), point.y + 10, point.z + 2);
 
         point.x -= layerIndent;
         point.y -= layerIndent;
         point.z -= layerIndent;
         drawCuboid(gl, point, size + layerIndent * 2f, 12 + layerIndent * 2f, 4 + layerIndent * 2f, textures);
 
-        gl.glPopMatrix();
+        resetMatrix(gl);
     }
 
-    public void drawHand(GL2 gl, Point3D point, float rotation, int... textures){
+    public void drawHand(GL2 gl, Point3D point, float rotation, boolean isLeft, int... textures){
         int size = viewer.isMaleSkin() ? 4 : 3;
-
-        gl.glPushMatrix();
-        gl.glTranslated(point.x + (size / 2d), point.y + 10, point.z + 2);
-        gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + (size / 2d)), -(point.y + 10), -(point.z + 2));
-
+        rotateXByPoint(gl, rotation, point.x + (size / 2d), point.y + 10, point.z + 2);
+        rotateXByPoint(gl, (isLeft ? -1 : 1) * 3 * Math.sin(capeAnim), point.x + (size / 2d), point.y + 10, point.z + 2);
+        rotateZByPoint(gl, (isLeft ? -1 : 1) * (1 + Math.sin(capeAnim)), point.x + (size / 2d), point.y + 10, point.z + 2);
         drawCuboid(gl, point, size, 12, 4, textures);
-
-        gl.glPopMatrix();
+        resetMatrix(gl);
     }
 
     public void drawLeg(GL2 gl, Point3D point, float rotation, int... textures){
-        gl.glPushMatrix();
-        gl.glTranslated(point.x + 2, point.y + 12, point.z + 2);
-        gl.glRotated(rotation,1,0,0);
-        gl.glTranslated(-(point.x + 2), -(point.y + 12), -(point.z + 2));
-
+        rotateXByPoint(gl, rotation, point.x + 2, point.y + 12, point.z + 2);
         drawCuboid(gl, point, 4, 12, 4, textures);
-
-        gl.glPopMatrix();
+        resetMatrix(gl);
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
@@ -172,6 +187,31 @@ public class SkinViewerRenderer implements GLEventListener {
         glu.gluPerspective(45.0f, h, 1, 100);
         gl.glMatrixMode(GL2.GL_MODELVIEW);
         gl.glLoadIdentity();
+    }
+
+    public void resetMatrix(GL2 gl){
+        gl.glPopMatrix();
+    }
+
+    public void rotateXByPoint(GL2 gl, double angle, double x, double y, double z){
+        gl.glPushMatrix();
+        gl.glTranslated(x, y, z);
+        gl.glRotated(angle, 1, 0, 0);
+        gl.glTranslated(-x, -y, -z);
+    }
+
+    public void rotateYByPoint(GL2 gl, double angle, double x, double y, double z){
+        gl.glPushMatrix();
+        gl.glTranslated(x, y, z);
+        gl.glRotated(angle, 0, 1, 0);
+        gl.glTranslated(-x, -y, -z);
+    }
+
+    public void rotateZByPoint(GL2 gl, double angle, double x, double y, double z){
+        gl.glPushMatrix();
+        gl.glTranslated(x, y, z);
+        gl.glRotated(angle, 0, 0, 1);
+        gl.glTranslated(-x, -y, -z);
     }
 
     public void init(GLAutoDrawable drawable) {
@@ -203,6 +243,8 @@ public class SkinViewerRenderer implements GLEventListener {
     }
 
     public void updateAnimation(float delta){
+        capeAnim += delta * 0.15;
+
         if(viewer.isAnimated()) {
             double speed = 1 - new Cubic.In().calculate(0, 1, Math.abs(angle), maxAngle);
             double value = 0.5 + delta * speed * 10;
@@ -242,13 +284,12 @@ public class SkinViewerRenderer implements GLEventListener {
     }
 
     public void checkForTextureChanges(GL2 gl){
-        if(viewer.getPlayerTexture() != null && (disposed || viewer.getTexturesId() != textureId))
+        if((viewer.getPlayerTexture() != null || viewer.getCapeTexture() != null || viewer.getElytraTexture() != null) && (disposed || viewer.getTexturesId() != textureId))
             updateTexture(gl);
     }
 
     public void updateTexture(GL2 gl){
         alpha = 0;
-
 
         if(viewer.getPlayerTexture() != null) {
             rightLeg = fromTextures(gl, viewer.getTexturesInputStream("leg_right"));
@@ -269,6 +310,11 @@ public class SkinViewerRenderer implements GLEventListener {
             head = fromTextures(gl, viewer.getTexturesInputStream("head"));
             head_layer = fromTextures(gl, viewer.getTexturesInputStream("head_layer"));
         }
+        if(viewer.getCapeTexture() != null)
+            cape = fromTextures(gl, viewer.getTexturesInputStream("cape"));
+        if(viewer.getElytraTexture() != null)
+            elytra = fromTextures(gl, viewer.getTexturesInputStream("elytra"));
+
         textureId = viewer.getTexturesId();
         disposed = false;
     }
@@ -280,8 +326,8 @@ public class SkinViewerRenderer implements GLEventListener {
         int[] values = new int[textures.length];
         for(int i = 0; i < textures.length; i++) {
             try {
-                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                 values[i] = TextureIO.newTexture(textures[i], false, "png").getTextureObject(gl);
+                gl.glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             }catch (Exception ex){
                 values[i] = -1;
             }

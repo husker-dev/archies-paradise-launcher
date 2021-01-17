@@ -2,14 +2,9 @@ package com.husker.launcher.ui.components.skin;
 
 import com.husker.launcher.utils.SkinUtils;
 import com.husker.launcher.utils.SystemUtils;
-import com.jogamp.nativewindow.ScalableSurface;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLJPanel;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.bridj.relocated.org.objectweb.asm.ClassWriter;
-import org.bridj.relocated.org.objectweb.asm.FieldVisitor;
-import org.bridj.relocated.org.objectweb.asm.*;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,15 +14,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.HashMap;
 
-public class SkinViewer extends GLJPanel {
+public class SkinViewer extends HiDPIGLJPanel {
 
     private static final Logger log = LogManager.getLogger(SkinViewer.class);
 
@@ -44,7 +33,7 @@ public class SkinViewer extends GLJPanel {
     private int bufferTextureId = 0;
     private HashMap<String, InputStream[]> textures = new HashMap<>();
 
-    private BufferedImage playerTexture;
+    private BufferedImage playerTexture, capeTexture, elytraTexture;
     private boolean isMale = true;
     private boolean animated = false;
     private boolean rotationEnabled = true;
@@ -63,15 +52,6 @@ public class SkinViewer extends GLJPanel {
         }});
 
         setSurfaceScale(new float[]{(float)SystemUtils.getWindowScaleFactor(), (float)SystemUtils.getWindowScaleFactor()});
-
-        try {
-            Field act = GLJPanel.class.getDeclaredField("disposeAction");
-            act.setAccessible(true);
-            act.set(this, (Runnable) () -> {});
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
         Threading.disableSingleThreading();
         setPlayerTexture(texture);
@@ -109,6 +89,18 @@ public class SkinViewer extends GLJPanel {
 
     }
 
+    public int getWidth() {
+        return (int)((float)super.getWidth() * SystemUtils.getWindowScaleFactor());
+    }
+
+    public int getHeight() {
+        return (int)((float)super.getHeight() * SystemUtils.getWindowScaleFactor());
+    }
+
+    public Dimension getDimension() {
+        return new Dimension(super.getSurfaceWidth(), super.getSurfaceHeight());
+    }
+
     public void addNotify() {
         try{
 
@@ -144,16 +136,40 @@ public class SkinViewer extends GLJPanel {
         return renderer;
     }
 
+    public void setPlayerTexture(BufferedImage skin, BufferedImage cape, BufferedImage elytra){
+        this.playerTexture = skin;
+        this.capeTexture = cape;
+        this.elytraTexture = elytra;
+        isMale = SkinUtils.isMale(skin);
+        updateTextureInputStreams();
+    }
+
+    public void setPlayerTexture(BufferedImage skin, BufferedImage cape){
+        this.playerTexture = skin;
+        this.capeTexture = cape;
+        isMale = SkinUtils.isMale(skin);
+        updateTextureInputStreams();
+    }
+
     public void setPlayerTexture(BufferedImage texture){
         this.playerTexture = texture;
         isMale = SkinUtils.isMale(texture);
+        updateTextureInputStreams();
+    }
 
+    public void setCapeTexture(BufferedImage texture){
+        this.capeTexture = texture;
+        updateTextureInputStreams();
+    }
+
+    public void setElytraTexture(BufferedImage texture){
+        this.elytraTexture = texture;
         updateTextureInputStreams();
     }
 
     public void updateTextureInputStreams(){
-        if(playerTexture == null) {
-            textureId++;
+        if(playerTexture == null && capeTexture == null && elytraTexture == null) {
+            textureId ++;
             textures = new HashMap<>();
         }else {
             bufferTextureId++;
@@ -180,6 +196,13 @@ public class SkinViewer extends GLJPanel {
                     local.put("head_layer", getHead(32, 0));
                     local.put("body_layer", getBody(16, 32));
                 }
+                if(capeTexture != null)
+                    local.put("cape", getCape());
+                /*
+                if(elytra != null)
+                    local.put("elytra", getCape());
+                 */
+
                 if (bufferTextureId == threadTextureId) {
                     textures = local;
                     textureId++;
@@ -190,6 +213,14 @@ public class SkinViewer extends GLJPanel {
 
     public BufferedImage getPlayerTexture(){
         return playerTexture;
+    }
+
+    public BufferedImage getCapeTexture(){
+        return capeTexture;
+    }
+
+    public BufferedImage getElytraTexture(){
+        return elytraTexture;
     }
 
     public boolean isAnimated() {
@@ -293,6 +324,28 @@ public class SkinViewer extends GLJPanel {
         }
     }
 
+    // Face
+    // Right
+    // Back
+    // Left
+    // Bottom
+    // Top
+
+    private InputStream[] getCape()  {
+        try {
+            return new InputStream[]{
+                    getSubTexture(capeTexture, 12, 1, 10, 16),
+                    getSubTexture(capeTexture, 11, 1, 1, 16),
+                    getSubTexture(capeTexture, 1, 1, 10, 16),
+                    getSubTexture(capeTexture, 0, 1, 1, 16),
+                    getSubTexture(capeTexture, 1, 0, 10, 1),
+                    getSubTexture(capeTexture, 11, 0, 10, 1)
+            };
+        }catch (Exception ex){
+            return null;
+        }
+    }
+
     private InputStream[] getHand(int translateX, int translateY)  {
         try {
             if (isMaleSkin()) {
@@ -324,13 +377,17 @@ public class SkinViewer extends GLJPanel {
     }
 
     public InputStream[] getTexturesInputStream(String name){
-        if(playerTexture == null)
+        if(playerTexture == null && capeTexture == null && elytraTexture == null)
             return null;
         return textures.get(name);
     }
 
     public InputStream getSubTexture(int x, int y, int width, int height) {
-        return getInputStream(playerTexture.getSubimage(x, y, width, height));
+        return getSubTexture(playerTexture, x, y, width, height);
+    }
+
+    public InputStream getSubTexture(BufferedImage texture, int x, int y, int width, int height) {
+        return getInputStream(texture.getSubimage(x, y, width, height));
     }
 
     public InputStream getInputStream(BufferedImage image){

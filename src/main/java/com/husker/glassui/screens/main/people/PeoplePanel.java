@@ -116,7 +116,7 @@ public class PeoplePanel extends TransparentPanel {
                                             try {
                                                 BufferedImage skin = ImageIO.read(file);
                                                 API.getJSON(ProfileApiMethod.create("profile.setSkin", screen.getLauncher().User.getToken())
-                                                        .set("skin", API.toBase64(skin))
+                                                        .set("base64", API.toBase64(skin))
                                                         .set("id", selectedPlayer.id)
                                                 );
                                                 setSelectedPlayer(selectedPlayer);
@@ -133,10 +133,6 @@ public class PeoplePanel extends TransparentPanel {
                                             NetManager.openLink(API.getMethodUrl(ApiMethod.create("skins.getSkin").set("name", selectedPlayer.name)));
                                         });
                                     }}, BorderLayout.EAST);
-                                }
-                                Icon createIcon(BufferedImage image){
-                                    int size = 25;
-                                    return new ImageIcon(ImageUtils.getScaledInstance(image, size, size, BufferedImage.SCALE_SMOOTH));
                                 }
                             }, BorderLayout.SOUTH);
                         }}, 0);
@@ -226,12 +222,13 @@ public class PeoplePanel extends TransparentPanel {
                 name.setText(info.getString("login"));
                 email.setText(info.getString("email"));
                 status.setSelected(Arrays.asList(statusList).indexOf(info.getString("status")));
-                skinViewer.setPlayerTexture(API.Skins.getSkin(info.getString("login")));
                 resetPassword.setEnabled(!info.getString("email").equals("null"));
                 resetEmail.setEnabled(!info.getString("email").equals("null"));
 
                 SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss yyyy.MM.dd");
                 creationTime.setText(dateFormat.format(new Date(Long.parseLong(info.getString("creation_time")))));
+
+                skinViewer.setPlayerTexture(API.Skins.getSkin(info.getString("login")), API.Skins.getCape(info.getString("login")));
             }catch (Exception ex){
                 ex.printStackTrace();
                 name.setText("[Error]");
@@ -252,8 +249,13 @@ public class PeoplePanel extends TransparentPanel {
                 JSONArray info = object.getJSONArray("info");
 
                 ArrayList<Player> players = new ArrayList<>();
-                for(int i = 0; i < info.length(); i++)
-                    players.add(new Player(info.getJSONObject(i).getInt("id"), info.getJSONObject(i).getString("name")));
+                for(int i = 0; i < info.length(); i++) {
+                    try {
+                        players.add(new Player(info.getJSONObject(i).getInt("id"), info.getJSONObject(i).getString("name")));
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
+                }
                 playerList.setContent(players.toArray(new Player[0]));
             } catch (Exception e) {
                 e.printStackTrace();

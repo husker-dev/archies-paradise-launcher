@@ -25,6 +25,8 @@ public class LabelButton extends MLabel {
         this.def = def;
         this.selected = selected;
 
+        setHorizontalAlignment(CENTER);
+
         addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent mouseEvent) {
                 updateState();

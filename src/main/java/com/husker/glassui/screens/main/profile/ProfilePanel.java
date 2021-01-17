@@ -108,14 +108,8 @@ public class ProfilePanel extends TransparentPanel {
                         super.onBlurApply(parameter, component);
                         if(returnOnInvisible(parameter, component))
                             return;
-                        if(component == this){
-                            parameter.setAdditionColor(new Color(0, 0, 0, 0));
-                            parameter.setBlurFactor(0);
-                            parameter.setShadowSize(2);
-
-                            if(isHovered())
-                                parameter.setShadowColor(new Color(0, 0, 0, 90));
-                        }
+                        if(component == this)
+                            GlassUI.applyTransparentButton(parameter, isHovered());
                     }
                 }, BorderLayout.EAST);
             }}, BorderLayout.SOUTH);
@@ -133,6 +127,10 @@ public class ProfilePanel extends TransparentPanel {
 
             if(skinViewer.getPlayerTexture() != screen.getLauncher().User.getSkin())
                 skinViewer.setPlayerTexture(screen.getLauncher().User.getSkin());
+            if(skinViewer.getCapeTexture() != screen.getLauncher().User.getCape())
+                skinViewer.setCapeTexture(screen.getLauncher().User.getCape());
+            if(skinViewer.getElytraTexture() != screen.getLauncher().User.getElytra())
+                skinViewer.setElytraTexture(screen.getLauncher().User.getElytra());
         }).start();
     }
 

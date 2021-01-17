@@ -1,13 +1,11 @@
 package com.husker.launcher.server;
 
-import com.husker.launcher.server.core.ProfileUtils;
 import com.husker.launcher.server.settings.ServerSettingsFile;
 import com.husker.launcher.server.services.*;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import java.util.Arrays;
 import java.util.Properties;
 
 
@@ -33,7 +31,7 @@ public class ServerMain {
         log.info("Starting \"Mail Service\"...");
         MailService.run();
 
-        log.info("Starting \"Client Service\"...");
+        log.info("Starting \"HTTP Service\"...");
         ClientService.run();
 
         log.info("Starting \"Console Service\"...");

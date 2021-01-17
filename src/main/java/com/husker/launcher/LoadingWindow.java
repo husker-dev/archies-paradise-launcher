@@ -8,17 +8,17 @@ import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
-import com.husker.launcher.utils.IOUtils;
-import org.apache.commons.codec.binary.StringUtils;
+import com.husker.mio.ProgressArguments;
+import com.husker.mio.processes.DeletingProcess;
+import com.husker.mio.processes.DownloadingProcess;
+import com.husker.mio.processes.UnzippingProcess;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.lang.reflect.Field;
+import java.awt.geom.AffineTransform;
 import java.util.*;
 
 import static com.husker.launcher.ui.utils.ShapeUtils.ALL_CORNERS;
@@ -45,12 +45,12 @@ public class LoadingWindow extends JFrame {
     private ProgressBar progressBar;
 
     private int launcherStatus = 0;
-    private Thread launcherLoadingThread;
+    private final Thread launcherLoadingThread;
 
     public LoadingWindow(){
         super("Launcher Loading");
 
-        Discord.init();
+        //Discord.init();
         Discord.setState(Discord.Texts.Loading);
         Resources.loadBase();
         setIconImage(Resources.Icon);
@@ -70,6 +70,8 @@ public class LoadingWindow extends JFrame {
         getRootPane().setLayout(new BorderLayout());
         getRootPane().add(new JPanel(){
             {
+                setOpaque(false);
+                setBackground(new Color(0, 0, 0, 0));
                 setBorder(BorderFactory.createEmptyBorder(shadow, shadow, shadow, shadow));
                 setLayout(new OverlayLayout(this));
 
@@ -121,10 +123,8 @@ public class LoadingWindow extends JFrame {
                                 }
                                 public void paint(Graphics graphics) {
                                     Graphics2D g2d = (Graphics2D) graphics;
-                                    if(hovered)
-                                        g2d.setColor(hoveredColor);
-                                    else
-                                        g2d.setColor(defaultColor);
+
+                                    g2d.setColor(hovered ? hoveredColor : defaultColor);
                                     g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10, ShapeUtils.Corner.BOTTOM_LEFT));
                                     super.paint(graphics);
                                 }
@@ -157,10 +157,8 @@ public class LoadingWindow extends JFrame {
                                 }
                                 public void paint(Graphics graphics) {
                                     Graphics2D g2d = (Graphics2D) graphics;
-                                    if(hovered)
-                                        g2d.setColor(hoveredColor);
-                                    else
-                                        g2d.setColor(defaultColor);
+
+                                    g2d.setColor(hovered ? hoveredColor : defaultColor);
                                     g2d.fill(ShapeUtils.createRoundRectangle(0, 0, getWidth(), getHeight(), 10, 10));
                                     super.paint(graphics);
                                 }
@@ -185,21 +183,24 @@ public class LoadingWindow extends JFrame {
 
                 add(new JPanel(){{
                     setLayout(new BorderLayout());
-                    add(new ScalableImage(Resources.Loading_Background){{
-                        setFitType(FitType.FILL_XY);
-                    }});
+                    add(new ScalableImage(Resources.Background_Loading){
+                        {
+                            setFitType(FitType.FILL_XY);
+                        }
+                        public void paint(Graphics g) {
+                            Shape s = getWindowShape();
+                            g.setClip(AffineTransform.getTranslateInstance(-s.getBounds().x, -s.getBounds().y).createTransformedShape(s));
+                            super.paint(g);
+                        }
+                    });
                 }});
             }
 
             public void paint(Graphics graphics) {
                 Graphics2D g2d = (Graphics2D) graphics;
 
-                BufferedImage tmp = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
-                super.paint(tmp.createGraphics());
-
-                g2d.setPaint(new TexturePaint(tmp, new Rectangle(0, -1, tmp.getWidth(), tmp.getHeight())));
-                RenderUtils.enableAntialiasing(g2d);
-                g2d.fill(getWindowShape());
+                g2d.setClip(getWindowShape());
+                super.paint(g2d);
 
                 Point hideLocation = ComponentUtils.getComponentLocationOnScreen(LoadingWindow.this, hideLabel);
 
@@ -250,22 +251,22 @@ public class LoadingWindow extends JFrame {
                 if(UpdateManager.hasUpdate()){
                     launcherLoadingThread.stop();
                     UpdateManager.processUpdating(new UpdateManager.UpdateProcessor() {
-                        public void onRemoveOld(double percent) {
-                            setStatusText("Удаление временных файлов...", percent);
+                        public void onRemoveOld(ProgressArguments<DeletingProcess> arguments) {
+                            setStatusText("Удаление временных файлов...", arguments.getPercent());
                         }
                         public void onConnecting() {
                             setStatusText("Соединение...", 0);
                         }
-                        public void onDownloading(IOUtils.FileReceivingArguments args) {
-                            String speed = (int)args.getSpeed() + " Мб/с";
-                            String data = (int)(args.getCurrentSize() / 1000000d) + "/" + (int)(args.getSize() / 1000000d) + " Мб";
-                            setStatusText("Скачивание...", speed, data, args.getPercent());
+                        public void onDownloading(ProgressArguments<DownloadingProcess> arguments) {
+                            String speed = (int)(arguments.getSpeed() / 1000000d) + " Мб/с";
+                            String data = (int)(arguments.getCurrentSize() / 1000000d) + "/" + (int)(arguments.getFullSize() / 1000000d) + " Мб";
+                            setStatusText("Скачивание...", speed, data, arguments.getPercent());
                         }
-                        public void onUnzipping(IOUtils.ZipArguments args) {
-                            setStatusText("Распаковка обновления...", args.getPercent());
+                        public void onUnzipping(ProgressArguments<UnzippingProcess> arguments) {
+                            setStatusText("Распаковка обновления...", arguments.getPercent());
                         }
-                        public void onZipRemoving(double percent) {
-                            setStatusText("Удаление временных файлов...", percent);
+                        public void onZipRemoving(ProgressArguments<DeletingProcess> arguments) {
+                            setStatusText("Удаление временных файлов...", arguments.getPercent());
                         }
                         public void onUnpack(double percent) {
                             setStatusText("Перемещение...", percent);

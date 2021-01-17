@@ -107,7 +107,7 @@ public class ScalableImage extends JComponent {
         RenderUtils.enableInterpolation(g2d);
 
         g2d.setPaint(new TexturePaint(image, imageShape.getBounds()));
-        g2d.setClip(imageShape.getBounds());
+        //g2d.setClip(imageShape.getBounds());
         g2d.fill(componentShape);
     }
 

@@ -1,11 +1,13 @@
 package com.husker.launcher.utils;
 
 import com.husker.launcher.settings.LauncherConfig;
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.Kernel32;
+import com.sun.jna.platform.win32.WinNT;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -94,6 +96,13 @@ public class SystemUtils {
         }
     }
 
+    public static File fixPath(File file){
+        return new File(file.getPath().replace("\\", File.separator).replace("/", File.separator));
+    }
+
+    public static String fixPath(String path){
+        return path.replace("\\", File.separator).replace("/", File.separator);
+    }
 
     public static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");
@@ -139,20 +148,22 @@ public class SystemUtils {
     }
 
     public static String getSettingsFolder(){
-        try {
-            Process p =  Runtime.getRuntime().exec("reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v personal");
-            p.waitFor();
+        if(isWindows()) {
+            try {
+                Process p = Runtime.getRuntime().exec("reg query \"HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders\" /v personal");
+                p.waitFor();
 
-            InputStream in = p.getInputStream();
-            byte[] b = new byte[in.available()];
-            in.read(b);
-            in.close();
+                InputStream in = p.getInputStream();
+                byte[] b = new byte[in.available()];
+                in.read(b);
+                in.close();
 
-            return new String(b).split("\\s\\s+")[4] + "/" + LauncherConfig.getFolderName();
-        } catch(Throwable t) {
-            t.printStackTrace();
+                return new String(b).split("\\s\\s+")[4] + "/" + LauncherConfig.getFolderName();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
         }
-        return new File(".").getAbsolutePath();
+        return System.getProperty("user.home") + File.separator + LauncherConfig.getFolderName();
     }
 
     public static int getRefreshRate(){
@@ -176,5 +187,58 @@ public class SystemUtils {
             .getDefaultScreenDevice()
             .getDefaultConfiguration();
         return getWindowScaleFactor(gc);
+    }
+
+    public static long getProcessID(Process p) {
+        long result = -1;
+        try {
+            //for windows
+            if (p.getClass().getName().equals("java.lang.Win32Process") ||
+                    p.getClass().getName().equals("java.lang.ProcessImpl"))
+            {
+                Field f = p.getClass().getDeclaredField("handle");
+                f.setAccessible(true);
+                long handl = f.getLong(p);
+                Kernel32 kernel = Kernel32.INSTANCE;
+                WinNT.HANDLE hand = new WinNT.HANDLE();
+                hand.setPointer(Pointer.createConstant(handl));
+                result = kernel.GetProcessId(hand);
+                f.setAccessible(false);
+            }
+            //for unix based operating systems
+            else if (p.getClass().getName().equals("java.lang.UNIXProcess")) {
+                Field f = p.getClass().getDeclaredField("pid");
+                f.setAccessible(true);
+                result = f.getLong(p);
+                f.setAccessible(false);
+            }
+        }
+        catch(Exception ex) {
+            result = -1;
+        }
+        return result;
+    }
+
+    public static String executePowerShell(String command) throws IOException {
+        Process powerShellProcess = Runtime.getRuntime().exec("powershell.exe " + command);
+
+        StringBuilder builder = new StringBuilder();
+        powerShellProcess.getOutputStream().close();
+        String line;
+        BufferedReader stdout = new BufferedReader(new InputStreamReader(powerShellProcess.getInputStream()));
+        while ((line = stdout.readLine()) != null) {
+            builder.append(line).append("\n");
+        }
+        stdout.close();
+
+        return builder.toString();
+    }
+
+    public static void sleep(long millis){
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

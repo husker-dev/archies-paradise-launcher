@@ -1,19 +1,26 @@
 package com.husker.launcher.social;
 
+import com.husker.launcher.Main;
 import com.husker.launcher.api.API;
 import com.husker.launcher.api.ApiMethod;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.net.Get;
 import com.husker.net.HttpsUrlBuilder;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.net.ConnectException;
 import java.net.URL;
 import java.util.ArrayList;
 
 public class Social {
+
+    private static final Logger log = LogManager.getLogger(Social.class);
 
     static {
         System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
@@ -120,7 +127,7 @@ public class Social {
         }
 
         private static void loadInstagram(){
-            while(true) {
+            for(int t = 0; t < 10; t++) {
                 try {
                     if (photos.size() > 0)
                         return;
@@ -145,7 +152,9 @@ public class Social {
                         photos.add(new InstagramPhotoInfo(i, text, previewUrl, url));
                     }
                     break;
-                } catch (Exception ex) {
+                }catch (ConnectException | JSONException ex) {
+                    log.info("Instagram loading error: " + ex.getMessage());
+                }catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }

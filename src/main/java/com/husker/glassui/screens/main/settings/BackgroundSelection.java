@@ -6,22 +6,29 @@ import com.husker.glassui.components.BlurPagePanel;
 import com.husker.glassui.components.BlurScalableImage;
 import com.husker.glassui.screens.SimpleTitledScreen;
 import com.husker.glassui.screens.main.MainScreen;
+import com.husker.glassui.screens.main.profile.skin.SkinApply;
+import com.husker.launcher.Launcher;
 import com.husker.launcher.Resources;
+import com.husker.launcher.settings.LauncherConfig;
 import com.husker.launcher.settings.LauncherSettings;
 import com.husker.launcher.ui.components.MLabel;
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.blur.BlurParameter;
+import com.husker.launcher.utils.SystemUtils;
+import com.husker.launcher.utils.filechooser.FileChooser;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 
 import static java.awt.FlowLayout.CENTER;
 
 public class BackgroundSelection extends SimpleTitledScreen {
 
     private BlurPagePanel pages;
-    private BlurScalableImage[] images = new BlurScalableImage[6];
+    private final BlurScalableImage[] images = new BlurScalableImage[6];
 
     public BackgroundSelection() {
         super("Настройки", "Фон");
@@ -107,9 +114,35 @@ public class BackgroundSelection extends SimpleTitledScreen {
     }
 
     public void onButtonsInit(TransparentPanel panel) {
+        panel.setLayout(new GridBagLayout());
+        panel.add(new BlurButton(this, "Назад"){{
+            addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
+            setPadding(40, 40);
+        }}, new GridBagConstraints(){{
+            this.gridx = 0;
+            this.weightx = 1;
+        }});
+
+        panel.add(new BlurButton(this, "Добавить..."){{
+            addActionListener(e -> {
+                try {
+                    Desktop.getDesktop().open(new File(SystemUtils.getSettingsFolder() + "\\background"));
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
+            });
+            setPadding(30, 30);
+        }}, new GridBagConstraints(){{
+            this.gridx = 1;
+            this.weightx = 1;
+        }});
+
+        /*
         panel.add(new BlurButton(this, "Назад"){{
             addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
             setPadding(25, 25);
         }});
+
+         */
     }
 }

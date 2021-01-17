@@ -44,8 +44,9 @@ public class MLabel extends WebLabel {
 
     public void setImage(BufferedImage image){
         this.image = image;
-        if(image == null)
-            super.setIcon(null);
+        //if(image == null)
+        //    super.setIcon(null);
+        repaint();
     }
 
     public void setImage(BufferedImage image, int size){

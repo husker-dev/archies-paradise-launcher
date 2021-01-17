@@ -11,10 +11,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -25,7 +22,8 @@ public class Resources {
 
     public static InputStream get(String file){
         String path = "resources/" + file;
-        log.info("Reading " + path);
+        log.info("Reading \"" + path + "\"");
+        path = SystemUtils.fixPath(path);
 
         try {
             return new FileInputStream(new File(path));
@@ -38,16 +36,31 @@ public class Resources {
     public static BufferedImage getBufferedImage(String file){
         try {
             return ImageUtils.toBufferedImage(ImageIO.read(get(file)));
-        }catch (Exception ex){
+        }catch (Exception ignored){
+            BufferedImage image = new BufferedImage(128 , 128, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = image.createGraphics();
+            int rectSize = 8;
+            for(int i = 0; i < image.getWidth(); i += rectSize){
+                for(int r = 0; r < image.getHeight(); r += rectSize){
+                    Color color = Color.black;
+                    if(i / rectSize % 2 == r / rectSize % 2)
+                        color = new Color(255, 0, 255);
+                    g2d.setColor(color);
+                    g2d.fillRect(i, r, rectSize, rectSize);
+                }
+            }
+            return image;
         }
-        return null;
+    }
+
+    public static BufferedImage loadIcon(String fileName){
+        return getBufferedImage("icons/" + fileName);
     }
 
     public static Image getImage(String file){
         try {
             return ImageIO.read(get(file));
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) { }
         return null;
     }
 
@@ -146,7 +159,9 @@ public class Resources {
 
     public static BufferedImage Logo;
     public static BufferedImage Icon;
-    public static BufferedImage Loading_Background;
+    public static BufferedImage Background_Loading;
+
+    public static BufferedImage[] Background;
 
     public static BufferedImage Icon_Info;
     public static BufferedImage Icon_Play;
@@ -177,36 +192,83 @@ public class Resources {
     public static BufferedImage Icon_Dot_Light;
     public static BufferedImage Icon_VR;
     public static BufferedImage Icon_VR_Disabled;
+    public static BufferedImage Icon_Subject;
+    public static BufferedImage Icon_Checkbox_On;
+    public static BufferedImage Icon_Checkbox_Off;
+    public static BufferedImage Icon_Back;
+    public static BufferedImage Icon_Add;
 
-    public static BufferedImage Social_Loading_Logo;
+    public static BufferedImage Logo_Social;
     public static BufferedImage Logo_Youtube;
     public static BufferedImage Logo_VK;
     public static BufferedImage Logo_Instagram;
 
     public static BufferedImage Skin_Steve;
 
-    public static BufferedImage[] Background;
-
-    public static BufferedImage Icon_Checkbox_On;
-    public static BufferedImage Icon_Checkbox_Off;
-
     public static BufferedImage blurDefaultTexture;
-
 
     public static void loadBase(){
         if(Logo == null)
             Logo = getBufferedImage("logo.png");
         if(Icon == null)
             Icon = getBufferedImage("icon.png");
-        if(Loading_Background == null)
-            Loading_Background = getBufferedImage("loading_background.png");
+        if(Background_Loading == null)
+            Background_Loading = getBufferedImage("loading_background.png");
     }
 
     public static void load(){
         loadBase();
 
+        updateBackgrounds();
+        Icon_Info = loadIcon("info.png");
+        Icon_Play = loadIcon("play.png");
+        Icon_Profile = loadIcon("profile.png");
+        Icon_Settings = loadIcon("settings.png");
+        Icon_Book = loadIcon("book.png");
+        Icon_Videos = loadIcon("videos.png");
+        Icon_Image = loadIcon("image.png");
+        Icon_Frame = loadIcon("frame.png");
+        Icon_Edit = loadIcon("edit.png");
+        Icon_Edit_Selected = loadIcon("edit_selected.png");
+        Icon_Arrow_Left = loadIcon("arrow_left.png");
+        Icon_Arrow_Right = loadIcon("arrow_right.png");
+        Icon_Arrow_Left_Selected = loadIcon("arrow_left_selected.png");
+        Icon_Arrow_Right_Selected = loadIcon("arrow_right_selected.png");
+        Icon_Dot = loadIcon("dot.png");
+        Icon_Dot_Selected = loadIcon("dot_selected.png");
+        Icon_Reply = loadIcon("reply.png");
+        Icon_Reply_Selected = loadIcon("reply_selected.png");
+        Icon_Download = loadIcon("download.png");
+        Icon_Reload = loadIcon("reload.png");
+        Icon_Reload_Selected = loadIcon("reload_selected.png");
+        Icon_Code = loadIcon("code.png");
+        Icon_People = loadIcon("people.png");
+        Icon_Key = loadIcon("key.png");
+        Icon_Folder = loadIcon("folder.png");
+        Icon_Fullscreen = loadIcon("fullscreen.png");
+        Icon_Dot_Light = loadIcon("dot_light.png");
+        Icon_VR = loadIcon("vr.png");
+        Icon_VR_Disabled = loadIcon("vr_disabled.png");
+        Icon_Subject = loadIcon("subject.png");
+        Icon_Checkbox_On = loadIcon("checkbox_on.png");
+        Icon_Checkbox_Off = loadIcon("checkbox_off.png");
+        Icon_Back = loadIcon("back.png");
+        Icon_Add = loadIcon("add.png");
+
+        Logo_Social = getBufferedImage("social_loading_logo.png");
+        Logo_Youtube = getBufferedImage("youtube_logo.png");
+        Logo_VK = getBufferedImage("vk_logo.png");
+        Logo_Instagram = getBufferedImage("instagram_logo.png");
+
+        Skin_Steve = getBufferedImage("steve.png");
+
+        blurDefaultTexture = getBufferedImage("paper.png");
+    }
+
+    public static void updateBackgrounds(){
         ArrayList<BufferedImage> bgs = new ArrayList<>();
         try {
+            bgs.add(getBufferedImage("background1.jpg"));
             bgs.add(getBufferedImage("background.jpg"));
 
             String backgroundsPath = SystemUtils.getSettingsFolder() + "/background";
@@ -220,48 +282,6 @@ public class Resources {
             e.printStackTrace();
         }
         Background = bgs.toArray(new BufferedImage[0]);
-
-        Icon_Info = getBufferedImage("info_icon.png");
-        Icon_Play = getBufferedImage("play_icon.png");
-        Icon_Profile = getBufferedImage("profile_icon.png");
-        Icon_Settings = getBufferedImage("settings_icon.png");
-        Icon_Book = getBufferedImage("book_icon.png");
-        Icon_Videos = getBufferedImage("videos_icon.png");
-        Icon_Image = getBufferedImage("image_icon.png");
-        Icon_Frame = getBufferedImage("frame_icon.png");
-        Icon_Edit = getBufferedImage("edit_icon.png");
-        Icon_Edit_Selected = getBufferedImage("edit_icon_selected.png");
-        Icon_Arrow_Left = getBufferedImage("arrow_left.png");
-        Icon_Arrow_Right = getBufferedImage("arrow_right.png");
-        Icon_Arrow_Left_Selected = getBufferedImage("arrow_left_selected.png");
-        Icon_Arrow_Right_Selected = getBufferedImage("arrow_right_selected.png");
-        Icon_Dot = getBufferedImage("dot.png");
-        Icon_Dot_Selected = getBufferedImage("dot_selected.png");
-        Icon_Reply = getBufferedImage("reply.png");
-        Icon_Reply_Selected = getBufferedImage("reply_selected.png");
-        Icon_Download = getBufferedImage("download_icon.png");
-        Icon_Reload = getBufferedImage("reload.png");
-        Icon_Reload_Selected = getBufferedImage("reload_selected.png");
-        Icon_Code = getBufferedImage("code_icon.png");
-        Icon_People = getBufferedImage("people_icon.png");
-        Icon_Key = getBufferedImage("key_icon.png");
-        Icon_Folder = getBufferedImage("folder_icon.png");
-        Icon_Fullscreen = getBufferedImage("fullscreen.png");
-        Icon_Dot_Light = getBufferedImage("dot_light.png");
-        Icon_VR = getBufferedImage("vr_icon.png");
-        Icon_VR_Disabled = getBufferedImage("vr_icon_disabled.png");
-
-        Social_Loading_Logo = getBufferedImage("social_loading_logo.png");
-        Logo_Youtube = getBufferedImage("youtube_logo.png");
-        Logo_VK = getBufferedImage("vk_logo.png");
-        Logo_Instagram = getBufferedImage("instagram_logo.png");
-
-        Skin_Steve = getBufferedImage("steve.png");
-
-        Icon_Checkbox_On = getBufferedImage("checkbox_on.png");
-        Icon_Checkbox_Off = getBufferedImage("checkbox_off.png");
-
-        blurDefaultTexture = Resources.getBufferedImage("paper.png");
     }
 
 }

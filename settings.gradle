@@ -3,4 +3,5 @@ include 'updater'
 include 'server'
 include 'plugin'
 include 'starter'
+include 'anticheat'
 

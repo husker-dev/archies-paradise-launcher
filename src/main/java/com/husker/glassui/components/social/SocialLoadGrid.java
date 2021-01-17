@@ -2,6 +2,7 @@ package com.husker.glassui.components.social;
 
 import com.husker.launcher.ui.components.TransparentPanel;
 import com.husker.launcher.ui.Screen;
+import com.husker.launcher.utils.SystemUtils;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -46,9 +47,7 @@ public class SocialLoadGrid extends TransparentPanel {
             try {
                 panel.update();
                 new Thread(() -> {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {}
+                    SystemUtils.sleep(100);
                     screen.getLauncher().updateUI();
                 }).start();
             }catch (Exception ex){

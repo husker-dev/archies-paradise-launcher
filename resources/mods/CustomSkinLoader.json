@@ -2,11 +2,13 @@
   "version": "14.12",
   "loadlist": [
     {
-      "name": "ArchiesParadiseName",
+      "name": "Archie's Paradise",
       "type": "Legacy",
       "checkPNG": false,
       "model": "auto",
-      "skin": "http://127.0.0.1:15565/api/method/skins.getSkin?name\u003d{USERNAME}"
+      "skin": "http://{server_ip}:{server_port}/api/method/skins.getSkin?name\u003d{USERNAME}",
+      "cape": "http://{server_ip}:{server_port}/api/method/skins.getCape?name\u003d{USERNAME}",
+      "elytra": "http://{server_ip}:{server_port}/api/method/skins.getElytra?name\u003d{USERNAME}"
     }
   ],
   "enableDynamicSkull": true,

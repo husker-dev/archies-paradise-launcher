@@ -15,6 +15,8 @@ import java.util.zip.ZipInputStream;
 
 public class IOUtils {
 
+    /*
+
     public static void delete(String path){
         delete(path, percent -> {});
     }
@@ -278,4 +280,6 @@ public class IOUtils {
             return current;
         }
     }
+
+     */
 }

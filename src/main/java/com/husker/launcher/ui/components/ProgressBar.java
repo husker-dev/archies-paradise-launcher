@@ -4,13 +4,13 @@ package com.husker.launcher.ui.components;
 import com.alee.utils.swing.extensions.SizeMethodsImpl;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.AnimationTimer;
+import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static com.husker.launcher.ui.utils.ShapeUtils.*;
 import static javax.swing.SwingConstants.*;
@@ -42,14 +42,13 @@ public class ProgressBar extends JComponent {
         speedLabel.setForeground(GlassUI.Colors.labelLightText);
         speedLabel.setHorizontalAlignment(RIGHT);
 
-        //setPreferredHeight(30);
-        new Timer().schedule(new TimerTask() {
-            public void run() {
-                currentValue += (value - currentValue) / 10;
-                if((int)currentValue != (int)value)
-                    repaint();
-            }
-        }, 0, 10);
+        new AnimationTimer(60, delta -> {
+            if(!isDisplayable() || ComponentUtils.isParentInvisible(this))
+                return;
+            currentValue += (value - currentValue) / 10d * (delta * 100d);
+            if((int)currentValue != (int)value)
+                repaint();
+        });
     }
 
     private JLabel createLabel(){
@@ -84,6 +83,8 @@ public class ProgressBar extends JComponent {
 
         int height = 5;
         Shape shape = ShapeUtils.createRoundRectangle(0, getHeight() - height, getWidth(), height, height, height, ALL_CORNERS);
+
+        //System.out.println(Math.max(currentValue / 100d * getWidth(), height));
         Shape progressShape = ShapeUtils.createRoundRectangle(0, getHeight() - height, Math.max(currentValue / 100d * getWidth(), height), height, height, height, ALL_CORNERS);
 
         g2d.setColor(new Color(190, 190, 190));
@@ -94,7 +95,7 @@ public class ProgressBar extends JComponent {
     }
 
     public void setValue(double value){
-        if(value > 100)
+        if(value > 100 || Double.isNaN(value))
             value = 0;
         this.value = value;
         repaint();

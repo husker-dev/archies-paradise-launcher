@@ -5,19 +5,20 @@ social:
   github: husker-dev/minecraft-launcher
 port: 15565
 launcher:
-  version: '0.1'
+  version: '0.3'
 mail:
-  password: vzhqvepladttbmqu
+  password: NiKiTa830017
+  login: nikitashtengauer1@yandex.ru
+  host: smtp.yandex.com
   password_code:
     text: Dear {name}, here is the code to change your password {code}
     title: Email title
   code:
-    text: 'Dear {name}, here is your code: {code}'
+    text: 'Dear {name}, вот ваш код: {code}'
     title: Email title
   password_reset:
     text: 'Dear {name}, here is your new password: {password}'
     title: Email title
-  login: redfancoestar@gmail.com
 owner:
   name: owner name
   url: owner url

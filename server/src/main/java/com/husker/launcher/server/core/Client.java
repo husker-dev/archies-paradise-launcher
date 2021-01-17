@@ -1,6 +1,9 @@
 package com.husker.launcher.server.core;
 
-import com.husker.launcher.server.utils.IOUtils;
+import com.husker.mio.FSUtils;
+import com.husker.mio.MIO;
+import com.husker.mio.ProgressArguments;
+import com.husker.mio.processes.ZippingProcess;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -8,16 +11,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.function.Consumer;
 
 public class Client {
 
@@ -63,15 +62,15 @@ public class Client {
         return new File(folder + "/" + id + "/other.zip");
     }
 
-    public JSONObject getSizeInfo() throws IOException {
-        return new JSONObject(IOUtils.readFileText(folder + "/" + id + "/files_info.json"));
+    public JSONObject getSizeInfo() throws Exception {
+        return new JSONObject(MIO.readFileText(folder + "/" + id + "/files_info.json"));
     }
 
-    public JSONObject getClientInfo() throws IOException {
-        return new JSONObject(IOUtils.readFileText(folder + "/" + id + "/client_info.json"));
+    public JSONObject getClientInfo() throws Exception {
+        return new JSONObject(MIO.readFileText(folder + "/" + id + "/client_info.json"));
     }
 
-    public List<SimpleModInfo> getModsInfo() throws IOException {
+    public List<SimpleModInfo> getModsInfo() throws Exception {
         JSONArray jsonMods = getClientInfo().getJSONArray("mods");
 
         // Sorting
@@ -83,11 +82,11 @@ public class Client {
         return mods;
     }
 
-    public String getModIcon(int index) throws IOException {
+    public String getModIcon(int index) throws Exception {
         return getModsInfo().get(index).iconBase64;
     }
 
-    public JSONObject getModsInfo(int index) throws IOException {
+    public JSONObject getModsInfo(int index) throws Exception {
         List<SimpleModInfo> mods = getModsInfo();
         JSONArray out = new JSONArray();
 
@@ -134,8 +133,6 @@ public class Client {
         }
     }
 
-
-
     public static String createId(){
         return System.currentTimeMillis() + "";
     }
@@ -150,7 +147,7 @@ public class Client {
             log.info("Updating...");
 
             String to = folder + "/" + id;
-            String from = "received_clients_tmp/" + id;
+            String from = "./received_clients_tmp/" + id;
 
             Files.createDirectories(Paths.get(to));
 
@@ -165,8 +162,9 @@ public class Client {
                 ex.printStackTrace();
             }
 
-            for(String file : new File(to).list())
-                IOUtils.delete(file);
+            for(File file : FSUtils.getChildren(new File(to)))
+                MIO.delete(file);
+
             Files.createDirectories(Paths.get(from + "/mods"));
             Files.createDirectories(Paths.get(from + "/versions"));
             Files.createDirectories(Paths.get(to));
@@ -191,8 +189,8 @@ public class Client {
             }}.toString(4)));
 
             // Write folder size
-            folderInfo.put("mods", IOUtils.getFileLength(from + "/mods"));
-            folderInfo.put("versions", IOUtils.getFileLength(from + "/versions"));
+            folderInfo.put("mods", FSUtils.getFileSize(new File(from + "/mods")));
+            folderInfo.put("versions", FSUtils.getFileSize(new File(from + "/versions")));
 
             // Zipping
             addFilesToZip(from + "/mods", to + "/mods.zip");
@@ -203,8 +201,8 @@ public class Client {
             removeIfExist(from + "/versions");
 
             // Zipping "other" files
-            folderInfo.put("other", IOUtils.getFileLength(from));
-            addFilesToZip(from,  to + "/other.zip");
+            folderInfo.put("other", FSUtils.getFileSize(new File(from)));
+            addFilesToZip(FSUtils.getChildren(new File(from)).toArray(new File[0]),  to + "/other.zip");
 
             // Write zip sizes
             zipInfo.put("mods", new File(to + "/mods.zip").length());
@@ -219,7 +217,7 @@ public class Client {
                 put("folders", folderInfo.toMap());
             }}.toString(4)));
 
-            IOUtils.delete(from);
+            MIO.delete(from);
             log.info("Updated!");
         } catch (Exception e) {
             log.error("Error while updating: " + e.getMessage());
@@ -232,7 +230,7 @@ public class Client {
         try {
             if (Files.exists(Paths.get(path))) {
                 log.info("Removing \"" + path + "\"...");
-                IOUtils.delete(path);
+                MIO.delete(path);
             }
         }catch (Exception ex){
             log.error("Error while removing: " + ex.getMessage());
@@ -240,46 +238,22 @@ public class Client {
         }
     }
 
-    public static void addFilesToZip(String sourceFolder, String zipPath) {
-        log.info("Archiving \"" + sourceFolder + "\" -> \"" + zipPath + "\"...");
-        try {
-            FileOutputStream fos = new FileOutputStream(zipPath);
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            File fileToZip = new File(sourceFolder);
-
-            fileToZip.setReadable(true);
-            fileToZip.setWritable(true);
-            zipFile(fileToZip, fileToZip.getName(), zipOut);
-            zipOut.close();
-            fos.close();
-        } catch(Exception e) {
-            log.error("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
+    public static void addFilesToZip(String sourceFile, String zipPath) throws Exception {
+        addFilesToZip(new File[]{new File(sourceFile)}, zipPath);
     }
 
-    private static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut) throws IOException {
-        if (fileToZip.isHidden()) {
-            return;
-        }
-        if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/"))
-                zipOut.putNextEntry(new ZipEntry(fileName));
-            else
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-            zipOut.closeEntry();
-            File[] children = fileToZip.listFiles();
-            for (File childFile : children)
-                zipFile(childFile, fileName + "/" + childFile.getName(), zipOut);
-            return;
-        }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0)
-            zipOut.write(bytes, 0, length);
-        fis.close();
+    public static void addFilesToZip(File[] sourceFiles, String zipPath) throws Exception {
+        log.info("Archiving \"" + Arrays.toString(sourceFiles) + "\" -> \"" + zipPath + "\"...");
+
+        new ZippingProcess(sourceFiles, new File(zipPath)).addProgressListener(new Consumer<ProgressArguments<ZippingProcess>>() {
+            int old_percent;
+            public void accept(ProgressArguments<ZippingProcess> e) {
+                if((int)e.getPercent() != old_percent) {
+                    System.out.println("Zipping " + zipPath + ": " + (int)e.getPercent() + "%");
+                    old_percent = (int)e.getPercent();
+                }
+            }
+        }).startSync();
     }
+
 }

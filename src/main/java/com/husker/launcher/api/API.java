@@ -1,13 +1,11 @@
 package com.husker.launcher.api;
 
-import com.alee.utils.general.Pair;
 import com.husker.launcher.managers.NetManager;
 import com.husker.launcher.managers.ProfileApiMethod;
 import com.husker.launcher.settings.LauncherConfig;
 import com.husker.net.Get;
-import org.apache.commons.io.IOUtils;
+import com.husker.net.HttpUrlBuilder;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -22,20 +20,12 @@ import org.json.JSONObject;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 public class API {
 
@@ -121,7 +111,14 @@ public class API {
 
     public static String getMethodUrl(ApiMethod apiMethod){
         String s = "http://" + LauncherConfig.getAuthIp() + ":" + LauncherConfig.getAuthPort() + "/api/method/" + apiMethod.getUrl();
-        log.info(s);
+        HttpUrlBuilder builder = new HttpUrlBuilder(s);
+
+        String oldUrl = builder.toString();
+        builder.remove("password");
+        String newUtr = builder.toString();
+        if(!oldUrl.equals(newUtr))
+            builder.set("password", "WhatDoYouWantToSeeHere");
+        log.info(builder.toString());
         return s;
     }
 
@@ -164,6 +161,40 @@ public class API {
     }
 
     public static class Skins {
+
+        public static String[] getCapes() throws InternalAPIException{
+            return toStringArray(API.getJSON("skins.getCapes").getJSONArray("names"));
+        }
+
+        public static BufferedImage getCapeByName(String capeName) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getImage(ProfileApiMethod.create("skins.getCapeByName").set("name", capeName), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
+        }
+
+        public static BufferedImage getElytraByName(String elytraName) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getImage(ProfileApiMethod.create("skins.getElytraByName").set("name", elytraName), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
+        }
+
+        public static BufferedImage getCape(String name) throws InternalAPIException, CategoryNotFoundException{
+            try {
+                return API.getImage(ApiMethod.create("skins.getCape").set("name", name), 1);
+            }catch (APIException e){
+                if(e.getCode() == 1)
+                    throw new CategoryNotFoundException(name);
+            }
+            return null;
+        }
 
         public static String[] getCategories() throws InternalAPIException {
             return toStringArray(API.getJSON("skins.getCategories").getJSONArray("categories"));
@@ -256,9 +287,73 @@ public class API {
             return null;
         }
 
+        public static BufferedImage getCape(String token) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getImage(ProfileApiMethod.create("profile.getCape", token), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
+        }
+
+        public static BufferedImage getElytra(String token) throws InternalAPIException, WrongAccessTokenException {
+            try {
+                return getImage(ProfileApiMethod.create("profile.getElytra", token), 25);
+            }catch (APIException e){
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+            return null;
+        }
+
+        public static void setCape(String token, BufferedImage skin) throws InternalAPIException, SkinTooLargeException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setCape", token).set("base64", toBase64(skin)),  3, 25);
+            }catch (APIException e){
+                if(e.getCode() == 3)
+                    throw new SkinTooLargeException();
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+        }
+
+        public static void setCape(String token, String name) throws InternalAPIException, SkinNameNotFoundException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setCape", token).set("name", name),  1, 2, 25);
+            }catch (APIException e){
+                switch (e.getCode()){
+                    case 2: throw new SkinNameNotFoundException("", name);
+                    case 25: throw new WrongAccessTokenException();
+                }
+            }
+        }
+
+        public static void setElytra(String token, BufferedImage skin) throws InternalAPIException, SkinTooLargeException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setElytra", token).set("base64", toBase64(skin)),  3, 25);
+            }catch (APIException e){
+                if(e.getCode() == 3)
+                    throw new SkinTooLargeException();
+                if(e.getCode() == 25)
+                    throw new WrongAccessTokenException();
+            }
+        }
+
+        public static void setElytra(String token, String name) throws InternalAPIException, SkinNameNotFoundException, WrongAccessTokenException {
+            try {
+                getJSON(ProfileApiMethod.create("profile.setElytra", token).set("name", name),  1, 2, 25);
+            }catch (APIException e){
+                switch (e.getCode()){
+                    case 2: throw new SkinNameNotFoundException("", name);
+                    case 25: throw new WrongAccessTokenException();
+                }
+            }
+        }
+
         public static void setSkin(String token, BufferedImage skin) throws InternalAPIException, SkinTooLargeException, WrongAccessTokenException {
             try {
-                getJSON(ProfileApiMethod.create("profile.setSkin", token).set("skin", toBase64(skin)),  3, 25);
+                getJSON(ProfileApiMethod.create("profile.setSkin", token).set("base64", toBase64(skin)),  3, 25);
             }catch (APIException e){
                 if(e.getCode() == 3)
                     throw new SkinTooLargeException();
@@ -390,17 +485,17 @@ public class API {
             return null;
         }
 
-        public static Pair<Boolean, Boolean> checksum(String clientId, String mods, String versions) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
+        public static boolean[] checksum(String clientId, String mods, String versions) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {
             try {
                 JSONObject object = getJSON(ApiMethod.create("clients.checksum").set("id", clientId).set("mods", mods).set("versions", versions), 1, 2);
-                return new Pair<>(object.getBoolean("equal_mods"), object.getBoolean("equal_versions"));
+                return new boolean[]{object.getBoolean("equal_mods"), object.getBoolean("equal_versions")};
             }catch (APIException e){
                 if(e.getCode() == 1)
                     throw new UnknownClientException();
                 if(e.getCode() == 2)
                     throw new ClientIsUpdatingException();
             }
-            return null;
+            return new boolean[]{false, false};
         }
 
         public static String getClientVersion(String clientId) throws InternalAPIException, UnknownClientException, ClientIsUpdatingException {

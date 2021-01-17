@@ -1,7 +1,7 @@
 package com.husker.launcher.settings;
 
-import com.husker.launcher.Launcher;
 import com.husker.launcher.utils.SystemUtils;
+
 
 public class LauncherSettings extends SettingsFile {
 
@@ -11,6 +11,7 @@ public class LauncherSettings extends SettingsFile {
     private static final String BACKGROUND = "background";
     private static final String WINDOWED = "windowed";
     private static final String CLIENT_TYPE = "client_type";
+    private static final String CONTROLLER_SUPPORT = "controller_support";
     private static final String POTATO = "potato";
     private static final String RAM = "ram";
 
@@ -18,9 +19,10 @@ public class LauncherSettings extends SettingsFile {
         super(SystemUtils.getSettingsFolder() + "/launcher.yaml");
 
         setDefault(AUTO_AUTH, true);
-        setDefault(BACKGROUND, 1);
+        setDefault(BACKGROUND, 0);
         setDefault(WINDOWED, false);
         setDefault(CLIENT_TYPE, "any");
+        setDefault(CONTROLLER_SUPPORT, false);
         setDefault(POTATO, false);
         setDefault(RAM, 4096);
     }
@@ -72,6 +74,14 @@ public class LauncherSettings extends SettingsFile {
 
     public static void setClientType(String clientType){
         INSTANCE.set(CLIENT_TYPE, clientType);
+    }
+
+    public static boolean getControllerSupport(){
+        return INSTANCE.getBoolean(CONTROLLER_SUPPORT);
+    }
+
+    public static void setControllerSupport(boolean support){
+        INSTANCE.set(CONTROLLER_SUPPORT, support);
     }
 
     public static void setPotatoSettings(boolean value){

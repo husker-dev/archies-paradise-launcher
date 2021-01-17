@@ -14,6 +14,8 @@ import java.util.Properties;
 
 public class Main {
 
+    // IP: 45.67.230.69
+
     private static final Logger log = LogManager.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -21,6 +23,8 @@ public class Main {
         log.info("Launcher version: " + Launcher.VERSION);
         log.info("OS: " + SystemUtils.getOSName() + " x" + SystemUtils.getArch());
         log.info("Window scale: " + SystemUtils.getWindowScaleFactor());
+        log.info("Settings folder:" + SystemUtils.getSettingsFolder());
+        System.setProperty("launcher.settingsPath", SystemUtils.getSettingsFolder());
 
         System.setProperty("illegal-access", "permit");
         Resources.Fonts.setDefaultFontRenderer();
@@ -49,5 +53,4 @@ public class Main {
 
         new LoadingWindow();
     }
-
 }

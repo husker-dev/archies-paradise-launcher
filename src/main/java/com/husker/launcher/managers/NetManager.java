@@ -1,5 +1,6 @@
 package com.husker.launcher.managers;
 
+import com.husker.launcher.Launcher;
 import com.husker.launcher.api.API;
 import com.husker.launcher.settings.LauncherConfig;
 import org.apache.http.HttpEntity;
@@ -40,8 +41,10 @@ public class NetManager {
         return statusList.contains(ServerStatus.MINECRAFT_SERVER_ONLINE);
     }
 
-    public static void updateStatusLabel(JLabel label){
+    public static void updateStatusLabel(Launcher launcher, JLabel label){
         if(label == null)
+            return;
+        if(!launcher.isVisible())
             return;
 
         Color red = new Color(160, 0, 0);

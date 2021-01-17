@@ -8,6 +8,7 @@ import com.husker.launcher.settings.*;
 import com.husker.launcher.ui.blur.BlurPainter;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.LauncherUI;
+import com.husker.launcher.utils.SystemUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -20,7 +21,7 @@ import java.util.HashMap;
 
 public class Launcher extends JFrame {
 
-    public static final String VERSION = "0.1";
+    public static final String VERSION = "0.3";
 
     private static final Logger log = LogManager.getLogger(Launcher.class);
 
@@ -178,30 +179,27 @@ public class Launcher extends JFrame {
             final float speed = 15;
 
             while(true){
-                try{
-                    if (currentUI.getNextScreen() != null) {
-                        currentAlpha += speed;
-                        if (currentAlpha >= 255) {
-                            currentAlpha = 255;
-                            currentUI.applyNextScreen();
-                            currentUI.setVisible(false);
-                            currentUI.setVisible(true);
-                            Thread.sleep(250);
-                        }
-                    } else {
-                        currentAlpha -= speed;
-                        if (currentAlpha <= 0) {
-                            currentAlpha = 0;
-                            isAnimating = false;
-                            animationPanel.setVisible(false);
-                            break;
-                        }
+                if (currentUI.getNextScreen() != null) {
+                    currentAlpha += speed;
+                    if (currentAlpha >= 255) {
+                        currentAlpha = 255;
+                        currentUI.applyNextScreen();
+                        currentUI.setVisible(false);
+                        currentUI.setVisible(true);
+                        SystemUtils.sleep(250);
                     }
-                    if (animationPanel != null)
-                        animationPanel.repaint();
-                    Thread.sleep(10);
-                } catch (InterruptedException ignored) {
+                } else {
+                    currentAlpha -= speed;
+                    if (currentAlpha <= 0) {
+                        currentAlpha = 0;
+                        isAnimating = false;
+                        animationPanel.setVisible(false);
+                        break;
+                    }
                 }
+                if (animationPanel != null)
+                    animationPanel.repaint();
+                SystemUtils.sleep(10);
             }
         }).start();
     }

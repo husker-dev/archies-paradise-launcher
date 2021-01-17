@@ -12,6 +12,8 @@ import java.util.Objects;
 
 public class ApiProfiles extends ApiClass {
 
+
+
     public JSONObject isIPBound(){
         int id = Integer.parseInt(getAttribute("id"));
         JSONObject object = new JSONObject();
@@ -160,5 +162,12 @@ public class ApiProfiles extends ApiClass {
 
         Profile profile = new Profile(id);
         profile.Password.change(hash, password, token);
+    }
+
+    public void setGuest(){
+        int id = Integer.parseInt(getAttribute("id"));
+
+        Profile profile = new Profile(id);
+        profile.data.set(Profile.STATUS, "Гость");
     }
 }

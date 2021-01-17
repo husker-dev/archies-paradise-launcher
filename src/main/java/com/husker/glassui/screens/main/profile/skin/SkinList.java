@@ -54,6 +54,7 @@ public class SkinList extends SimpleTitledScreen {
 
     public void onButtonsInit(TransparentPanel panel) {
         panel.add(new BlurButton(this, "Назад"){{
+            setImage(Resources.Icon_Back, 23, 23);
             addActionListener(e -> getLauncherUI().setScreen(SkinCategoriesLoading.class, new Parameters("notReset", "1")));
             setPadding(40, 40);
         }});

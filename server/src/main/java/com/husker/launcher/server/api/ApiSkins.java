@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,6 +18,42 @@ import java.util.Objects;
 import java.util.Random;
 
 public class ApiSkins extends ApiClass {
+
+    public JSONObject getCapes(){
+        ArrayList<String> list = new ArrayList<>();
+
+        if(Files.exists(Paths.get("./capes")))
+            for (File file : new File("./capes").listFiles())
+                list.add(file.getName().split("\\.")[0]);
+        return SimpleJSON.create("names", list.toArray(new String[0]));
+    }
+
+    public JSONObject getElytras(){
+        ArrayList<String> list = new ArrayList<>();
+
+        if(Files.exists(Paths.get("./elytras")))
+            for (File file : new File("./elytras").listFiles())
+                list.add(file.getName().split("\\.")[0]);
+        return SimpleJSON.create("names", list.toArray(new String[0]));
+    }
+
+    public ImageLink getCapeByName(){
+        String name = getAttribute("name");
+
+        if(Files.exists(Paths.get("./capes/" + name + ".png")))
+            return new ImageLink(new File("./capes/" + name + ".png"));
+        else
+            throw new ApiException("Cape " + name + " doesn't exist", 1);
+    }
+
+    public ImageLink getElytraByName(){
+        String name = getAttribute("name");
+
+        if(Files.exists(Paths.get("./elytras/" + name + ".png")))
+            return new ImageLink(new File("./elytras/" + name + ".png"));
+        else
+            throw new ApiException("Elytra " + name + " doesn't exist", 1);
+    }
 
     public JSONObject getCategories(){
         ArrayList<String> list = new ArrayList<>();
@@ -69,21 +106,57 @@ public class ApiSkins extends ApiClass {
             throw new ApiException("Skin " + category + "/" + name + " doesn't exist", 1);
     }
 
-    public ImageLink getSkin(){
+    public ImageLink getElytra() throws IOException {
         Profile profile;
 
         if(containsAttribute("name")){
-            profile = Profile.getByName(getAttribute("name"));
-        }else if(containsAttribute("id"))
-            profile = new Profile(Integer.parseInt(getAttribute("id")));
-        else
+            try{
+                profile = new Profile(Integer.parseInt(getAttribute("name")));
+            }catch (Exception e){
+                profile = Profile.getByName(getAttribute("name"));
+            }
+        }else
             throw new ApiException("Attribute \"name\" or \"id\" not specified", 2);
 
-        if(profile != null) {
-            if(profile.Data.getSkin() == null)
-                return new ImageLink("./steve.png");
-            return profile.Data.getSkin();
+        if(profile != null)
+            return profile.Data.getElytra();
+        else
+            throw new ApiException("Can't find profile", 1);
+    }
+
+    public ImageLink getCape() throws IOException {
+        Profile profile;
+
+        if(containsAttribute("name")){
+            try{
+                profile = new Profile(Integer.parseInt(getAttribute("name")));
+            }catch (Exception e){
+                profile = Profile.getByName(getAttribute("name"));
+            }
         }else
+            throw new ApiException("Attribute \"name\" or \"id\" not specified", 2);
+
+        if(profile != null)
+            return profile.Data.getCape();
+        else
+            throw new ApiException("Can't find profile", 1);
+    }
+
+    public ImageLink getSkin() throws IOException {
+        Profile profile;
+
+        if(containsAttribute("name")){
+            try{
+                profile = new Profile(Integer.parseInt(getAttribute("name")));
+            }catch (Exception e){
+                profile = Profile.getByName(getAttribute("name"));
+            }
+        }else
+            throw new ApiException("Attribute \"name\" or \"id\" not specified", 2);
+
+        if(profile != null)
+            return profile.Data.getSkin();
+        else
             throw new ApiException("Can't find profile", 1);
     }
 

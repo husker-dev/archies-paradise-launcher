@@ -3,6 +3,7 @@ package com.husker.glassui.components;
 import com.alee.laf.text.WebTextField;
 import com.alee.managers.style.StyleId;
 import com.husker.launcher.Resources;
+import com.husker.launcher.ui.AnimationTimer;
 import com.husker.launcher.ui.Screen;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
@@ -143,48 +144,40 @@ public class BlurTextField extends WebTextField implements BlurComponent{
 
         private final JFrame frame;
 
+        // a
+        private int old_from = 0;
+        private int old_to = 0;
+
         public CustomCaret(JFrame frame){
             this.frame = frame;
 
-            new Timer().schedule(new TimerTask() {
+            new AnimationTimer(60, delta -> {
+                try {
+                    double speed = 3;
 
-                int old_from = 0;
-                int old_to = 0;
+                    current_width += (width - current_width) / speed * delta * 60;
+                    current_x += (x - current_x) / speed * delta * 60;
 
-                long lastTime = System.currentTimeMillis();
+                    int from = getComponent().getSelectionStart();
+                    int to = getComponent().getSelectionEnd();
 
-                public void run() {
-                    long currentTime = System.currentTimeMillis();
-                    long delta = currentTime - lastTime;
-                    lastTime = currentTime;
+                    if(from == to && old_from != old_to) {
+                        onSelectedChanged(from, to, old_from, old_to);
+                        if(getComponent() != null)
+                            getComponent().repaint();
+                    }
 
-                    try {
-                        double speed = 3;
+                    if (from != to && (old_from != from || old_to != to)) {
+                        onSelectedChanged(from, to, old_from, old_to);
+                        if(getComponent() != null)
+                            getComponent().repaint();
+                    }
 
-                        current_width += (width - current_width) / speed;
-                        current_x += (x - current_x) / speed;
+                    old_from = from;
+                    old_to = to;
 
-                        int from = getComponent().getSelectionStart();
-                        int to = getComponent().getSelectionEnd();
-
-                        if(from == to && old_from != old_to) {
-                            onSelectedChanged(from, to, old_from, old_to);
-                            if(getComponent() != null)
-                                getComponent().repaint();
-                        }
-
-                        if (from != to && (old_from != from || old_to != to)) {
-                            onSelectedChanged(from, to, old_from, old_to);
-                            if(getComponent() != null)
-                                getComponent().repaint();
-                        }
-
-                        old_from = from;
-                        old_to = to;
-
-                    }catch (Exception ignored){ }
-                }
-            }, 0, (int)(1000.0 / FPS));
+                }catch (Exception ignored){ }
+            });
         }
 
         private final Highlighter.HighlightPainter painter = (g, offs0, offs1, bounds, c) -> {

@@ -30,7 +30,7 @@ public abstract class SimpleLoadingScreen extends CenteredMenuScreen {
         addToMenu(title = GlassUI.createTitleLabel("Заголовок"));
         title.setMargin(6, 0, 0, 0);
         addIndent(30);
-        addToMenu(text = GlassUI.createSimpleLabel("Проверка соединения...", true));
+        addToMenu(text = GlassUI.createSimpleLabel("Загрузка...", true));
         text.setMargin(3, 0, 0, 0);
         addIndent(30);
 

@@ -83,13 +83,18 @@ public class MainScreen extends AbstractMainScreen {
         Discord.setState(Discord.Texts.InMainMenu);
         try {
             newsPanel.load();
-            tabPanel.removeTab("control");
-            tabPanel.removeTab("keys");
-            tabPanel.removeTab("people");
+
             if(getLauncher().User.getStatus().equals("Администратор")){
-                tabPanel.addTab("control", "Управление", Resources.Icon_Folder, controlPanel);
-                tabPanel.addBottomTab("keys", "Ссылки", Resources.Icon_Code, keysPanel);
-                tabPanel.addBottomTab("people", "Пользователи", Resources.Icon_People, peoplePanel);
+                if(tabPanel.getIndex("control") == -1)
+                    tabPanel.addTab("control", "Управление", Resources.Icon_Folder, controlPanel);
+                if(tabPanel.getIndex("keys") == -1)
+                    tabPanel.addBottomTab("keys", "Ссылки", Resources.Icon_Code, keysPanel);
+                if(tabPanel.getIndex("people") == -1)
+                    tabPanel.addBottomTab("people", "Пользователи", Resources.Icon_People, peoplePanel);
+            }else{
+                tabPanel.removeTab("control");
+                tabPanel.removeTab("keys");
+                tabPanel.removeTab("people");
             }
             onShowPanelEvent();
         }catch (Exception ex){

@@ -16,7 +16,8 @@ import java.awt.*;
 public class KeysPanel extends TransparentPanel {
 
     private BlurTextField vk_id, yt_id, inst_id, github_id;
-    private Screen screen;
+    private final Screen screen;
+    private boolean eventsEnabled = true;
 
     public KeysPanel(Screen screen){
         this.screen = screen;
@@ -88,35 +89,63 @@ public class KeysPanel extends TransparentPanel {
     }
 
     public void updateYouTubeInfo(){
-        yt_id.setText(Social.YouTube.getId());
+        eventsEnabled = false;
+        yt_id.setEnabled(false);
+        yt_id.setText("...");
+        String text = Social.YouTube.getId();
+        SwingUtilities.invokeLater(() -> yt_id.setText(text));
+        yt_id.setEnabled(true);
+        eventsEnabled = true;
     }
 
     public void updateVkInfo(){
-        vk_id.setText(Social.VK.getId());
+        eventsEnabled = false;
+        vk_id.setEnabled(false);
+        vk_id.setText("...");
+        String text = Social.VK.getId();
+        SwingUtilities.invokeLater(() -> vk_id.setText(text));
+        vk_id.setEnabled(true);
+        eventsEnabled = true;
     }
 
     public void updateInstagramInfo(){
-        inst_id.setText(Social.Instagram.getId());
+        eventsEnabled = false;
+        inst_id.setEnabled(false);
+        inst_id.setText("...");
+        String text = Social.Instagram.getId();
+        SwingUtilities.invokeLater(() -> inst_id.setText(text));
+        inst_id.setEnabled(true);
+        eventsEnabled = true;
     }
 
     public void updateGitHubInfo(){
-        github_id.setText(Social.GitHub.getRepository());
+        eventsEnabled = false;
+        github_id.setEnabled(false);
+        github_id.setText("...");
+        String text = Social.GitHub.getRepository();
+        SwingUtilities.invokeLater(() -> github_id.setText(text));
+        github_id.setEnabled(true);
+        eventsEnabled = true;
     }
 
     public void sendYouTubeInfo(){
-        Social.YouTube.setId(yt_id.getText(), screen.getLauncher().User.getToken());
+        if(eventsEnabled)
+            Social.YouTube.setId(yt_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendVkInfo(){
-        Social.VK.setId(vk_id.getText(), screen.getLauncher().User.getToken());
+        if(eventsEnabled)
+            Social.VK.setId(vk_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendInstagramInfo(){
-        Social.Instagram.setId(inst_id.getText(), screen.getLauncher().User.getToken());
+        if(eventsEnabled)
+            Social.Instagram.setId(inst_id.getText(), screen.getLauncher().User.getToken());
     }
 
     public void sendGitHubInfo(){
-        Social.GitHub.setRepository(github_id.getText(), screen.getLauncher().User.getToken());
+        if(eventsEnabled)
+            Social.GitHub.setRepository(github_id.getText(), screen.getLauncher().User.getToken());
     }
 
     private TransparentPanel createParameter(String text, JComponent component){
@@ -131,9 +160,11 @@ public class KeysPanel extends TransparentPanel {
     }
 
     public void onShow(){
-        updateYouTubeInfo();
-        updateVkInfo();
-        updateInstagramInfo();
-        updateGitHubInfo();
+        new Thread(() -> {
+            updateYouTubeInfo();
+            updateVkInfo();
+            updateInstagramInfo();
+            updateGitHubInfo();
+        }).start();
     }
 }

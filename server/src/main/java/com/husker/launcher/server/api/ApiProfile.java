@@ -7,6 +7,7 @@ import com.husker.launcher.server.services.http.*;
 import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -61,36 +62,53 @@ public class ApiProfile extends ApiClass {
         profile.IP.set(getExchange().getRemoteAddress().getHostName());
     }
 
-    public ImageLink getSkin(Profile profile){
+    public ImageLink getSkin(Profile profile) throws IOException {
         return profile.Data.getSkin();
     }
 
+    public ImageLink getCape(Profile profile) throws IOException {
+        return profile.Data.getCape();
+    }
+
+    public ImageLink getElytra(Profile profile) throws IOException {
+        return profile.Data.getElytra();
+    }
+
     public void setSkin(Profile profile) throws IOException {
-        BufferedImage skin;
+        applyPlayerFile(profile, "skins", "skin", new Dimension(64, 64));
+    }
+
+    public void setCape(Profile profile) throws IOException {
+        applyPlayerFile(profile, "capes", "cape", new Dimension(64, 32));
+    }
+
+    public void setElytra(Profile profile) throws IOException {
+        applyPlayerFile(profile, "elytras", "elytra", new Dimension(64, 32));
+    }
+
+    private void applyPlayerFile(Profile profile, String categoriesName, String fileName, Dimension size) throws IOException {
+        BufferedImage file;
 
         if(containsAttribute("id")){
             profile.checkStatus("Администратор");
             profile = new Profile(Integer.parseInt(getAttribute("id")));
         }
 
-        if (containsAttribute("category") && containsAttribute("name")) {
-            String category = getAttribute("category");
-            String name = getAttribute("name");
+        if (containsAttribute("name")) {
+            String name = (containsAttribute("category") ? getAttribute("category") + "/" : "") + getAttribute("name");
 
-            if(!Files.exists(Paths.get("./skins/" + category)))
-                throw new ApiException("Category '" + category + "' doesn't exist", 1);
-            if(!Files.exists(Paths.get("./skins/" + category + "/" + name + ".png")))
-                throw new ApiException("Skin '" + name + "' doesn't exist in category '" + category + "'", 2);
+            if(!Files.exists(Paths.get("./" + categoriesName + "/" + name + ".png")))
+                throw new ApiException("Specified " + fileName + " " + name + "' doesn't exist in path '" + name + "'", 2);
 
-            skin = ImageIO.read(new File("./skins/" + category + "/" + name + ".png"));
-        }else if(containsAttribute("skin"))
-            skin = HttpService.fromBase64(getAttribute("skin"));
+            file = ImageIO.read(new File("./" + categoriesName + "/" + name + ".png"));
+        }else if(containsAttribute("base64"))
+            file = HttpService.fromBase64(getAttribute("base64"));
         else
-            throw new AttributeNotFoundException("Can't find attributes (category, name) or (skin)");
+            throw new AttributeNotFoundException("Can't find attributes (category, name) or (base64)");
 
-        if(skin == null || skin.getWidth() != 64 || skin.getHeight() != 64)
-            throw new ApiException("Image is too large. Preferred skin size: 64x64", 3);
+        if(file == null || file.getWidth() != size.width || file.getHeight() != size.height)
+            throw new ApiException("Image is too large. Preferred " + fileName + " size: " + size.width + "x" + size.height, 3);
 
-        ImageIO.write(skin, "png", new File(profile.getFolder() + "/skin.png"));
+        ImageIO.write(file, "png", new File(profile.getFolder() + "/" + fileName + ".png"));
     }
 }

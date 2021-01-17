@@ -18,6 +18,7 @@ public class User {
     private String status = "Статус";
     private long id = -1;
     private BufferedImage skin = Resources.Skin_Steve;
+    private BufferedImage cape, elytra;
     private boolean emailConfirmed = false;
 
     public final UserInfoFile File = new UserInfoFile();
@@ -59,6 +60,8 @@ public class User {
 
             emailConfirmed = API.Profile.isEmailConfirmed(token);
             skin = API.Profile.getSkin(token);
+            cape = API.Profile.getCape(token);
+            elytra = API.Profile.getElytra(token);
         } catch (InternalAPIException | WrongAccessTokenException e) {
             errorLogoutEvent();
         }
@@ -102,6 +105,14 @@ public class User {
         return skin;
     }
 
+    public BufferedImage getCape(){
+        return cape;
+    }
+
+    public BufferedImage getElytra(){
+        return cape;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -136,6 +147,24 @@ public class User {
         id = -1;
         logoutListeners.forEach(Runnable::run);
         File.setPassword("null");
+    }
+
+    public void setCape(BufferedImage image){
+        try {
+            Profile.setCape(token, image);
+            updateData();
+        } catch (InternalAPIException | WrongAccessTokenException | SkinTooLargeException e) {
+            errorLogoutEvent();
+        }
+    }
+
+    public void setCape(String name){
+        try {
+            Profile.setCape(token, name);
+            updateData();
+        } catch (InternalAPIException | WrongAccessTokenException | SkinNameNotFoundException e) {
+            errorLogoutEvent();
+        }
     }
 
     public void setSkin(BufferedImage image) throws SkinTooLargeException {

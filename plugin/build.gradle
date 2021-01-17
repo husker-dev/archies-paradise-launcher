@@ -35,6 +35,7 @@ dependencies {
     compileOnly files("libs/spigot-1.12.2-R0.1-SNAPSHOT-shaded.jar")
     shade 'com.github.husker-dev:SimpleHttp:+'
     shade 'org.json:json:+'
+    shade 'com.github.husker-dev:MIO:1.5'
     //shade 'org.apache.commons:commons-lang3:3.11'
     compileOnly 'net.luckperms:api:5.2'
 }

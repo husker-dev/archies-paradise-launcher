@@ -59,6 +59,7 @@ public class SkinCategories extends SimpleTitledScreen {
     public void onButtonsInit(TransparentPanel panel) {
         panel.setLayout(new GridBagLayout());
         panel.add(new BlurButton(this, "Назад"){{
+            setImage(Resources.Icon_Back, 23, 23);
             addActionListener(e -> getLauncherUI().setScreen(MainScreen.class));
             setPadding(40, 40);
         }}, new GridBagConstraints(){{
@@ -66,7 +67,16 @@ public class SkinCategories extends SimpleTitledScreen {
             this.weightx = 1;
         }});
 
-        panel.add(new BlurButton(this, "Открыть"){{
+        panel.add(new BlurButton(this, "Плащи"){{
+            addActionListener(e -> getLauncherUI().setScreen(CapeListLoading.class));
+            setPadding(40, 40);
+        }}, new GridBagConstraints(){{
+            this.gridx = 1;
+            this.weightx = 1;
+        }});
+
+        panel.add(new BlurButton(this, "Добавить"){{
+            setImage(Resources.Icon_Add, 23, 23);
             addActionListener(e -> {
                 try{
                     FileChooser chooser = new FileChooser("Выбор скина");
@@ -81,7 +91,7 @@ public class SkinCategories extends SimpleTitledScreen {
             });
             setPadding(30, 30);
         }}, new GridBagConstraints(){{
-            this.gridx = 1;
+            this.gridx = 2;
             this.weightx = 1;
         }});
     }

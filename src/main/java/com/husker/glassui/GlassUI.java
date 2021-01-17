@@ -6,6 +6,8 @@ import com.husker.glassui.screens.confirm.C_2_SendingCode;
 import com.husker.glassui.screens.confirm.C_3_Code;
 import com.husker.glassui.screens.confirm.C_4_ConfirmingCode;
 import com.husker.glassui.screens.main.control.ClientLoading;
+import com.husker.glassui.screens.main.play.ClientSettings;
+import com.husker.glassui.screens.main.play.RemovingProcess;
 import com.husker.glassui.screens.main.profile.skin.*;
 import com.husker.glassui.screens.main.settings.*;
 import com.husker.glassui.screens.*;
@@ -86,11 +88,13 @@ public class GlassUI extends LauncherUI {
         // Main
         addScreen(MainScreen.class);
         addScreen(BackgroundSelection.class);
+        addScreen(ClientSettings.class, RemovingProcess.class);
         addScreen(ClientLoading.class);
         addScreen(InfoEdit.class, InfoApplying.class, EmailConfirm.class, SendingCode.class);
 
         // Skins
         addScreen(SkinCategoriesLoading.class, SkinCategories.class, SkinListLoading.class, SkinList.class, SkinApply.class);
+        addScreen(CapeListLoading.class, CapeList.class, CapeApply.class);
 
         getLauncher().User.addLogoutListener(() -> {
             setScreen(Login.class, new Screen.Parameters("login", getLauncher().User.getNickname()));
@@ -158,6 +162,15 @@ public class GlassUI extends LauncherUI {
             parameter.setShape(ShapeUtils.createRoundRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 10, 10, ALL_CORNERS));
         }
         parameter.setShadowSize(4);
+    }
+
+    public static void applyTransparentButton(BlurParameter parameter, boolean isHovered){
+        parameter.setAdditionColor(new Color(0, 0, 0, 0));
+        parameter.setBlurFactor(0);
+        parameter.setShadowSize(2);
+
+        if(isHovered)
+            parameter.setShadowColor(new Color(0, 0, 0, 90));
     }
 
     public static MLabel createTagLabel(Screen screen, String text){

@@ -5,6 +5,7 @@ import com.husker.launcher.server.services.http.ImageLink;
 import com.husker.launcher.server.ServerMain;
 import com.husker.launcher.server.settings.SettingsFile;
 import com.husker.launcher.server.utils.IOUtils;
+import com.husker.mio.MIO;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONObject;
 
@@ -25,6 +26,8 @@ public class Profile {
     public static final String mailCodesFile = "mail_codes.txt";
     public static final String passwordResetHashesFile = "password_reset_hashes.txt";
     public static final String skinFile = "skin.png";
+    public static final String capeFile = "cape.png";
+    public static final String elytraFile = "elytra.png";
     public static final String ipFile = "ip.txt";
 
     public static final String ACCESS_TOKEN = "access_token";
@@ -47,7 +50,11 @@ public class Profile {
         if(!FormatUtils.isCorrectPassword(password))
             throw new ApiException("Wrong password format", 3);
 
-        int id = Profile.getProfilesCount() + 1;
+        int maxId = 0;
+        for(Profile profile : Profile.getProfiles())
+            maxId = Math.max(maxId, profile.getId());
+        int id = maxId + 1;
+
         String path = profilesFolder + "/" + id;
 
         Files.createDirectories(Paths.get(path));
@@ -65,6 +72,8 @@ public class Profile {
         Files.createFile(Paths.get(path + "/" + mailCodesFile));
         Files.createFile(Paths.get(path + "/" + passwordResetHashesFile));
         Files.copy(Profile.class.getResourceAsStream("/steve.png"), Paths.get(path + "/" + skinFile));
+        Files.copy(Profile.class.getResourceAsStream("/elytra.png"), Paths.get(path + "/" + elytraFile));
+        Files.copy(Profile.class.getResourceAsStream("/cape.png"), Paths.get(path + "/" + capeFile));
     }
 
     public static int getProfilesCount(){
@@ -76,7 +85,7 @@ public class Profile {
 
     public static int[] getIds(){
         String[] ids_text = new File(Profile.profilesFolder).list((dir, name) -> {
-            File[] child = new File(dir.getAbsolutePath() + "\\" + name).listFiles();
+            File[] child = new File(dir.getAbsolutePath() + File.separator + name).listFiles();
             if(child != null && child.length > 0){
                 for (File value : child)
                     if (value.getName().equals("data.yaml"))
@@ -149,11 +158,15 @@ public class Profile {
 
     public Profile(int id){
         this.id = id;
-        data = new SettingsFile(getFolder() + "/" + dataFile);
+        data = new SettingsFile(getFolder() + File.separator + dataFile);
     }
 
     public void remove(){
-        IOUtils.delete(getFolder());
+        try {
+            MIO.delete(getFolder());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void checkStatus(String status){
@@ -295,13 +308,26 @@ public class Profile {
             ProfileUtils.fileLineFilter(getFolder() + "/" + keysFile, line -> line.equals(currentToken));
             ProfileUtils.fileLineFilter(getFolder() + "/" + mailCodesFile, line -> false);
         }
-
     }
 
     public class Data{
 
-        public ImageLink getSkin(){
+        public ImageLink getSkin() throws IOException {
+            if(!Files.exists(Paths.get(getFolder() + "/" + skinFile)))
+                Files.copy(Profile.class.getResourceAsStream("/steve.png"), Paths.get(getFolder() + "/" + skinFile));
             return new ImageLink(new File(getFolder() + "/" + skinFile));
+        }
+
+        public ImageLink getCape() throws IOException {
+            if(!Files.exists(Paths.get(getFolder() + "/" + capeFile)))
+                Files.copy(Profile.class.getResourceAsStream("/cape.png"), Paths.get(getFolder() + "/" + capeFile));
+            return new ImageLink(new File(getFolder() + "/" + capeFile));
+        }
+
+        public ImageLink getElytra() throws IOException {
+            if(!Files.exists(Paths.get(getFolder() + "/" + elytraFile)))
+                Files.copy(Profile.class.getResourceAsStream("/elytra.png"), Paths.get(getFolder() + "/" + elytraFile));
+            return new ImageLink(new File(getFolder() + "/" + elytraFile));
         }
 
         public String getValue(String parameter){
@@ -495,7 +521,7 @@ public class Profile {
     }
 
     public String getFolder(){
-        return profilesFolder + "/" + id;
+        return profilesFolder + File.separator + id;
     }
 
 }

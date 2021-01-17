@@ -11,6 +11,7 @@ import com.husker.launcher.ui.components.skin.SkinViewer;
 import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.glassui.screens.SimpleCenteredScreen;
+import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
 import com.husker.launcher.ui.utils.UIUtils;
 
@@ -47,7 +48,7 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                 }, BorderLayout.NORTH);
 
                 add(new TransparentPanel(){{
-                    setLayout(new VerticalFlowLayout(0, 0));
+                    setLayout(new BorderLayout(0, 0));
 
                     setMargin(10, 0, 0, 0);
 
@@ -57,7 +58,8 @@ public abstract class InfoEditPanel extends SimpleCenteredScreen {
                         setCamZoom(18);
                         setPreferredSize(new Dimension(60, 180));
                         setRotationY(-8);
-                    }});
+                        ComponentUtils.makeMouseEventTransparent(this);
+                    }}, BorderLayout.NORTH);
 
                     add(new BlurPanel(InfoEditPanel.this, true){
                         {
