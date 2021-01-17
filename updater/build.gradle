@@ -29,9 +29,10 @@ jar {
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io/' }
 }
 
 dependencies {
-    implementation 'commons-io:commons-io:2.5'
     implementation 'com.vnetpublishing.java:super-user-application:0.0.5'
+    implementation 'com.github.husker-dev:MIO:1.5'
 }

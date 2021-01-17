@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Archie's Paradise"
-#define MyAppVersion "0.3"
+#define MyAppVersion "0.3.1"
 #define MyAppPublisher "Heart&Paw"
 #define MyAppExeName "launcher.exe"
 

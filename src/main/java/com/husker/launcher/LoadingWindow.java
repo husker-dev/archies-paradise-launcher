@@ -8,6 +8,7 @@ import com.husker.launcher.managers.UpdateManager;
 import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.RenderUtils;
 import com.husker.launcher.ui.utils.ShapeUtils;
+import com.husker.launcher.utils.SystemUtils;
 import com.husker.mio.ProgressArguments;
 import com.husker.mio.processes.DeletingProcess;
 import com.husker.mio.processes.DownloadingProcess;
@@ -50,7 +51,7 @@ public class LoadingWindow extends JFrame {
     public LoadingWindow(){
         super("Launcher Loading");
 
-        //Discord.init();
+        Discord.init();
         Discord.setState(Discord.Texts.Loading);
         Resources.loadBase();
         setIconImage(Resources.Icon);
@@ -258,9 +259,8 @@ public class LoadingWindow extends JFrame {
                             setStatusText("Соединение...", 0);
                         }
                         public void onDownloading(ProgressArguments<DownloadingProcess> arguments) {
-                            String speed = (int)(arguments.getSpeed() / 1000000d) + " Мб/с";
                             String data = (int)(arguments.getCurrentSize() / 1000000d) + "/" + (int)(arguments.getFullSize() / 1000000d) + " Мб";
-                            setStatusText("Скачивание...", speed, data, arguments.getPercent());
+                            setStatusText("Скачивание...", SystemUtils.formatSpeed(arguments.getSpeed()), data, arguments.getPercent());
                         }
                         public void onUnzipping(ProgressArguments<UnzippingProcess> arguments) {
                             setStatusText("Распаковка обновления...", arguments.getPercent());

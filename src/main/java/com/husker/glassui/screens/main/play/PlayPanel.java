@@ -237,9 +237,8 @@ public class PlayPanel extends TransparentPanel {
 
         int current = (int) (arguments.getCurrentSize() / 1000000d);
         int full = (int) (arguments.getFullSize() / 1000000d);
-        double speed = (double)arguments.getSpeed() / 1000000d;
         progressBar.setSpeedText(current + "/" + full + " Мб");
-        progressBar.setValueText(new DecimalFormat("#0").format(speed) + " Мб/сек");
+        progressBar.setValueText(SystemUtils.formatSpeed(arguments.getSpeed()));
         TaskBar.setProgress(screen.getLauncher(), (int) arguments.getPercent());
     }
 

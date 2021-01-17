@@ -35,7 +35,9 @@ import static com.sun.jna.platform.win32.WinUser.SWP_SHOWWINDOW;
 public class MinecraftStarter {
 
     private static final Logger log = LogManager.getLogger(MinecraftStarter.class);
-    private static final String skinModName = "CustomSkinLoader_Forge.jar";
+
+    public static final String controllerModName = "controllable-0.8.0-mc1.12.2.jar";
+    public static final String skinModName = "CustomSkinLoader_Forge.jar";
     private static final String skinLibraryPath = "customskinloader\\CustomSkinLoader\\" + skinModName;
 
     private Process proc;
@@ -85,6 +87,9 @@ public class MinecraftStarter {
             }catch (Exception ex){
                 title = LauncherConfig.getTitle();
             }
+
+            // Setting addition mods
+            applyAdditionMods();
 
             // Setting icon
             if(icon != null) {
@@ -190,6 +195,7 @@ public class MinecraftStarter {
                 new Thread(() -> {
                     try {
                         proc.waitFor();
+                        clearAdditionMods();
                         if (scriptFile != null)
                             MIO.delete(scriptFile);
                     } catch (Exception e) {
@@ -217,10 +223,12 @@ public class MinecraftStarter {
 
     private void onWindowTimer(WinDef.HWND hwnd){
         MyUser32.INSTANCE.SetWindowText(hwnd, title);
+        MyUser32.INSTANCE.UpdateWindow(hwnd);
     }
 
-    public void clearSkinMod(){
+    public void clearAdditionMods(){
         try {
+            MIO.delete(clientInfo.getClientFolder() + "\\mods\\" + controllerModName);
             MIO.delete(clientInfo.getClientFolder() + "\\mods\\" + skinModName);
             MIO.delete(clientInfo.getClientFolder() + "\\libraries\\customskinloader");
             MIO.delete(clientInfo.getClientFolder() + "\\CustomSkinLoader");
@@ -229,8 +237,13 @@ public class MinecraftStarter {
         }
     }
 
-    public void applySkinMod(){
+    public void applyAdditionMods(){
+
+
         try {
+            if(LauncherSettings.getControllerSupport() && clientInfo.getType() == MinecraftClientInfo.ClientType.FORGE)
+                Files.copy(Resources.get("mods\\" + controllerModName), Paths.get(clientInfo.getClientFolder() + "\\mods\\" + controllerModName));
+
             String toFolder = "";
             clientInfo.removeLibrary(skinLibraryPath);
             if(clientInfo.getType() == MinecraftClientInfo.ClientType.FORGE) {
@@ -254,7 +267,9 @@ public class MinecraftStarter {
             Files.write(Paths.get(clientInfo.getClientFolder() + "\\CustomSkinLoader\\CustomSkinLoader.json"), Arrays.asList(configText.split("\n")));
             //MIO.writeText(configText, clientInfo.getClientFolder() + "\\CustomSkinLoader\\CustomSkinLoader.json");
 
-            Files.copy(Resources.get("mods\\CustomSkinLoader_Forge.jar"), Paths.get(toFolder));
+            Files.copy(Resources.get("mods\\" + skinModName), Paths.get(toFolder));
+
+
         }catch (Exception ex){
             ex.printStackTrace();
         }

@@ -108,6 +108,9 @@ task createShell()  {
         new File("$buildDir/release", "shell.sh").text = """java -cp "lib/*" com.husker.launcher.Main -Xms200m -Xmx800m
 exit 0
 """
+        new File("$buildDir/release", "console.bat").text = """java -cp "lib/*" com.husker.launcher.Main -Xms200m -Xmx800m
+exit 0
+"""
     }
 }
 
@@ -122,7 +125,25 @@ task copyUpdater(type: Copy){
     into file("$buildDir/release")
 }
 
-task release{
-    group = "relase"
-    dependsOn zipRelease, copyUpdater, createShell, copyResources, copyLib, copyExe, ':updater:jar', createExe, clearRelease
+task buildRelease(type: GradleBuild){
+    tasks = ['clearRelease', 'createExe', ':updater:jar', 'copyExe', 'copyLib', 'copyResources', 'createShell', 'copyUpdater', 'zipRelease']
+    group = "release"
+    doLast {
+        println ""
+        println "Release directory:"
+        println "$buildDir\\release"
+    }
+}
+
+task updaterTest(type: GradleBuild){
+    tasks = [':updater:jar']
+    group = "release"
+    doLast{
+        exec {
+            workingDir "$projectDir/updater/build/libs/"
+            executable "java"
+            args "-jar", "$projectDir/updater/build/libs/updater.jar", "--safe=true"
+        }
+
+    }
 }

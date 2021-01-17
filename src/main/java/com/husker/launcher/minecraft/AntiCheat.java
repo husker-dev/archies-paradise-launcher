@@ -10,10 +10,7 @@ import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Vector;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AntiCheat {
@@ -105,15 +102,22 @@ public class AntiCheat {
 
     private static String getModsMD5(File clientFolder){
         try{
-            File customSkin = new File(clientFolder, "mods/CustomSkinLoader_Forge.jar");
-            if(customSkin.exists()){
-                if(!DigestUtils.md5Hex(new FileInputStream(customSkin)).equals("0aeb2a97185effb9000a7fbe7f76247b"))
-                    return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            HashMap<String, String> additionModsHash = new HashMap<String, String>(){{
+                put(MinecraftStarter.skinModName, "0aeb2a97185effb9000a7fbe7f76247b");
+                put(MinecraftStarter.controllerModName, "1d7419c12dd68cf5d02a7e60d35fc075");
+            }};
+
+            for(Map.Entry<String, String> entry : additionModsHash.entrySet()) {
+                File file = new File(clientFolder, "mods\\" + entry.getKey());
+                if (file.exists()) {
+                    if (!DigestUtils.md5Hex(new FileInputStream(file)).equals(entry.getValue()))
+                        return "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+                }
             }
 
             ArrayList<File> mods = new ArrayList<>(FSUtils.getChildren(new File(clientFolder, "mods")));
             mods = mods.stream()
-                    .filter(file -> file.getName().endsWith(".jar") && !file.getName().equals("CustomSkinLoader_Forge.jar"))
+                    .filter(file -> file.getName().endsWith(".jar") && !additionModsHash.containsKey(file.getName()))
                     .sorted(Comparator.comparing(File::getName))
                     .collect(Collectors.toCollection(ArrayList::new));
 

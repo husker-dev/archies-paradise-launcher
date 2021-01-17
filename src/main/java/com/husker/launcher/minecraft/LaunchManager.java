@@ -146,7 +146,7 @@ public class LaunchManager {
                         setRam(LauncherSettings.getRAM());
                         setIcon(Resources.Icon);
                     }};
-                    starter.clearSkinMod();
+                    starter.clearAdditionMods();
 
                     while (true) {
                         boolean[] eq = AntiCheat.checkMD5(new File(getClientPath(clientId)));
@@ -179,14 +179,13 @@ public class LaunchManager {
 
                     listener.onClientStarting();
                     user.bindIP();
-                    starter.applySkinMod();
                     starter.launch();
 
                     listener.onClientStarted();
                     System.gc();
 
                     starter.joinThread();
-                    starter.clearSkinMod();
+
                     listener.onClientClosed();
                 }
             }catch (Exception ex){

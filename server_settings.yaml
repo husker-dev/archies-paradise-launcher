@@ -5,7 +5,7 @@ social:
   github: husker-dev/minecraft-launcher
 port: 15565
 launcher:
-  version: '0.3'
+  version: 0.3.1
 mail:
   password: NiKiTa830017
   login: nikitashtengauer1@yandex.ru

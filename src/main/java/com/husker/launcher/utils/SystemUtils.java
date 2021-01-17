@@ -11,6 +11,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Map;
@@ -240,5 +241,9 @@ public class SystemUtils {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String formatSpeed(long speed){
+        return new DecimalFormat("#.#").format(speed / 1000000d).replace(",", ".") + " Мб/с";
     }
 }

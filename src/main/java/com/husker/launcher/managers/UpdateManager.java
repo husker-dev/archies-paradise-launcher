@@ -3,6 +3,7 @@ package com.husker.launcher.managers;
 import com.husker.launcher.Launcher;
 import com.husker.launcher.api.API;
 import com.husker.launcher.api.ApiMethod;
+import com.husker.launcher.minecraft.LaunchManager;
 import com.husker.launcher.social.Social;
 import com.husker.launcher.utils.IOUtils;
 import com.husker.mio.MIO;
@@ -25,7 +26,7 @@ public class UpdateManager {
     private static final Logger log = LogManager.getLogger(UpdateManager.class);
     public static boolean enable = true;
 
-    private static final String UpdateFolder = "./update_launcher";
+    private static final String UpdateFolder = new File(LaunchManager.clientsFolderPath, "launcher_update").getAbsolutePath();
 
     private static final String[] filesToDelete = new String[]{
             "lib", "resources", "launcher.exe", "shell.sh"
@@ -36,6 +37,7 @@ public class UpdateManager {
         new Thread(() -> {
             try {
                 MIO.delete(UpdateFolder);
+                MIO.delete(LaunchManager.clientsFolderPath + "/updater.jar");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -77,9 +79,9 @@ public class UpdateManager {
 
             new UnzippingProcess(UpdateFolder + "/update_archive.zip", UpdateFolder).addProgressListener(processor::onUnzipping).startSync();
             new DeletingProcess(UpdateFolder + "/update_archive.zip").addProgressListener(processor::onZipRemoving).startSync();
-            if(Files.exists(Paths.get("./updater.jar")))
-                MIO.delete("./updater.jar");
-            MIO.copy(UpdateFolder + "/updater.jar", "./");
+            if(Files.exists(Paths.get(LaunchManager.clientsFolderPath + "/updater.jar")))
+                MIO.delete(LaunchManager.clientsFolderPath + "/updater.jar");
+            MIO.copy(UpdateFolder + "/updater.jar", LaunchManager.clientsFolderPath);
             MIO.delete(UpdateFolder + "/updater.jar");
 
             processor.onReboot();
@@ -103,7 +105,7 @@ public class UpdateManager {
         if(!Files.exists(Paths.get("./updater.jar")))
             throw new UpdateException(UpdateException.Stage.REBOOT, 7, new IOException("updater.jar doesn't exist"));
         try {
-            Runtime.getRuntime().exec("java -jar \"" + new File("./updater.jar").getAbsolutePath() + "\" --delete=\"" + String.join(",", filesToDelete) + "\" --folder=\"" + new File(UpdateFolder).getAbsolutePath() + "\"");
+            Runtime.getRuntime().exec("java -jar \"" + new File("./updater.jar").getAbsolutePath() + "\" --delete=\"" + String.join(",", filesToDelete) + "\" --folder=\"" + new File(UpdateFolder).getAbsolutePath() + "\" --launcher=\"" + new File("./").getAbsolutePath() + "\"");
             System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
