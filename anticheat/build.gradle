@@ -7,8 +7,14 @@ version 'unspecified'
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io/' }
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation 'com.github.husker-dev:MIO:1.5'
+    implementation 'commons-codec:commons-codec:1.15'
+    implementation 'org.json:json:+'
+
+    implementation 'net.java.dev.jna:jna:+'
+    implementation 'net.java.dev.jna:jna-platform:+'
 }

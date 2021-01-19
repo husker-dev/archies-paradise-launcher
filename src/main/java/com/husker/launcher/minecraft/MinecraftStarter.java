@@ -41,13 +41,9 @@ public class MinecraftStarter {
     private static final String skinLibraryPath = "customskinloader\\CustomSkinLoader\\" + skinModName;
 
     private Process proc;
-    private WinDef.HWND hwnd;
 
     private final MinecraftClientInfo clientInfo;
     private BufferedImage icon = null;
-    private String title;
-
-    private File scriptFile;
 
     private String customTweakClass = null;
 
@@ -78,9 +74,10 @@ public class MinecraftStarter {
     public void launch(){
         try {
             String startString = getLaunchString();
-            log.info("Executing: " + startString);
+            //log.info("Executing: " + startString);
 
             // Setting title
+            String title;
             try {
                 String[] titles = MIO.readText(getClass().getResourceAsStream("/game_titles.txt")).split("\n");
                 title = titles[new Random().nextInt(titles.length)];
@@ -126,27 +123,33 @@ public class MinecraftStarter {
                 }
             }
 
-            if(SystemUtils.isWindows()) {
-                proc = Runtime.getRuntime().exec(startString, null, clientInfo.getClientFolder());
-            }else{
-                scriptFile = new File(clientInfo.getClientFolder(), "launch_script.sh");
-                if(scriptFile.createNewFile())
-                    Runtime.getRuntime().exec("chmod +x " + scriptFile.getAbsolutePath());
-                MIO.writeText(startString, scriptFile);
-                proc = Runtime.getRuntime().exec(scriptFile.getAbsolutePath(), null, clientInfo.getClientFolder());
-            }
+            JSONObject settings = new JSONObject();
+            settings.put("additionMods", new HashMap<String, String>(){{
+                put(MinecraftStarter.skinModName, "0aeb2a97185effb9000a7fbe7f76247b");
+                put(MinecraftStarter.controllerModName, "1d7419c12dd68cf5d02a7e60d35fc075");
+            }});
+            settings.put("folder", clientInfo.getClientFolder().getAbsolutePath());
+            settings.put("launch", startString);
+            settings.put("host_ip", LauncherConfig.getAuthIp());
+            settings.put("host_port", LauncherConfig.getAuthPort());
+            settings.put("title", title);
 
-            AntiCheat.bindProcess(clientInfo.getClientFolder(), proc);
+            String anticheatStartLine = "java -cp \"anticheat.jar;lib/*\" com.husker.launcher.anticheat.AntiCheat --settings=\"" + settings.toString().replace("\"", "[quo]") + "\"";
+            anticheatStartLine = SystemUtils.fixPath(anticheatStartLine);
+            log.info("Executing AntiCheat: " + anticheatStartLine);
+            proc = Runtime.getRuntime().exec(anticheatStartLine);
 
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-            stdInput.readLine();
+
+            //procId = Integer.parseInt(stdInput.readLine().split("proc_id:")[1]);
+            //log.info("Process ID: " + procId);
 
             new Thread(() -> {
                 try {
                     String s;
                     while ((s = stdInput.readLine()) != null)
-                        log.info(s);
+                        System.out.println(s);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -155,75 +158,23 @@ public class MinecraftStarter {
                 try {
                     String s;
                     while ((s = stdError.readLine()) != null)
-                        log.error(s);
+                        System.out.println(s);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
             }).start();
-            if(SystemUtils.isWindows()) {
-                MyUser32 user32 = MyUser32.INSTANCE;
-
-                /*
-                    If Windows, catch windows title using WinApi, and change it
-                 */
-                new Thread(() -> {
-                    try {
-                        int minecraftProcId = (int)SystemUtils.getProcessID(proc);
-
-                        while (proc.isAlive()) {
-                            user32.EnumWindows((User32.WNDENUMPROC) (hwnd, data) -> {
-                                IntByReference procId = new IntByReference();
-                                user32.GetWindowThreadProcessId(hwnd, procId);
-
-                                if(minecraftProcId == procId.getValue()){
-                                    if(MinecraftStarter.this.hwnd == null)
-                                        onWindowShow(hwnd);
-                                    onWindowTimer(hwnd);
-                                    MinecraftStarter.this.hwnd = hwnd;
-                                    return false;
-                                }
-                                return true;
-                            }, null);
-                            SystemUtils.sleep(2000);
-                        }
-                    }catch (Exception ignored){}
-                }).start();
-            }else {
-                /*
-                    If unix, remove .sh file after close
-                 */
-                new Thread(() -> {
-                    try {
-                        proc.waitFor();
-                        clearAdditionMods();
-                        if (scriptFile != null)
-                            MIO.delete(scriptFile);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
-            }
+            new Thread(() -> {
+                try {
+                    proc.waitFor();
+                    clearAdditionMods();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void onWindowShow(WinDef.HWND hwnd){
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
-        int screenWidth = gd.getDisplayMode().getWidth();
-        int screenHeight = gd.getDisplayMode().getHeight();
-        int windowWidth = screenWidth / 2;
-        int windowHeight = screenHeight / 2;
-
-        if(LauncherSettings.isWindowed())
-            MyUser32.INSTANCE.SetWindowPos(hwnd, hwnd, (screenWidth - windowWidth) / 2, (screenHeight - windowHeight) / 2, windowWidth, windowHeight, SWP_NOZORDER| SWP_SHOWWINDOW);
-        MyUser32.INSTANCE.ShowWindow(hwnd, 1);
-    }
-
-    private void onWindowTimer(WinDef.HWND hwnd){
-        MyUser32.INSTANCE.SetWindowText(hwnd, title);
-        MyUser32.INSTANCE.UpdateWindow(hwnd);
     }
 
     public void clearAdditionMods(){
@@ -290,24 +241,7 @@ public class MinecraftStarter {
         return SystemUtils.fixPath(line);
     }
 
-    private interface MyUser32 extends com.sun.jna.platform.win32.User32 {
-        MyUser32 INSTANCE = Native.load("user32", MyUser32.class, W32APIOptions.UNICODE_OPTIONS);
 
-        long SetWindowLongPtr(HWND hWnd, int nIndex, long ln);
-        boolean ShowWindow(HWND hWnd, int  nCmdShow);
-        HWND FindWindow(String className, String windowName);
-        BOOL SetWindowTextA(
-                HWND   hWnd,
-                String lpString
-        );
-        boolean SetWindowText(HWND hwnd, String newText);
-
-        interface WNDENUMPROC extends StdCallCallback {
-            boolean callback(Pointer hWnd, Pointer arg);
-        }
-
-        boolean EnumWindows(WNDENUMPROC lpEnumFunc, Pointer arg);
-    }
 
     private String getJavaPath(){
         HashMap<Integer, String> paths = new HashMap<>();

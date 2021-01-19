@@ -10,6 +10,8 @@ import org.apache.log4j.PropertyConfigurator;
 
 import java.awt.*;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class Main {
@@ -50,6 +52,12 @@ public class Main {
             System.setProperty("sun.awt.noerasebackground", "true");
             Toolkit.getDefaultToolkit().setDynamicLayout(true);
         }
+
+        new Timer().schedule(new TimerTask() {
+            public void run() {
+                System.gc();
+            }
+        }, 0, 1000);
 
         new LoadingWindow();
     }

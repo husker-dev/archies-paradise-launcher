@@ -94,8 +94,6 @@ public class AntiCheat {
         }
     }
 
-
-
     public static boolean[] checkMD5(File clientFolder) throws API.UnknownClientException, API.InternalAPIException, API.ClientIsUpdatingException {
         return API.Client.checksum(clientFolder.getName().replace("/", File.separator).replace("\\", File.separator), getModsMD5(clientFolder), getClientMD5(clientFolder));
     }

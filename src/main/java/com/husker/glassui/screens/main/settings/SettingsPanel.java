@@ -45,11 +45,8 @@ public class SettingsPanel extends TransparentPanel {
                     setOnAction(() -> LauncherSettings.setAutoAuth(isChecked()));
                 }});
                 add(Box.createRigidArea(new Dimension(25, 0)));
-                add(new BlurCheckbox(screen, "Высокое качество", !LauncherSettings.isPotatoSettings()){{
-                    setOnAction(() -> {
-                        LauncherSettings.setPotatoSettings(!isChecked());
-                        JOptionPane.showMessageDialog(screen.getLauncher(), "Для применения этой настройки нужно перезапустить лаунчер", "Предупреждение", JOptionPane.INFORMATION_MESSAGE);
-                    });
+                add(new BlurCheckbox(screen, "Закрывать при игре", !LauncherSettings.isPotatoSettings()){{
+                    setOnAction(() -> LauncherSettings.setAutoClose(!isChecked()));
                 }});
             }});
 

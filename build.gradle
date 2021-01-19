@@ -109,7 +109,6 @@ task createShell()  {
 exit 0
 """
         new File("$buildDir/release", "console.bat").text = """java -cp "lib/*" com.husker.launcher.Main -Xms200m -Xmx800m
-exit 0
 """
     }
 }
@@ -125,8 +124,13 @@ task copyUpdater(type: Copy){
     into file("$buildDir/release")
 }
 
+task copyAnticheat(type: Copy){
+    from file("$projectDir/anticheat/build/libs/anticheat.jar")
+    into file("$buildDir/release")
+}
+
 task buildRelease(type: GradleBuild){
-    tasks = ['clearRelease', 'createExe', ':updater:jar', 'copyExe', 'copyLib', 'copyResources', 'createShell', 'copyUpdater', 'zipRelease']
+    tasks = ['clearRelease', 'createExe', ':updater:jar', 'copyExe', 'copyLib', 'copyResources', 'createShell', 'copyUpdater', ':anticheat:jar', 'copyAnticheat', 'zipRelease']
     group = "release"
     doLast {
         println ""

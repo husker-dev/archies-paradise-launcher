@@ -9,6 +9,7 @@ import com.husker.launcher.ui.blur.BlurParameter;
 import com.husker.glassui.GlassUI;
 import com.husker.launcher.ui.utils.ComponentUtils;
 import com.husker.launcher.ui.utils.RenderUtils;
+import com.husker.launcher.utils.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -90,8 +91,14 @@ public class BlurButton extends WebButton implements BlurComponent{
             RenderUtils.enableInterpolation(g2d);
 
             Rectangle iconBounds = getIconBounds();
-            if (iconBounds != null)
-                g2d.drawImage(image, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
+            if (iconBounds != null) {
+                if(SystemUtils.getWindowScaleFactor(getGraphicsConfiguration()) == 1) {
+                    Image scaled = image.getScaledInstance(iconBounds.width, iconBounds.height, Image.SCALE_SMOOTH);
+                    g2d.drawImage(scaled, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
+                }else
+                    g2d.drawImage(image, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
+
+            }
         }
     }
 

@@ -53,8 +53,8 @@ public class API {
     public static String getIdByName(String name){
         try{
             JSONObject jsonObject = getJson(new HttpUrlBuilder(getMethodUrl("profiles.getId")).set("name", name));
-            if(jsonObject.has(name))
-                return jsonObject.getString(name);
+            if(jsonObject.has("id"))
+                return jsonObject.getString("id");
         } catch (ConnectException ignored){
 
         } catch (Exception ex){

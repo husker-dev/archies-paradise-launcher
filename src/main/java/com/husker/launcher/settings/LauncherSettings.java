@@ -13,6 +13,7 @@ public class LauncherSettings extends SettingsFile {
     private static final String CLIENT_TYPE = "client_type";
     private static final String CONTROLLER_SUPPORT = "controller_support";
     private static final String POTATO = "potato";
+    private static final String AUTO_CLOSE = "auto_close";
     private static final String RAM = "ram";
 
     private LauncherSettings() {
@@ -90,5 +91,13 @@ public class LauncherSettings extends SettingsFile {
 
     public static boolean isPotatoSettings(){
         return INSTANCE.getBoolean(POTATO);
+    }
+
+    public static void setAutoClose(boolean value){
+        INSTANCE.set(AUTO_CLOSE, value);
+    }
+
+    public static boolean isAutoClose(){
+        return INSTANCE.getBoolean(AUTO_CLOSE);
     }
 }

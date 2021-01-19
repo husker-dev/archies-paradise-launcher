@@ -2,6 +2,7 @@ package com.husker.launcher.ui.components;
 
 import com.alee.laf.label.WebLabel;
 import com.husker.launcher.ui.utils.RenderUtils;
+import com.husker.launcher.utils.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -80,8 +81,13 @@ public class MLabel extends WebLabel {
         RenderUtils.enableInterpolation(g2d);
 
         Rectangle iconBounds = getIconBounds();
-        if(iconBounds != null)
-            g2d.drawImage(image, iconBounds.x, iconBounds.y, iconBounds.width, iconBounds.height, null);
+        if(iconBounds != null) {
+            if(SystemUtils.getWindowScaleFactor(getGraphicsConfiguration()) == 1) {
+                Image scaled = image.getScaledInstance(iconBounds.width, iconBounds.height, Image.SCALE_SMOOTH);
+                g2d.drawImage(scaled, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
+            }else
+                g2d.drawImage(image, iconBounds.x, iconBounds.y - 1, iconBounds.width, iconBounds.height, null);
+        }
     }
 
     // From JLabel -> getTextRectangle()
